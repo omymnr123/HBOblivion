@@ -1,0 +1,570 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7B9AB095-E6AF-3FFD-8BDE-8DAE549247BC}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.28000.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>HelbreathClient</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">HelbreathClient.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Game</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">HelbreathClient.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Game</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">HelbreathClient.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Game</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">HelbreathClient.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Game</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\SFMLEngine;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\AutoUpdater;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Entity;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Game;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Net;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Render;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Util;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Log;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\ASIO;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Client\Includes;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\_deps\sfml-src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;SFML_STATIC;SFML_ENGINE;TESTER_ONLY;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;SFML_STATIC;SFML_ENGINE;TESTER_ONLY;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\SFMLEngine;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\AutoUpdater;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Entity;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Game;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Net;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Render;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Util;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Log;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\ASIO;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Client\Includes;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\_deps\sfml-src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\SFMLEngine;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\AutoUpdater;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Entity;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Game;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Net;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Render;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Util;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Log;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\ASIO;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Client\Includes;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\_deps\sfml-src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>CControls_build\Debug\CControls.lib;Debug\AutoUpdater.lib;Debug\SFMLEngine.lib;_deps\sfml-build\lib\Debug\sfml-graphics-s-d.lib;_deps\sfml-build\lib\Debug\sfml-window-s-d.lib;_deps\sfml-build\lib\Debug\sfml-system-s-d.lib;_deps\sfml-build\lib\Debug\freetyped.lib;opengl32.lib;gdi32.lib;winmm.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>D:/HB Server/Helbreath-Heldenian-Project-Development/build_client/Debug/Game.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>D:/HB Server/Helbreath-Heldenian-Project-Development/build_client/Debug/Game.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\SFMLEngine;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\AutoUpdater;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Entity;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Game;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Net;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Render;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Util;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Log;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\ASIO;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Client\Includes;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\_deps\sfml-src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;SFML_STATIC;SFML_ENGINE;TESTER_ONLY;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;SFML_STATIC;SFML_ENGINE;TESTER_ONLY;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\SFMLEngine;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\AutoUpdater;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Entity;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Game;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Net;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Render;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Util;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Log;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\ASIO;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Client\Includes;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\_deps\sfml-src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\SFMLEngine;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\AutoUpdater;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Entity;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Game;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Net;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Render;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Util;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Log;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\ASIO;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Client\Includes;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\_deps\sfml-src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>CControls_build\Release\CControls.lib;Release\AutoUpdater.lib;Release\SFMLEngine.lib;_deps\sfml-build\lib\Release\sfml-graphics-s.lib;_deps\sfml-build\lib\Release\sfml-window-s.lib;_deps\sfml-build\lib\Release\sfml-system-s.lib;_deps\sfml-build\lib\Release\freetype.lib;opengl32.lib;gdi32.lib;winmm.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>D:/HB Server/Helbreath-Heldenian-Project-Development/build_client/Release/Game.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>D:/HB Server/Helbreath-Heldenian-Project-Development/build_client/Release/Game.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\SFMLEngine;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\AutoUpdater;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Entity;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Game;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Net;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Render;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Util;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Log;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\ASIO;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Client\Includes;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\_deps\sfml-src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;SFML_STATIC;SFML_ENGINE;TESTER_ONLY;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;SFML_STATIC;SFML_ENGINE;TESTER_ONLY;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\SFMLEngine;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\AutoUpdater;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Entity;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Game;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Net;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Render;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Util;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Log;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\ASIO;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Client\Includes;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\_deps\sfml-src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\SFMLEngine;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\AutoUpdater;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Entity;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Game;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Net;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Render;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Util;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Log;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\ASIO;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Client\Includes;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\_deps\sfml-src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>CControls_build\MinSizeRel\CControls.lib;MinSizeRel\AutoUpdater.lib;MinSizeRel\SFMLEngine.lib;_deps\sfml-build\lib\MinSizeRel\sfml-graphics-s.lib;_deps\sfml-build\lib\MinSizeRel\sfml-window-s.lib;_deps\sfml-build\lib\MinSizeRel\sfml-system-s.lib;_deps\sfml-build\lib\MinSizeRel\freetype.lib;opengl32.lib;gdi32.lib;winmm.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>D:/HB Server/Helbreath-Heldenian-Project-Development/build_client/MinSizeRel/Game.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>D:/HB Server/Helbreath-Heldenian-Project-Development/build_client/MinSizeRel/Game.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\SFMLEngine;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\AutoUpdater;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Entity;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Game;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Net;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Render;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Util;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Log;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\ASIO;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Client\Includes;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\_deps\sfml-src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BufferSecurityCheck></BufferSecurityCheck>
+      <CallingConvention></CallingConvention>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <FloatingPointModel></FloatingPointModel>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;SFML_STATIC;SFML_ENGINE;TESTER_ONLY;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;SFML_STATIC;SFML_ENGINE;TESTER_ONLY;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\SFMLEngine;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\AutoUpdater;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Entity;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Game;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Net;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Render;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Util;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Log;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\ASIO;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Client\Includes;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\_deps\sfml-src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\SFMLEngine;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\AutoUpdater;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Entity;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Game;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Net;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Render;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Util;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\Log;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Shared\ASIO;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\..\Dependencies\Client\Includes;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\CControls;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\_deps\sfml-src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>CControls_build\RelWithDebInfo\CControls.lib;RelWithDebInfo\AutoUpdater.lib;RelWithDebInfo\SFMLEngine.lib;_deps\sfml-build\lib\RelWithDebInfo\sfml-graphics-s.lib;_deps\sfml-build\lib\RelWithDebInfo\sfml-window-s.lib;_deps\sfml-build\lib\RelWithDebInfo\sfml-system-s.lib;_deps\sfml-build\lib\RelWithDebInfo\freetype.lib;opengl32.lib;gdi32.lib;winmm.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>D:/HB Server/Helbreath-Heldenian-Project-Development/build_client/RelWithDebInfo/Game.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>D:/HB Server/Helbreath-Heldenian-Project-Development/build_client/RelWithDebInfo/Game.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule D:/HB Server/Helbreath-Heldenian-Project-Development/Sources/Client/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SD:/HB Server/Helbreath-Heldenian-Project-Development/Sources/Client" "-BD:/HB Server/Helbreath-Heldenian-Project-Development/build_client" --check-stamp-file "D:/HB Server/Helbreath-Heldenian-Project-Development/build_client/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CheckIncludeFileCXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\ExternalProject\shared_internal_commands.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FetchContent.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FetchContent\CMakeLists.cmake.in;C:\Program Files\CMake\share\cmake-4.4\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\WindowsPaths.cmake;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\version.cmake;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\CMakeFiles\4.4.0-rc2\CMakeCXXCompiler.cmake;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\CMakeFiles\4.4.0-rc2\CMakeRCCompiler.cmake;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\CMakeFiles\4.4.0-rc2\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule D:/HB Server/Helbreath-Heldenian-Project-Development/Sources/Client/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SD:/HB Server/Helbreath-Heldenian-Project-Development/Sources/Client" "-BD:/HB Server/Helbreath-Heldenian-Project-Development/build_client" --check-stamp-file "D:/HB Server/Helbreath-Heldenian-Project-Development/build_client/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CheckIncludeFileCXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\ExternalProject\shared_internal_commands.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FetchContent.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FetchContent\CMakeLists.cmake.in;C:\Program Files\CMake\share\cmake-4.4\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\WindowsPaths.cmake;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\version.cmake;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\CMakeFiles\4.4.0-rc2\CMakeCXXCompiler.cmake;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\CMakeFiles\4.4.0-rc2\CMakeRCCompiler.cmake;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\CMakeFiles\4.4.0-rc2\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule D:/HB Server/Helbreath-Heldenian-Project-Development/Sources/Client/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SD:/HB Server/Helbreath-Heldenian-Project-Development/Sources/Client" "-BD:/HB Server/Helbreath-Heldenian-Project-Development/build_client" --check-stamp-file "D:/HB Server/Helbreath-Heldenian-Project-Development/build_client/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CheckIncludeFileCXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\ExternalProject\shared_internal_commands.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FetchContent.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FetchContent\CMakeLists.cmake.in;C:\Program Files\CMake\share\cmake-4.4\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\WindowsPaths.cmake;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\version.cmake;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\CMakeFiles\4.4.0-rc2\CMakeCXXCompiler.cmake;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\CMakeFiles\4.4.0-rc2\CMakeRCCompiler.cmake;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\CMakeFiles\4.4.0-rc2\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule D:/HB Server/Helbreath-Heldenian-Project-Development/Sources/Client/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SD:/HB Server/Helbreath-Heldenian-Project-Development/Sources/Client" "-BD:/HB Server/Helbreath-Heldenian-Project-Development/build_client" --check-stamp-file "D:/HB Server/Helbreath-Heldenian-Project-Development/build_client/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CheckIncludeFileCXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\ExternalProject\shared_internal_commands.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FetchContent.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FetchContent\CMakeLists.cmake.in;C:\Program Files\CMake\share\cmake-4.4\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.4\Modules\Platform\WindowsPaths.cmake;D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\version.cmake;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\CMakeFiles\4.4.0-rc2\CMakeCXXCompiler.cmake;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\CMakeFiles\4.4.0-rc2\CMakeRCCompiler.cmake;D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\CMakeFiles\4.4.0-rc2\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\AnimationState.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\AudioManager.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\BuildItemManager.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Camera.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\ChatCommandManager.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\ChatManager.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\ClientLog.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\CombatSystem.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\CommonTypes.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\ConfigManager.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\CraftingManager.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\CursorTarget.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBoxManager.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Bank.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_ChangeStatsMajestic.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Character.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_ChatHistory.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_CityHallMenu.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_CommandHallMenu.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Commander.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_ConfirmExchange.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Constructor.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_CrusadeJob.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Exchange.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Fishing.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_GuideMap.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Guild.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_GuildDisbandConfirm.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_GuildInvite.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_GuildMenu.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_GuildOperation.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Help.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_HudPanel.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Inventory.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_ItemCreator.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_ItemDrop.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_ItemDropAmount.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_ItemUpgrade.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_LevelUpSetting.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Magic.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_MagicShop.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Manufacture.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Map.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Noticement.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_NpcActionQuery.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_NpcTalk.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Party.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Quest.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_RepairAll.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Resurrect.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_SellList.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_SellOrRepair.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Shop.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Skill.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Slates.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Soldier.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_StatusOverlay.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_SysMenu.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_TesterMenu.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Text.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_WarningMsg.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\EffectManager.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Effect_Add.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Effect_Draw.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Effect_Lights.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Effect_Update.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\EntityMotion.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\EquipmentIndices.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\EventListManager.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\FishingManager.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\FloatingTextManager.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Game.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\GameModeManager.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\GuildManager.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\HotkeyManager.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\IDialogBox.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\IGameScreen.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\InputStateHelper.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\InventoryManager.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\ItemNameFormatter.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\ItemSpriteMetadata.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\ItemTooltip.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\LocalCacheManager.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\MagicCastingSystem.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\MapData.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessageManager.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessages_Admin.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessages_Agriculture.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessages_Angels.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessages_Apocalypse.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessages_Bank.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessages_Combat.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessages_Crafting.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessages_Crusade.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessages_Events.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessages_Exchange.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessages_Fish.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessages_Guild.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessages_Heldenian.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessages_Items.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessages_Map.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessages_Party.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessages_Player.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessages_Quest.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessages_Skills.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessages_Slates.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessages_Stats.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessages_System.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\NpcRenderer.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Overlay_ChangePassword.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Overlay_Connecting.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Overlay_ConnectionLost.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Overlay_LogResMsg.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Overlay_Msg.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Overlay_QueryDeleteCharacter.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Overlay_QueryForceLogin.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Overlay_VersionNotMatch.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Overlay_WaitInitData.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Overlay_WaitingResponse.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Player.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\PlayerController.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\PlayerRenderer.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\QuestManager.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\RenderHelpers.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Screen_CreateAccount.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Screen_CreateNewCharacter.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Screen_Loading.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Screen_Login.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Screen_MainMenu.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Screen_OnGame.DrawObjects.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Screen_OnGame.Hotkeys.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Screen_OnGame.Network.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Screen_OnGame.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Screen_Quit.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Screen_SelectCharacter.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Screen_Splash.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Screen_Test.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Screen_TestPrimitives.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\ShopManager.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\SpellAoE.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\TeleportManager.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\TextFieldRenderer.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\TextInputManager.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\WeatherManager.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Wmain.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\miniaudio_impl.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\performance_monitor.cpp" />
+    <ResourceCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Game.rc" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Dependencies\Shared\Log\LogBackend.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Dependencies\Shared\Net\ASIOSocket.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Dependencies\Shared\Net\IOServicePool.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Dependencies\Shared\Render\Application.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Dependencies\Shared\Render\Event.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Dependencies\Shared\Render\ISpriteFactory.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Dependencies\Shared\Render\ResolutionConfig.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Dependencies\Shared\Render\TextLib.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Dependencies\Shared\Util\SHA256.cpp" />
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Dependencies\Shared\Game\FormulaEngine.cpp" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\ZERO_CHECK.vcxproj">
+      <Project>{A8805C12-625C-336B-8820-8379C3072A24}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\AutoUpdater.vcxproj">
+      <Project>{18455CDE-2D3B-3148-969D-9C2C040C3C2D}</Project>
+      <Name>AutoUpdater</Name>
+    </ProjectReference>
+    <ProjectReference Include="D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\CControls_build\CControls.vcxproj">
+      <Project>{4D8A2311-905E-3EFA-8E30-FB665509B268}</Project>
+      <Name>CControls</Name>
+    </ProjectReference>
+    <ProjectReference Include="D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\SFMLEngine.vcxproj">
+      <Project>{A3FF12AD-D1CE-3A72-910E-4A683F1909E7}</Project>
+      <Name>SFMLEngine</Name>
+    </ProjectReference>
+    <ProjectReference Include="D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\_deps\freetype-build\freetype.vcxproj">
+      <Project>{B086C5A3-770A-3873-AF66-CD03CDF34DCD}</Project>
+      <Name>freetype</Name>
+    </ProjectReference>
+    <ProjectReference Include="D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\_deps\sfml-build\src\SFML\Graphics\sfml-graphics.vcxproj">
+      <Project>{6CDA1012-94D8-3A8D-BCC9-973A4A9E4385}</Project>
+      <Name>sfml-graphics</Name>
+    </ProjectReference>
+    <ProjectReference Include="D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\_deps\sfml-build\src\SFML\System\sfml-system.vcxproj">
+      <Project>{0BCEBDBB-B1BA-3EE6-A1E5-836BF21E8B9B}</Project>
+      <Name>sfml-system</Name>
+    </ProjectReference>
+    <ProjectReference Include="D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\_deps\sfml-build\src\SFML\Window\sfml-window.vcxproj">
+      <Project>{DB55BC61-5F2B-3BAF-A5FC-D877A101DD9C}</Project>
+      <Name>sfml-window</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

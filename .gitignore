@@ -1,0 +1,384 @@
+## Visual Studio C++ .gitignore
+## Comprehensive patterns for MSVC/MSBuild projects
+## All patterns use **/ prefix to match in subdirectories
+
+#################
+# User-specific #
+#################
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+######################
+# Build Directories  #
+######################
+**/[Dd]ebug/
+**/[Dd]ebug-*/
+**/[Dd]ebugPublic/
+**/[Rr]elease/
+**/[Rr]elease-*/
+**/[Rr]eleases/
+**/x64/
+**/x86/
+**/[Ww][Ii][Nn]32/
+**/[Aa][Rr][Mm]/
+**/[Aa][Rr][Mm]64/
+**/bld/
+**/[Bb]in/
+**/[Oo]bj/
+**/[Oo]ut/
+**/[Ll]og/
+**/[Ll]ogs/
+**/[Dd]ebugPS/
+**/[Rr]eleasePS/
+
+# Ignore root lib folder but allow Dependencies lib folders
+/lib/
+!**/Dependencies/**/lib/
+
+###########################
+# MSBuild/MSVC Artifacts  #
+###########################
+# Object files
+**/*.obj
+**/*.o
+
+# Precompiled headers
+**/*.pch
+**/*.gch
+
+# Linker files
+**/*.ilk
+**/*.exp
+**/*.exe
+
+# Program database (debug symbols)
+**/*.pdb
+**/*.idb
+**/*.ipdb
+**/*.iobj
+
+# Profile-guided optimization
+**/*.pgc
+**/*.pgd
+
+# Build logs and tracking
+**/*.tlog
+**/*.tlog/
+**/*.log
+**/*.lastbuildstate
+**/*.FileListAbsolute.txt
+*.binlog
+[Bb]uild[Ll]og.*
+build_*.log
+
+# Resource files
+**/*.res
+**/*.aps
+
+# Response files
+**/*.rsp
+
+# Source browser
+**/*.sbr
+**/*.bsc
+
+# Type library files
+**/*.tlb
+**/*.tli
+**/*.tlh
+
+# MIDL generated
+*_i.c
+*_p.c
+*_h.h
+dlldata.c
+
+# Manifest files (generated)
+**/*.intermediate.manifest
+**/*.lastcodeanalysissucceeded
+
+# Recipe files
+**/*.recipe
+
+# IncrementalClean files
+**/*.idb
+
+#######################
+# Visual Studio Cache #
+#######################
+.vs/
+**/*.VC.db
+**/*.VC.opendb
+**/*.VC.VC.opendb
+ipch/
+**/*.ncb
+**/*.sdf
+**/*.opensdf
+**/*.opendb
+**/*.cachefile
+*.[Cc]ache
+!?*.[Cc]ache/
+.builds
+
+# IntelliSense
+**/*.aps
+**/*.ncb
+
+######################
+# Visual Studio Temp #
+######################
+*.tmp
+*.tmp_proj
+*_wpftmp.csproj
+~$*
+*~
+
+# Generated files
+Generated\ Files/
+Generated_Code/
+
+###############
+# Test Results #
+###############
+[Tt]est[Rr]esult*/
+*.VisualState.xml
+TestResult.xml
+nunit-*.xml
+
+#############
+# Profiler  #
+#############
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+###########
+# Tracing #
+###########
+*.e2e
+*.svclog
+
+#################
+# Code Coverage #
+#################
+*.coverage
+*.coveragexml
+coverage*.json
+coverage*.xml
+coverage*.info
+*.dotCover
+.axoCover/*
+!.axoCover/settings.json
+
+############
+# ReSharper #
+############
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+#############
+# TeamCity  #
+#############
+_TeamCity*
+
+###########
+# NCrunch #
+###########
+_NCrunch_*
+.*crunch*.local.xml
+nCrunchTemp_*
+
+##############
+# MightyMoose #
+##############
+*.mm.*
+AutoTest.Net/
+
+#########
+# NuGet #
+#########
+*.nupkg
+*.snupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+
+##########
+# Backup #
+##########
+_UpgradeReport_Files/
+Backup*/
+UpgradeLog*.XML
+UpgradeLog*.htm
+ServiceFabricBackup/
+*.rptproj.bak
+MigrationBackup/
+
+##############
+# SQL Server #
+##############
+*.mdf
+*.ldf
+*.ndf
+
+#########
+# Other #
+#########
+ClientBin/
+*.dbmdl
+*.dbproj.schemaview
+*.jfm
+*.pfx
+*.publishsettings
+orleans.codegen.cs
+$tf/
+*.gpState
+*.meta
+*.pidb
+*.vspscc
+*.vssscc
+*.scc
+publish/
+*.[Pp]ublish.xml
+*.azurePubxml
+*.pubxml
+*.publishproj
+PublishScripts/
+csx/
+*.build.csdef
+ecf/
+rcf/
+AppPackages/
+BundleArtifacts/
+Package.StoreAssociation.xml
+_pkginfo.txt
+*.appx
+*.appxbundle
+*.appxupload
+
+# Visual Studio 6
+*.plg
+*.opt
+*.vbw
+
+# Misc IDE
+.ntvs_analysis.dat
+node_modules/
+__pycache__/
+*.pyc
+.sass-cache/
+[Ee]xpress/
+.fake/
+.cr/personal
+*.tss
+*.jmconfig
+OpenCover/
+ASALocalRun/
+*.nvuser
+.mfractor/
+.localhistory/
+healthchecksdb
+.ionide/
+FodyWeavers.xsd
+mono_crash.*
+_Chutzpah*
+FakesAssemblies/
+*.GhostDoc.xml
+_Pvt_Extensions
+.paket/paket.exe
+paket-files/
+
+# BizTalk
+*.btp.cs
+*.btm.cs
+*.odx.cs
+*.xsd.cs
+
+# DocProject
+DocProject/buildhelp/
+DocProject/Help/*.HxT
+DocProject/Help/*.HxC
+DocProject/Help/*.hhc
+DocProject/Help/*.hhk
+DocProject/Help/*.hhp
+DocProject/Help/Html2
+DocProject/Help/html
+
+# LightSwitch
+**/*.HTMLClient/GeneratedArtifacts
+**/*.DesktopClient/GeneratedArtifacts
+**/*.DesktopClient/ModelManifest.xml
+**/*.Server/GeneratedArtifacts
+**/*.Server/ModelManifest.xml
+
+# Business Intelligence
+*.rdl.data
+*.bim.layout
+*.bim_*.settings
+*.rptproj.rsuser
+*- [Bb]ackup.rdl
+*- [Bb]ackup ([0-9]).rdl
+*- [Bb]ackup ([0-9][0-9]).rdl
+
+###########################
+# GCC / CMake / Linux     #
+###########################
+# CMake build directories
+**/build/
+**/build_linux/
+**/cmake-build-*/
+**/CMakeFiles/
+**/CMakeCache.txt
+**/cmake_install.cmake
+**/Makefile
+**/compile_commands.json
+
+# GCC/Clang precompiled headers and dependency files
+**/*.d
+**/*.dwo
+
+# Shared libraries
+**/*.so
+**/*.so.*
+
+# Static libraries (except Dependencies)
+**/*.a
+!**/Dependencies/**/*.a
+
+# FetchContent downloads
+**/_deps/
+
+########################
+# Project-specific     #
+########################
+
+# Project docs/plans (tracked separately)
+PLANS/
+*.md
+!**/README.md
+!/CLAUDE*.md
+!/CHANGELOG.md
+!/CODING_STANDARDS.md
+!/VERSION_STANDARDS.md
+
+# Game logs and runtime data
+**/GameLogs/
+
+# Temporary files
+tmpclaude*cwd
+nul
+!/Scripts
+
+# Installer staging folder
+tools/InstallerCreator/Helbreath/
+
+# Backup checkpoints (bak.py)
+**/*.bak_*
+Binaries/Game.rar

@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="D:\HB Server\Helbreath-Heldenian-Project-Development\build_client\CMakeFiles\1521bb98debfb4db0ee858b0aed871a0\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{CF95512E-D7C8-3BCA-ADC3-E0492A8939C5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\CControls\control.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\CControls\control_collection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\CControls\panel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\CControls\button.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\CControls\text_input.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\CControls\textbox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\CControls\label.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\CControls\toggle_button.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\CControls\focus_manager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\CControls\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{1435B327-7C1B-374B-9BFE-ECB304033493}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
