@@ -1,4 +1,5 @@
 @echo off
+cd /d %~dp0
 title Subir cambios a GitHub - HBOblivion
 color 0A
 echo ========================================
