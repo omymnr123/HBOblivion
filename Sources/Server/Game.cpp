@@ -1335,133 +1335,148 @@ void CGame::on_client_read(int client_h)
 
 void CGame::client_motion_handler(int client_h, char* data)
 {
-	uint32_t client_time;
-	uint16_t command, target_object_id = 0;
-	short sX, sY, dX, dY, type;
-	direction dir;
-	int   ret, temp;
+    uint32_t client_time;
+    uint16_t command, target_object_id = 0;
+    short sX, sY, dX, dY, type;
+    direction dir;
+    int   ret, temp;
 
-	if (m_client_list[client_h] == 0) return;
-	if (m_client_list[client_h]->m_is_init_complete == false) return;
-	if (m_client_list[client_h]->m_is_killed) return;
+    if (m_client_list[client_h] == 0) return;
+    if (m_client_list[client_h]->m_is_init_complete == false) return;
+    if (m_client_list[client_h]->m_is_killed) return;
 
-	const auto* base = hb::net::PacketCast<hb::net::PacketCommandMotionBase>(
-		data, sizeof(hb::net::PacketCommandMotionBase));
-	if (!base) return;
-	command = base->header.msg_type;
-	sX = base->x;
-	sY = base->y;
-	dir = static_cast<direction>(base->dir);
-	dX = base->dx;
-	dY = base->dy;
-	type = base->type;
+    const auto* base = hb::net::PacketCast<hb::net::PacketCommandMotionBase>(
+        data, sizeof(hb::net::PacketCommandMotionBase));
+    if (!base) return;
+    command = base->header.msg_type;
+    sX = base->x;
+    sY = base->y;
+    dir = static_cast<direction>(base->dir);
+    dX = base->dx;
+    dY = base->dy;
+    type = base->type;
 
-	if ((command == Type::Attack) || (command == Type::AttackMove)) { // v1.4
-		const auto* pkt = hb::net::PacketCast<hb::net::PacketCommandMotionAttack>(
-			data, sizeof(hb::net::PacketCommandMotionAttack));
-		if (!pkt) return;
-		target_object_id = pkt->target_id;
-		client_time = pkt->time_ms;
-	}
-	else {
-		const auto* pkt = hb::net::PacketCast<hb::net::PacketCommandMotionSimple>(
-			data, sizeof(hb::net::PacketCommandMotionSimple));
-		if (!pkt) return;
-		client_time = pkt->time_ms;
-	}
+    if ((command == Type::Attack) || (command == Type::AttackMove)) { // v1.4
+        const auto* pkt = hb::net::PacketCast<hb::net::PacketCommandMotionAttack>(
+            data, sizeof(hb::net::PacketCommandMotionAttack));
+        if (!pkt) return;
+        target_object_id = pkt->target_id;
+        client_time = pkt->time_ms;
+    }
+    else {
+        const auto* pkt = hb::net::PacketCast<hb::net::PacketCommandMotionSimple>(
+            data, sizeof(hb::net::PacketCommandMotionSimple));
+        if (!pkt) return;
+        client_time = pkt->time_ms;
+    }
 
-	switch (command) {
-	case Type::stop:
-		ret = client_motion_stop_handler(client_h, sX, sY, dir);
-		if (ret == 1) {
-			send_event_to_near_client_type_a(client_h, hb::shared::owner_class::Player, MsgId::EventMotion, Type::stop, 0, 0, 0);
-		}
-		else if (ret == 2) send_object_motion_reject_msg(client_h);
-		break;
+    switch (command) {
+    case Type::stop:
+        ret = client_motion_stop_handler(client_h, sX, sY, dir);
+        if (ret == 1) {
+            send_event_to_near_client_type_a(client_h, hb::shared::owner_class::Player, MsgId::EventMotion, Type::stop, 0, 0, 0);
+        }
+        else if (ret == 2) send_object_motion_reject_msg(client_h);
+        break;
 
-	case Type::Run:
-		ret = client_motion_move_handler(client_h, sX, sY, dir, 1);
-		if (ret == 1) {
-			send_event_to_near_client_type_a(client_h, hb::shared::owner_class::Player, MsgId::EventMotion, Type::Run, 0, 0, 0);
-		}
-		else if (ret == 2) send_object_motion_reject_msg(client_h);
-		if ((m_client_list[client_h] != 0) && (m_client_list[client_h]->m_hp <= 0)) m_combat_manager->client_killed_handler(client_h, 0, 0, 1); // v1.4
-		// v2.171
-		check_client_move_frequency(client_h, client_time);
-		break;
+    case Type::Run:
+        ret = client_motion_move_handler(client_h, sX, sY, dir, 1);
+        if (ret == 1) {
+            send_event_to_near_client_type_a(client_h, hb::shared::owner_class::Player, MsgId::EventMotion, Type::Run, 0, 0, 0);
+        }
+        else if (ret == 2) send_object_motion_reject_msg(client_h);
+        if ((m_client_list[client_h] != 0) && (m_client_list[client_h]->m_hp <= 0)) m_combat_manager->client_killed_handler(client_h, 0, 0, 1); // v1.4
+        // v2.171
+        check_client_move_frequency(client_h, client_time);
+        break;
 
-	case Type::Move:
-		ret = client_motion_move_handler(client_h, sX, sY, dir, 2);
-		if (ret == 1) {
-			send_event_to_near_client_type_a(client_h, hb::shared::owner_class::Player, MsgId::EventMotion, Type::Move, 0, 0, 0);
-		}
-		else if (ret == 2) send_object_motion_reject_msg(client_h);
-		if ((m_client_list[client_h] != 0) && (m_client_list[client_h]->m_hp <= 0)) m_combat_manager->client_killed_handler(client_h, 0, 0, 1); // v1.4
-		// v2.171
-		check_client_move_frequency(client_h, client_time);
-		break;
+    case Type::Move:
+        ret = client_motion_move_handler(client_h, sX, sY, dir, 2);
+        if (ret == 1) {
+            send_event_to_near_client_type_a(client_h, hb::shared::owner_class::Player, MsgId::EventMotion, Type::Move, 0, 0, 0);
+        }
+        else if (ret == 2) send_object_motion_reject_msg(client_h);
+        if ((m_client_list[client_h] != 0) && (m_client_list[client_h]->m_hp <= 0)) m_combat_manager->client_killed_handler(client_h, 0, 0, 1); // v1.4
+        // v2.171
+        check_client_move_frequency(client_h, client_time);
+        break;
 
-	case Type::DamageMove:
-		ret = client_motion_move_handler(client_h, sX, sY, dir, 0);
-		if (ret == 1) {
-			send_event_to_near_client_type_a(client_h, hb::shared::owner_class::Player, MsgId::EventMotion, Type::DamageMove, m_client_list[client_h]->m_last_damage, 0, 0);
-		}
-		else if (ret == 2) send_object_motion_reject_msg(client_h);
-		if ((m_client_list[client_h] != 0) && (m_client_list[client_h]->m_hp <= 0)) m_combat_manager->client_killed_handler(client_h, 0, 0, 1); // v1.4
-		break;
+    case Type::DamageMove:
+        ret = client_motion_move_handler(client_h, sX, sY, dir, 0);
+        if (ret == 1) {
+            send_event_to_near_client_type_a(client_h, hb::shared::owner_class::Player, MsgId::EventMotion, Type::DamageMove, m_client_list[client_h]->m_last_damage, 0, 0);
+        }
+        else if (ret == 2) send_object_motion_reject_msg(client_h);
+        if ((m_client_list[client_h] != 0) && (m_client_list[client_h]->m_hp <= 0)) m_combat_manager->client_killed_handler(client_h, 0, 0, 1); // v1.4
+        break;
 
-	case Type::AttackMove:
-		ret = client_motion_move_handler(client_h, sX, sY, dir, 0);
-		if ((ret == 1) && (m_client_list[client_h] != 0)) {
-			send_event_to_near_client_type_a(client_h, hb::shared::owner_class::Player, MsgId::EventMotion, Type::AttackMove, 0, 0, 0);
-			client_motion_attack_handler(client_h, m_client_list[client_h]->m_x, m_client_list[client_h]->m_y, dX, dY, type, dir, target_object_id, client_time, false, true); // v1.4
-		}
-		else if (ret == 2) send_object_motion_reject_msg(client_h);
-		if ((m_client_list[client_h] != 0) && (m_client_list[client_h]->m_hp <= 0)) m_combat_manager->client_killed_handler(client_h, 0, 0, 1); // v1.4
-		// v2.171
-		m_combat_manager->check_client_attack_frequency(client_h, client_time);
-		break;
+    case Type::AttackMove:
+        ret = client_motion_move_handler(client_h, sX, sY, dir, 0);
+        if ((ret == 1) && (m_client_list[client_h] != 0)) {
+            send_event_to_near_client_type_a(client_h, hb::shared::owner_class::Player, MsgId::EventMotion, Type::AttackMove, 0, 0, 0);
+            client_motion_attack_handler(client_h, m_client_list[client_h]->m_x, m_client_list[client_h]->m_y, dX, dY, type, dir, target_object_id, client_time, false, true); // v1.4
+        }
+        else if (ret == 2) send_object_motion_reject_msg(client_h);
+        if ((m_client_list[client_h] != 0) && (m_client_list[client_h]->m_hp <= 0)) m_combat_manager->client_killed_handler(client_h, 0, 0, 1); // v1.4
+        // v2.171
+        m_combat_manager->check_client_attack_frequency(client_h, client_time);
+        break;
 
-	case Type::Attack:
-		m_combat_manager->check_attack_type(client_h, &type);
-		ret = client_motion_attack_handler(client_h, sX, sY, dX, dY, type, dir, target_object_id, client_time); // v1.4
-		if (ret == 1) {
-			if (type >= 20) {
-				m_client_list[client_h]->m_super_attack_left--;
-				if (m_client_list[client_h]->m_super_attack_left < 0) m_client_list[client_h]->m_super_attack_left = 0;
-				send_notify_msg(0, client_h, Notify::SuperAttackLeft, 0, 0, 0, 0);
-			}
+    case Type::Attack:
+    {
+        short requested_type = type; // Guardamos lo que el cliente INTENTA hacer
+        
+        m_combat_manager->check_attack_type(client_h, &type);
+        ret = client_motion_attack_handler(client_h, sX, sY, dX, dY, type, dir, target_object_id, client_time); // v1.4
+        
+        if (ret == 1) {
+            if (type >= 20) {
+                // Súper ataque válido: descontamos carga y avisamos
+                m_client_list[client_h]->m_super_attack_left--;
+                if (m_client_list[client_h]->m_super_attack_left < 0) m_client_list[client_h]->m_super_attack_left = 0;
+                send_notify_msg(0, client_h, Notify::SuperAttackLeft, m_client_list[client_h]->m_super_attack_left, 0, 0, 0);
+            }
+            else if (requested_type >= 20 && type < 20) {
+                // CHAPUZA EVITADA: El cliente intentó un súper ataque (requested_type >= 20), 
+                // pero el CombatManager lo degradó a normal (type < 20).
+                // Esto significa que el cliente está desincronizado (ataque fantasma). Le forzamos a actualizar su UI.
+                send_notify_msg(0, client_h, Notify::SuperAttackLeft, m_client_list[client_h]->m_super_attack_left, 0, 0, 0);
+            }
 
-			send_event_to_near_client_type_a(client_h, hb::shared::owner_class::Player, MsgId::EventMotion, Type::Attack, dX, dY, type);
-		}
-		else if (ret == 2) send_object_motion_reject_msg(client_h);
-		// v2.171
-		m_combat_manager->check_client_attack_frequency(client_h, client_time);
-		break;
+            send_event_to_near_client_type_a(client_h, hb::shared::owner_class::Player, MsgId::EventMotion, Type::Attack, dX, dY, type);
+        }
+        else if (ret == 2) {
+            send_object_motion_reject_msg(client_h);
+        }
+        
+        // v2.171
+        m_combat_manager->check_client_attack_frequency(client_h, client_time);
+        break;
+    }
 
-	case Type::GetItem:
-		ret = m_item_manager->client_motion_get_item_handler(client_h, sX, sY, dir);
-		if (ret == 1) {
-			send_event_to_near_client_type_a(client_h, hb::shared::owner_class::Player, MsgId::EventMotion, Type::GetItem, 0, 0, 0);
-		}
-		else if (ret == 2) send_object_motion_reject_msg(client_h);
-		break;
+    case Type::GetItem:
+        ret = m_item_manager->client_motion_get_item_handler(client_h, sX, sY, dir);
+        if (ret == 1) {
+            send_event_to_near_client_type_a(client_h, hb::shared::owner_class::Player, MsgId::EventMotion, Type::GetItem, 0, 0, 0);
+        }
+        else if (ret == 2) send_object_motion_reject_msg(client_h);
+        break;
 
-	case Type::Magic:
-		ret = m_magic_manager->client_motion_magic_handler(client_h, sX, sY, dir);
-		if (ret == 1) {
-			m_client_list[client_h]->m_magic_pause_time = true;
-			temp = 10;
-			send_event_to_near_client_type_a(client_h, hb::shared::owner_class::Player, MsgId::EventMotion, Type::Magic, dX, temp, 0);
-			m_client_list[client_h]->m_spell_count++;
-			m_magic_manager->check_client_magic_frequency(client_h, client_time);
-		}
-		else if (ret == 2) send_object_motion_reject_msg(client_h);
-		break;
+    case Type::Magic:
+        ret = m_magic_manager->client_motion_magic_handler(client_h, sX, sY, dir);
+        if (ret == 1) {
+            m_client_list[client_h]->m_magic_pause_time = true;
+            temp = 10;
+            send_event_to_near_client_type_a(client_h, hb::shared::owner_class::Player, MsgId::EventMotion, Type::Magic, dX, temp, 0);
+            m_client_list[client_h]->m_spell_count++;
+            m_magic_manager->check_client_magic_frequency(client_h, client_time);
+        }
+        else if (ret == 2) send_object_motion_reject_msg(client_h);
+        break;
 
-	default:
-		break;
-	}
+    default:
+        break;
+    }
 }
 
 int CGame::client_motion_move_handler(int client_h, short sX, short sY, direction dir, char move_type)

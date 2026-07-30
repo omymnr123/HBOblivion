@@ -37,7 +37,12 @@ int combat_system::get_attack_type() const
 {
 	if (!m_player) return 0;
 	int8_t wc = get_weapon_class();
-	bool super = (m_player->m_super_attack_left > 0) && (m_player->m_super_attack_mode == true);
+	int skill_idx = get_weapon_skill_type(); // <-- Identificamos el skill del arma equipada
+
+	// --- BLOQUEO VISUAL: Solo es "super" si hay cargas, está activo Y el skill es 100 ---
+	bool super = (m_player->m_super_attack_left > 0) && 
+	             (m_player->m_super_attack_mode == true) && 
+	             (m_player->m_skill_mastery[skill_idx] >= 100);
 
 	switch (wc) {
 	case weapon_class::none:
@@ -98,6 +103,10 @@ int combat_system::get_weapon_skill_type() const
 bool combat_system::can_super_attack() const
 {
 	if (!m_player) return false;
+	int skill_idx = get_weapon_skill_type(); // <-- Identificamos el skill del arma equipada
+
+	// --- BLOQUEO UI: Retorna falso si el skill no está al 100 ---
 	return m_player->m_super_attack_left > 0
-		&& m_player->m_super_attack_mode;
+		&& m_player->m_super_attack_mode
+		&& m_player->m_skill_mastery[skill_idx] >= 100;
 }

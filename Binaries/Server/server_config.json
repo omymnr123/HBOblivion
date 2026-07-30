@@ -15,7 +15,7 @@
     },
     "timing": {
         "client_timeout_ms": 30000,
-        "stamina_regen_ms": 2000,
+        "stamina_regen_ms": 10000,
         "poison_damage_ms": 8000,
         "health_regen_ms": 15000,
         "mana_regen_ms": 15000,

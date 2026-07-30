@@ -759,7 +759,7 @@ void CombatManager::effect_damage_spot(short attacker_h, char attacker_type, sho
 			damage = damage / 2;
 
 		m_game->m_npc_list[target_h]->m_hp -= damage;
-		if (m_game->m_npc_list[target_h]->m_hp < 0) {
+		if (m_game->m_npc_list[target_h]->m_hp <= 0) {
 			// Use EntityManager for NPC death handling
 			if (m_game->m_entity_manager != NULL)
 				m_game->m_entity_manager->on_entity_killed(target_h, attacker_h, attacker_type, damage);
@@ -1231,7 +1231,7 @@ void CombatManager::effect_damage_spot_damage_move(short attacker_h, char attack
 			damage = damage / 2;
 
 		m_game->m_npc_list[target_h]->m_hp -= damage;
-		if (m_game->m_npc_list[target_h]->m_hp < 0) {
+		if (m_game->m_npc_list[target_h]->m_hp <= 0) {
 			// NPC .
 			m_game->m_entity_manager->on_entity_killed(target_h, attacker_h, attacker_type, damage);
 		}
@@ -1784,46 +1784,37 @@ void CombatManager::check_attack_type(int client_h, short* spType)
 {
 	if (m_game->m_client_list[client_h] == 0) return;
 	auto wc = m_game->m_client_list[client_h]->get_equipped_weapon_class();
+	int skill_idx = get_weapon_skill_type(client_h);
 
 	switch (*spType) {
 	case 2:
-		// Effect  .
 		if (m_game->m_client_list[client_h]->m_arrow_index == -1) *spType = 0;
 		if (wc != weapon_class::bow) *spType = 1;
 		break;
 
 	case 20:
-		if (m_game->m_client_list[client_h]->m_super_attack_left <= 0)  *spType = 1;
-		break;
-
 	case 21:
-		if (m_game->m_client_list[client_h]->m_super_attack_left <= 0)  *spType = 1;
-		break;
-
 	case 22:
-		if (m_game->m_client_list[client_h]->m_super_attack_left <= 0)  *spType = 1;
-		break;
-
 	case 23:
-		if (m_game->m_client_list[client_h]->m_super_attack_left <= 0)   *spType = 1;
-		break;
-
 	case 24:
-		if (m_game->m_client_list[client_h]->m_super_attack_left <= 0)  *spType = 1;
+	case 26:
+	case 27:
+		// Si NO tienes cargas o el skill NO está al 100%
+		if (m_game->m_client_list[client_h]->m_super_attack_left <= 0 || 
+			m_game->m_client_list[client_h]->m_skill_mastery[skill_idx] < 100) {
+			*spType = 1; // Degradamos a ataque normal de forma silenciosa
+		}
 		break;
 
 	case 25:
-		if (m_game->m_client_list[client_h]->m_super_attack_left <= 0)  *spType = 2;
-		if (m_game->m_client_list[client_h]->m_arrow_index == -1)      *spType = 0;
-		if (wc != weapon_class::bow) *spType = 1;
-		break;
-
-	case 26:
-		if (m_game->m_client_list[client_h]->m_super_attack_left <= 0)  *spType = 1;
-		break;
-
-	case 27:
-		if (m_game->m_client_list[client_h]->m_super_attack_left <= 0)  *spType = 1;
+		if (m_game->m_client_list[client_h]->m_super_attack_left <= 0 || 
+			m_game->m_client_list[client_h]->m_skill_mastery[skill_idx] < 100) {
+			*spType = 2; // Degradamos a flechazo normal
+		}
+		else {
+			if (m_game->m_client_list[client_h]->m_arrow_index == -1) *spType = 0;
+			if (wc != weapon_class::bow) *spType = 1;
+		}
 		break;
 	}
 }
@@ -2228,19 +2219,8 @@ uint32_t CombatManager::calculate_attack_effect(short target_h, char target_type
 	attacker_s_avalue = 0;
 	wc = weapon_class::none;
 
-	switch (attacker_type) {
+switch (attacker_type) {
 	case hb::shared::owner_class::Player:
-
-		if (m_game->m_client_list[attacker_h] == 0) return 0;
-		if ((m_game->m_map_list[m_game->m_client_list[attacker_h]->m_map_index]->m_is_attack_enabled == false)) return 0;
-		if ((m_game->m_map_list[m_game->m_client_list[attacker_h]->m_map_index] == 0) && (m_game->m_map_list[m_game->m_client_list[attacker_h]->m_map_index]->m_is_heldenian_map) && (m_game->m_is_heldenian_mode)) return 0;
-		if ((m_game->m_is_crusade_mode == false) && (m_game->m_client_list[attacker_h]->m_is_player_civil) && (target_type == hb::shared::owner_class::Player)) return 0;
-
-		if (m_game->m_client_list[attacker_h]->m_status.invisibility) {
-			m_game->m_status_effect_manager->set_invisibility_flag(attacker_h, hb::shared::owner_class::Player, false);
-			m_game->m_delay_event_manager->remove_from_delay_event_list(attacker_h, hb::shared::owner_class::Player, hb::shared::magic::Invisibility);
-			m_game->m_client_list[attacker_h]->m_magic_effect_status[hb::shared::magic::Invisibility] = 0;
-		}
 
 		if (!m_game->m_client_list[attacker_h]->m_appearance.is_walking) return 0;
 
@@ -2250,18 +2230,6 @@ uint32_t CombatManager::calculate_attack_effect(short target_h, char target_type
 		wc = m_game->m_client_list[attacker_h]->get_equipped_weapon_class();
 
 		skill_used = m_game->m_client_list[attacker_h]->m_using_weapon_skill;
-		if ((is_dash) && (m_game->m_client_list[attacker_h]->m_skill_mastery[skill_used] != 100) && (wc != weapon_class::axe)) {
-			try
-			{
-				hb::logger::warn<log_channel::security>("Fullswing hack: IP={} player={}, dashing with weapon skill {}", m_game->m_client_list[attacker_h]->m_ip_address, m_game->m_client_list[attacker_h]->m_char_name, m_game->m_client_list[attacker_h]->m_skill_mastery[skill_used]);
-				m_game->delete_client(attacker_h, true, true);
-			}
-			catch (...)
-			{
-
-			}
-			return 0;
-		}
 
 		attacker_side = m_game->m_client_list[attacker_h]->m_side;
 

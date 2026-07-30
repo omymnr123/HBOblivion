@@ -2,11 +2,11 @@
     "audio": {
         "ambientEnabled": true,
         "ambientVolume": 20,
-        "masterEnabled": false,
-        "masterVolume": 50,
+        "masterEnabled": true,
+        "masterVolume": 21,
         "musicEnabled": false,
         "musicVolume": 15,
-        "soundEnabled": false,
+        "soundEnabled": true,
         "soundVolume": 22,
         "uiEnabled": false,
         "uiVolume": 14
@@ -32,7 +32,7 @@
         "zoomMap": false
     },
     "shortcuts": {
-        "magic": 32,
+        "magic": 26,
         "slots": [
             -1,
             -1,
