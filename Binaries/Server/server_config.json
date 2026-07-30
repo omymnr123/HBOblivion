@@ -6,7 +6,7 @@
         "rep_modifier": 5
     },
     "exp_rates": {
-        "npc_kill": 5.0
+        "npc_kill": 4.0
     },
     "skill_rates": {
         "weapon_skill_multiplier": 10.0,
@@ -15,7 +15,7 @@
     },
     "timing": {
         "client_timeout_ms": 30000,
-        "stamina_regen_ms": 7000,
+        "stamina_regen_ms": 2000,
         "poison_damage_ms": 8000,
         "health_regen_ms": 15000,
         "mana_regen_ms": 15000,

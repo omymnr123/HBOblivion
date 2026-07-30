@@ -37,6 +37,8 @@ void DialogBox_StatusOverlay::on_update()
 	bool has_primary = m_show_levelup || m_show_restart;
 
 #ifdef TESTER_ONLY
+	// En el cliente, si el usuario tiene privilegios o modo GM activo se habilita el botón
+	// (El servidor ya se encarga de bloquear estrictamente las acciones si no es admin nivel 1000)
 	m_show_tester = !m_game->get_dialog_box_manager().is_enabled(DialogBoxId::TesterMenu);
 	bool has_tester = m_show_tester;
 #else
@@ -50,7 +52,7 @@ void DialogBox_StatusOverlay::on_update()
 		return;
 	}
 
-	// Measure text
+	// Measure primary text
 	int primary_w = 0, primary_h = 0;
 	if (has_primary)
 	{
@@ -153,6 +155,7 @@ bool DialogBox_StatusOverlay::on_click()
 #ifdef TESTER_ONLY
 	if (m_show_tester && mouse_in(m_tester_btn))
 	{
+		// Seguridad en el servidor: si intentan usarlo sin permisos, el servidor lo rechaza de inmediato.
 		enable_dialog_box(DialogBoxId::TesterMenu, 0, 0, 0);
 		audio_manager::get().play_game_sound(sound_type::effect, 14, 5);
 		return true;
@@ -177,5 +180,5 @@ bool DialogBox_StatusOverlay::on_click()
 		return true;
 	}
 
-	return true;
+	return false;
 }

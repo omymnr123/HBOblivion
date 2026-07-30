@@ -118,6 +118,8 @@ struct AccountDbCharacterState
     int party_id;
     int gizon_item_upgrade_left;
     hb::shared::entity::PlayerAppearance appearance;
+    uint8_t talent_points;
+    uint8_t talents[8];
 };
 
 struct AccountDbItemRow

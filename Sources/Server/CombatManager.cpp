@@ -2335,14 +2335,28 @@ uint32_t CombatManager::calculate_attack_effect(short target_h, char target_type
 			iAP_L += 5;
 		}
 
+{
+int guerrero_level = m_game->m_guild_manager->get_player_guild_skill(attacker_h, static_cast<int>(GuildSkillId::Guerrero));if (guerrero_level > 0) {
+int bonus = guerrero_level * GuildConfig::BONUS_PHYS_DMG_PERCENT;
+iAP_SM += (iAP_SM * bonus) / 100;
+iAP_L += (iAP_L * bonus) / 100;
+}
+}
+
+// === NUEVO: SISTEMA DE TALENTOS (Fuerza Descomunal) ===
 		{
-			int guerrero_level = m_game->m_guild_manager->get_player_guild_skill(attacker_h, static_cast<int>(GuildSkillId::Guerrero));
-			if (guerrero_level > 0) {
-				int bonus = guerrero_level * GuildConfig::BONUS_PHYS_DMG_PERCENT;
-				iAP_SM += (iAP_SM * bonus) / 100;
-				iAP_L += (iAP_L * bonus) / 100;
+			int furia_nivel = m_game->m_client_list[attacker_h]->m_status.talents[0];
+			if (furia_nivel > 0) {
+				int bonus_dmg = 0;
+				if (furia_nivel == 1) bonus_dmg = 4;
+				else if (furia_nivel == 2) bonus_dmg = 8;
+				else if (furia_nivel >= 3) bonus_dmg = 15;
+				
+				iAP_SM += (iAP_SM * bonus_dmg) / 100;
+				iAP_L  += (iAP_L * bonus_dmg) / 100;
 			}
 		}
+		// =======================================================
 
 		item_index = m_game->m_client_list[attacker_h]->m_item_equipment_status[to_int(EquipPos::RightHand)];
 		if ((item_index != -1) && (m_game->m_client_list[attacker_h]->m_item_list[item_index] != 0)) {
@@ -2977,13 +2991,26 @@ uint32_t CombatManager::calculate_attack_effect(short target_h, char target_type
 								m_game->m_client_list[target_h]->m_item_list[temp]->m_instance.cur_durability--;
 								m_game->send_notify_msg(0, target_h, Notify::CurDurability, temp, m_game->m_client_list[target_h]->m_item_list[temp]->m_instance.cur_durability, 0, 0);
 							}
-							if (m_game->m_client_list[target_h]->m_item_list[temp]->m_instance.cur_durability == 0) {
-								m_game->send_notify_msg(0, target_h, Notify::ItemDurabilityEnd, m_game->m_client_list[target_h]->m_item_list[temp]->m_equip_pos, temp, 0, 0);
-								m_game->m_item_manager->release_item_handler(target_h, temp, true);
-							}
-						}
-					}
-				}
+if (m_game->m_client_list[target_h]->m_item_list[temp]->m_instance.cur_durability == 0) {
+				m_game->send_notify_msg(0, target_h, Notify::ItemDurabilityEnd, m_game->m_client_list[target_h]->m_item_list[temp]->m_equip_pos, temp, 0, 0);
+				m_game->m_item_manager->release_item_handler(target_h, temp, true);
+			}
+		}
+	}
+}
+
+// === NUEVO: SISTEMA DE TALENTOS (Golpe Triturador PvP) ===
+if (attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[attacker_h] != 0) {
+	int triturador_nivel = m_game->m_client_list[attacker_h]->m_status.talents[2];
+	if (triturador_nivel > 0) {
+		int prob = triturador_nivel * 5; // Nivel 1: 5%, Nivel 2: 10%, Nivel 3: 15%
+		if (m_game->dice(1, 100) <= prob) {
+			iAP_Abs_Armor = 0;
+			iAP_Abs_Shield = 0;
+		}
+	}
+}
+// =========================================================
 
 				iAP_SM = iAP_SM - (iAP_Abs_Armor + iAP_Abs_Shield);
 				if (iAP_SM < 0) iAP_SM = 0;
@@ -3262,18 +3289,31 @@ uint32_t CombatManager::calculate_attack_effect(short target_h, char target_type
 				damage = iAP_SM;
 			else damage = iAP_L;
 
-			if (m_game->m_npc_list[target_h]->m_abs_damage < 0) {
-				tmp1 = (double)damage;
-				tmp2 = (double)(abs(m_game->m_npc_list[target_h]->m_abs_damage)) / 100.0f;
-				tmp3 = tmp1 * tmp2;
-				tmp2 = tmp1 - tmp3;
-				damage = (int)tmp2;
-				if (damage < 0) damage = 1;
-				else if ((m_game->m_npc_list[target_h]->m_type == 31) && (attacker_type == 1) && (m_game->m_client_list[attacker_h] != 0) && (m_game->m_client_list[attacker_h]->m_special_ability_type == 7))
-					damage += m_game->dice(3, 2);
-			}
+if (m_game->m_npc_list[target_h]->m_abs_damage < 0) {
+tmp1 = (double)damage;
+tmp2 = (double)(abs(m_game->m_npc_list[target_h]->m_abs_damage)) / 100.0f;
 
-			if ((attacker_sa == 2) && (m_game->m_npc_list[target_h]->m_magic_effect_status[hb::shared::magic::Protect] != 0)) {
+// === NUEVO: SISTEMA DE TALENTOS (Golpe Triturador vs NPCs) ===
+if (attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[attacker_h] != 0) {
+	int triturador_nivel = m_game->m_client_list[attacker_h]->m_status.talents[2];
+	if (triturador_nivel > 0) {
+		int prob = triturador_nivel * 5;
+		if (m_game->dice(1, 100) <= prob) {
+			tmp2 = 0.0f; // Ignora toda la resistencia de absorción del monstruo
+		}
+	}
+}
+// =============================================================
+
+tmp3 = tmp1 * tmp2;
+tmp2 = tmp1 - tmp3;
+damage = (int)tmp2;
+if (damage < 0) damage = 1;
+else if ((m_game->m_npc_list[target_h]->m_type == 31) && (attacker_type == 1) && (m_game->m_client_list[attacker_h] != 0) && (m_game->m_client_list[attacker_h]->m_special_ability_type == 7))
+	damage += m_game->dice(3, 2);
+}
+
+	if ((attacker_sa == 2) && (m_game->m_npc_list[target_h]->m_magic_effect_status[hb::shared::magic::Protect] != 0)) {
 				switch (m_game->m_npc_list[target_h]->m_magic_effect_status[hb::shared::magic::Protect]) {
 				case 1:
 					m_game->m_status_effect_manager->set_protection_from_arrow_flag(target_h, hb::shared::owner_class::Npc, false);
@@ -3321,7 +3361,8 @@ uint32_t CombatManager::calculate_attack_effect(short target_h, char target_type
 			if (m_game->m_npc_list[target_h]->m_hp <= 0) {
 				m_game->m_entity_manager->on_entity_killed(target_h, attacker_h, attacker_type, damage);
 				killed = true;
-				killed_dice = std::max(1, m_game->m_npc_list[target_h]->m_max_hp / 5);
+				killed_dice = m_game->m_npc_list[target_h]->m_max_hp / 5;
+				if (killed_dice < 1) killed_dice = 1;
 			}
 			else {
 				bool skip_counter =

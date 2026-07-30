@@ -1,6 +1,6 @@
 {
     "audio": {
-        "ambientEnabled": false,
+        "ambientEnabled": true,
         "ambientVolume": 20,
         "masterEnabled": false,
         "masterVolume": 50,
@@ -14,7 +14,7 @@
     "display": {
         "backgroundFpsThrottle": false,
         "borderless": false,
-        "captureMouse": false,
+        "captureMouse": true,
         "detailLevel": 2,
         "dialogTransparency": false,
         "fpsLimit": 0,
@@ -24,20 +24,20 @@
         "patchingGrid": false,
         "reducedMotion": true,
         "runningMode": true,
-        "showFps": true,
-        "showLatency": true,
+        "showFps": false,
+        "showLatency": false,
         "tileGrid": false,
         "toggleToChat": true,
         "vsync": false,
         "zoomMap": false
     },
     "shortcuts": {
-        "magic": 12,
+        "magic": 32,
         "slots": [
             -1,
             -1,
-            9,
-            2,
+            157,
+            147,
             -1
         ]
     },

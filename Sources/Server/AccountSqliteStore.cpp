@@ -400,27 +400,11 @@ bool EnsureAccountDatabase(const char* account_name, sqlite3** outDb, std::strin
         " created_at TEXT NOT NULL,"
         " underwear_type INTEGER NOT NULL DEFAULT 0,"
         " hair_color INTEGER NOT NULL DEFAULT 0,"
-        " hair_style INTEGER NOT NULL DEFAULT 0,"
-        " skin_color INTEGER NOT NULL DEFAULT 0,"
-        " level INTEGER NOT NULL,"
-        " exp INTEGER NOT NULL,"
-        " map_name TEXT NOT NULL,"
-        " map_x INTEGER NOT NULL,"
-        " map_y INTEGER NOT NULL,"
-        " hp INTEGER NOT NULL,"
-        " mp INTEGER NOT NULL,"
-        " sp INTEGER NOT NULL,"
-        " str INTEGER NOT NULL,"
-        " vit INTEGER NOT NULL,"
-        " dex INTEGER NOT NULL,"
-        " intl INTEGER NOT NULL,"
-        " mag INTEGER NOT NULL,"
-        " chr INTEGER NOT NULL,"
-        " gender INTEGER NOT NULL,"
-        " skin INTEGER NOT NULL,"
         " hairstyle INTEGER NOT NULL,"
         " haircolor INTEGER NOT NULL,"
         " underwear INTEGER NOT NULL,"
+        " TalentPoints INTEGER NOT NULL DEFAULT 0,"
+        " Talents TEXT NOT NULL DEFAULT '0,0,0,0,0,0,0,0',"
         " FOREIGN KEY(account_name) REFERENCES accounts(account_name) ON DELETE CASCADE"
         ");"
         "CREATE TABLE IF NOT EXISTS character_items ("
@@ -521,7 +505,25 @@ bool EnsureAccountDatabase(const char* account_name, sqlite3** outDb, std::strin
         return false;
     }
 
-    if (!AddColumnIfMissing(db, "characters", "profile", "TEXT NOT NULL DEFAULT ''") ||
+    if (!AddColumnIfMissing(db, "characters", "map_name", "TEXT NOT NULL DEFAULT 'NONE'") ||
+        !AddColumnIfMissing(db, "characters", "map_x", "INTEGER NOT NULL DEFAULT 0") ||
+        !AddColumnIfMissing(db, "characters", "map_y", "INTEGER NOT NULL DEFAULT 0") ||
+        !AddColumnIfMissing(db, "characters", "hp", "INTEGER NOT NULL DEFAULT 0") ||
+        !AddColumnIfMissing(db, "characters", "mp", "INTEGER NOT NULL DEFAULT 0") ||
+        !AddColumnIfMissing(db, "characters", "sp", "INTEGER NOT NULL DEFAULT 0") ||
+        !AddColumnIfMissing(db, "characters", "level", "INTEGER NOT NULL DEFAULT 1") ||
+        !AddColumnIfMissing(db, "characters", "str", "INTEGER NOT NULL DEFAULT 0") ||
+        !AddColumnIfMissing(db, "characters", "intl", "INTEGER NOT NULL DEFAULT 0") ||
+        !AddColumnIfMissing(db, "characters", "vit", "INTEGER NOT NULL DEFAULT 0") ||
+        !AddColumnIfMissing(db, "characters", "dex", "INTEGER NOT NULL DEFAULT 0") ||
+        !AddColumnIfMissing(db, "characters", "mag", "INTEGER NOT NULL DEFAULT 0") ||
+        !AddColumnIfMissing(db, "characters", "chr", "INTEGER NOT NULL DEFAULT 0") ||
+        !AddColumnIfMissing(db, "characters", "exp", "INTEGER NOT NULL DEFAULT 0") ||
+        !AddColumnIfMissing(db, "characters", "gender", "INTEGER NOT NULL DEFAULT 0") ||
+        !AddColumnIfMissing(db, "characters", "skin", "INTEGER NOT NULL DEFAULT 0") ||
+        !AddColumnIfMissing(db, "characters", "hair_style", "INTEGER NOT NULL DEFAULT 0") ||
+        !AddColumnIfMissing(db, "characters", "skin_color", "INTEGER NOT NULL DEFAULT 0") ||
+        !AddColumnIfMissing(db, "characters", "profile", "TEXT NOT NULL DEFAULT ''") ||
         !AddColumnIfMissing(db, "characters", "location", "TEXT NOT NULL DEFAULT ''") ||
         !AddColumnIfMissing(db, "characters", "rating", "INTEGER NOT NULL DEFAULT 0") ||
         !AddColumnIfMissing(db, "characters", "luck", "INTEGER NOT NULL DEFAULT 0") ||
@@ -558,7 +560,9 @@ bool EnsureAccountDatabase(const char* account_name, sqlite3** outDb, std::strin
         !AddColumnIfMissing(db, "characters", "construct_point", "INTEGER NOT NULL DEFAULT 0") ||
         !AddColumnIfMissing(db, "characters", "dead_penalty_time", "INTEGER NOT NULL DEFAULT 0") ||
         !AddColumnIfMissing(db, "characters", "party_id", "INTEGER NOT NULL DEFAULT 0") ||
-        !AddColumnIfMissing(db, "characters", "gizon_item_upgrade_left", "INTEGER NOT NULL DEFAULT 0")) {
+        !AddColumnIfMissing(db, "characters", "gizon_item_upgrade_left", "INTEGER NOT NULL DEFAULT 0") ||
+        !AddColumnIfMissing(db, "characters", "TalentPoints", "INTEGER NOT NULL DEFAULT 0") ||
+        !AddColumnIfMissing(db, "characters", "Talents", "TEXT NOT NULL DEFAULT '0,0,0,0,0,0,0,0'")) {
         sqlite3_close(db);
         return false;
     }
@@ -699,7 +703,7 @@ bool LoadCharacterState(sqlite3* db, const char* character_name, AccountDbCharac
         "special_event_id, super_attack_left, "
         "special_ability_time, locked_map_name, locked_map_time, crusade_job, crusade_guid, "
         "construct_point, dead_penalty_time, party_id, gizon_item_upgrade_left, "
-        "underwear_type, hair_color, hair_style, skin_color "
+        "underwear_type, hair_color, hair_style, skin_color, TalentPoints, Talents "
         "FROM characters WHERE character_name = ? COLLATE NOCASE;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -771,10 +775,21 @@ bool LoadCharacterState(sqlite3* db, const char* character_name, AccountDbCharac
         outState.dead_penalty_time = sqlite3_column_int(stmt, col++);
         outState.party_id = sqlite3_column_int(stmt, col++);
         outState.gizon_item_upgrade_left = sqlite3_column_int(stmt, col++);
+        
         outState.appearance.underwear_type = static_cast<uint8_t>(sqlite3_column_int(stmt, col++));
         outState.appearance.hair_color = static_cast<uint8_t>(sqlite3_column_int(stmt, col++));
         outState.appearance.hair_style = static_cast<uint8_t>(sqlite3_column_int(stmt, col++));
         outState.appearance.skin_color = static_cast<uint8_t>(sqlite3_column_int(stmt, col++));
+
+        outState.talent_points = sqlite3_column_int(stmt, col++);
+        const char* talentStr = reinterpret_cast<const char*>(sqlite3_column_text(stmt, col++));
+        if (talentStr) {
+            memset(outState.talents, 0, sizeof(outState.talents));
+            sscanf(talentStr, "%hhu,%hhu,%hhu,%hhu,%hhu,%hhu,%hhu,%hhu",
+                &outState.talents[0], &outState.talents[1], &outState.talents[2], &outState.talents[3],
+                &outState.talents[4], &outState.talents[5], &outState.talents[6], &outState.talents[7]);
+        }
+
         ok = true;
     }
 
@@ -1581,8 +1596,8 @@ bool SaveCharacterSnapshot(sqlite3* db, const CClient* client)
         " special_event_id, super_attack_left,"
         " special_ability_time, locked_map_name, locked_map_time, crusade_job, crusade_guid,"
         " construct_point, dead_penalty_time, party_id, gizon_item_upgrade_left,"
-        " underwear_type, hair_color, hair_style, skin_color"
-        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+        " underwear_type, hair_color, hair_style, skin_color, TalentPoints, Talents"
+        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
     sqlite3_stmt* stmt = nullptr;
     if (sqlite3_prepare_v2(db, upsertSql, -1, &stmt, nullptr) != SQLITE_OK) {
@@ -1658,6 +1673,15 @@ bool SaveCharacterSnapshot(sqlite3* db, const CClient* client)
     ok &= (sqlite3_bind_int(stmt, idx++, client->m_appearance.hair_color) == SQLITE_OK);
     ok &= (sqlite3_bind_int(stmt, idx++, client->m_appearance.hair_style) == SQLITE_OK);
     ok &= (sqlite3_bind_int(stmt, idx++, client->m_appearance.skin_color) == SQLITE_OK);
+
+    ok &= (sqlite3_bind_int(stmt, idx++, client->m_status.talent_points) == SQLITE_OK);
+    char talentBuffer[64];
+    snprintf(talentBuffer, sizeof(talentBuffer), "%u,%u,%u,%u,%u,%u,%u,%u",
+        client->m_status.talents[0], client->m_status.talents[1],
+        client->m_status.talents[2], client->m_status.talents[3],
+        client->m_status.talents[4], client->m_status.talents[5],
+        client->m_status.talents[6], client->m_status.talents[7]);
+    ok &= PrepareAndBindText(stmt, idx++, talentBuffer);
 
     if (!ok) {
         char logMsg[512] = {};

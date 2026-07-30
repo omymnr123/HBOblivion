@@ -4485,341 +4485,346 @@ void CGame::response_player_data_handler(char* data, uint32_t size)
 
 bool CGame::load_player_data_from_db(int client_h)
 {
-	if (m_client_list[client_h] == 0) return false;
+    if (m_client_list[client_h] == 0) return false;
 
-	sqlite3* db = nullptr;
-	std::string dbPath;
-	if (!EnsureAccountDatabase(m_client_list[client_h]->m_account_name, &db, dbPath)) {
-		return false;
-	}
+    sqlite3* db = nullptr;
+    std::string dbPath;
+    if (!EnsureAccountDatabase(m_client_list[client_h]->m_account_name, &db, dbPath)) {
+        return false;
+    }
 
-	AccountDbCharacterState state = {};
-	if (!LoadCharacterState(db, m_client_list[client_h]->m_char_name, state)) {
-		CloseAccountDatabase(db);
-		return false;
-	}
+    AccountDbCharacterState state = {};
+    if (!LoadCharacterState(db, m_client_list[client_h]->m_char_name, state)) {
+        CloseAccountDatabase(db);
+        return false;
+    }
 
-	std::memset(m_client_list[client_h]->m_profile, 0, sizeof(m_client_list[client_h]->m_profile));
-	std::snprintf(m_client_list[client_h]->m_profile, sizeof(m_client_list[client_h]->m_profile), "%s", state.profile);
+    std::memset(m_client_list[client_h]->m_profile, 0, sizeof(m_client_list[client_h]->m_profile));
+    std::snprintf(m_client_list[client_h]->m_profile, sizeof(m_client_list[client_h]->m_profile), "%s", state.profile);
 
-	std::memset(m_client_list[client_h]->m_location, 0, sizeof(m_client_list[client_h]->m_location));
-	std::snprintf(m_client_list[client_h]->m_location, sizeof(m_client_list[client_h]->m_location), "%s", state.location);
+    std::memset(m_client_list[client_h]->m_location, 0, sizeof(m_client_list[client_h]->m_location));
+    std::snprintf(m_client_list[client_h]->m_location, sizeof(m_client_list[client_h]->m_location), "%s", state.location);
 
-	std::memset(m_client_list[client_h]->m_map_name, 0, sizeof(m_client_list[client_h]->m_map_name));
-	std::snprintf(m_client_list[client_h]->m_map_name, sizeof(m_client_list[client_h]->m_map_name), "%s", state.map_name);
-	m_client_list[client_h]->m_map_index = -1;
-	for(int i = 0; i < MaxMaps; i++) {
-		if ((m_map_list[i] != 0) && (memcmp(m_map_list[i]->m_name, m_client_list[client_h]->m_map_name, 10) == 0)) {
-			m_client_list[client_h]->m_map_index = (char)i;
-			break;
-		}
-	}
-	if (m_client_list[client_h]->m_map_index == -1) {
-		hb::logger::log("Player '{}' tried to enter unknown map: {}", m_client_list[client_h]->m_char_name, m_client_list[client_h]->m_map_name);
-		CloseAccountDatabase(db);
-		return false;
-	}
+    std::memset(m_client_list[client_h]->m_map_name, 0, sizeof(m_client_list[client_h]->m_map_name));
+    std::snprintf(m_client_list[client_h]->m_map_name, sizeof(m_client_list[client_h]->m_map_name), "%s", state.map_name);
+    m_client_list[client_h]->m_map_index = -1;
+    for(int i = 0; i < MaxMaps; i++) {
+        if ((m_map_list[i] != 0) && (memcmp(m_map_list[i]->m_name, m_client_list[client_h]->m_map_name, 10) == 0)) {
+            m_client_list[client_h]->m_map_index = (char)i;
+            break;
+        }
+    }
+    if (m_client_list[client_h]->m_map_index == -1) {
+        hb::logger::log("Player '{}' tried to enter unknown map: {}", m_client_list[client_h]->m_char_name, m_client_list[client_h]->m_map_name);
+        CloseAccountDatabase(db);
+        return false;
+    }
 
-	m_client_list[client_h]->m_x = (short)state.map_x;
-	m_client_list[client_h]->m_y = (short)state.map_y;
-	m_client_list[client_h]->m_hp = state.hp;
-	m_client_list[client_h]->m_mp = state.mp;
-	m_client_list[client_h]->m_sp = state.sp;
-	m_client_list[client_h]->m_level = state.level;
-	m_client_list[client_h]->m_rating = state.rating;
-	m_client_list[client_h]->m_str = state.str;
-	m_client_list[client_h]->m_int = state.intl;
-	m_client_list[client_h]->m_vit = state.vit;
-	m_client_list[client_h]->m_dex = state.dex;
-	m_client_list[client_h]->m_mag = state.mag;
-	m_client_list[client_h]->m_charisma = state.chr;
-	m_client_list[client_h]->m_luck = state.luck;
-	m_client_list[client_h]->m_exp = state.exp;
-	m_client_list[client_h]->m_levelup_pool = state.lu_pool;
-	m_client_list[client_h]->m_enemy_kill_count = state.enemy_kill_count;
-	m_client_list[client_h]->m_player_kill_count = state.pk_count;
-	m_client_list[client_h]->m_reward_gold = state.reward_gold;
-	m_client_list[client_h]->m_down_skill_index = state.down_skill_index;
-	m_client_list[client_h]->m_char_id_num1 = (short)state.id_num1;
-	m_client_list[client_h]->m_char_id_num2 = (short)state.id_num2;
-	m_client_list[client_h]->m_char_id_num3 = (short)state.id_num3;
-	m_client_list[client_h]->m_sex = (char)state.sex;
-	m_client_list[client_h]->m_skin = (char)state.skin;
-	m_client_list[client_h]->m_hair_style = (char)state.hair_style;
-	m_client_list[client_h]->m_hair_color = (char)state.hair_color;
-	m_client_list[client_h]->m_underwear = (char)state.underwear;
-	m_client_list[client_h]->m_hunger_status = state.hunger_status;
-	m_client_list[client_h]->m_time_left_rating = state.timeleft_rating;
-	m_client_list[client_h]->m_time_left_force_recall = state.timeleft_force_recall;
-	m_client_list[client_h]->m_time_left_firm_stamina = state.timeleft_firm_stamina;
-	m_client_list[client_h]->m_penalty_block_year = state.penalty_block_year;
-	m_client_list[client_h]->m_penalty_block_month = state.penalty_block_month;
-	m_client_list[client_h]->m_penalty_block_day = state.penalty_block_day;
-	m_client_list[client_h]->m_quest = state.quest_number;
-	m_client_list[client_h]->m_quest_id = state.quest_id;
-	m_client_list[client_h]->m_cur_quest_count = state.current_quest_count;
-	m_client_list[client_h]->m_quest_reward_type = state.quest_reward_type;
-	m_client_list[client_h]->m_quest_reward_amount = state.quest_reward_amount;
-	m_client_list[client_h]->m_contribution = state.contribution;
-	m_client_list[client_h]->m_war_contribution = state.war_contribution;
-	m_client_list[client_h]->m_is_quest_completed = (state.quest_completed != 0);
-	m_client_list[client_h]->m_special_event_id = state.special_event_id;
-	m_client_list[client_h]->m_super_attack_left = state.super_attack_left;
-	m_client_list[client_h]->m_special_ability_time = state.special_ability_time;
-	std::memset(m_client_list[client_h]->m_locked_map_name, 0, sizeof(m_client_list[client_h]->m_locked_map_name));
-	std::snprintf(m_client_list[client_h]->m_locked_map_name, sizeof(m_client_list[client_h]->m_locked_map_name), "%s", state.locked_map_name);
-	m_client_list[client_h]->m_locked_map_time = state.locked_map_time;
-	m_client_list[client_h]->m_crusade_duty = state.crusade_job;
-	m_client_list[client_h]->m_crusade_guid = state.crusade_guid;
-	m_client_list[client_h]->m_construction_point = state.construct_point;
-	m_client_list[client_h]->m_dead_penalty_time = state.dead_penalty_time;
-	m_client_list[client_h]->m_party_id = state.party_id;
-	m_client_list[client_h]->m_gizon_item_upgrade_left = state.gizon_item_upgrade_left;
-	m_client_list[client_h]->m_appearance = state.appearance;
+    m_client_list[client_h]->m_x = (short)state.map_x;
+    m_client_list[client_h]->m_y = (short)state.map_y;
+    m_client_list[client_h]->m_hp = state.hp;
+    m_client_list[client_h]->m_mp = state.mp;
+    m_client_list[client_h]->m_sp = state.sp;
+    m_client_list[client_h]->m_level = state.level;
+    m_client_list[client_h]->m_rating = state.rating;
+    m_client_list[client_h]->m_str = state.str;
+    m_client_list[client_h]->m_int = state.intl;
+    m_client_list[client_h]->m_vit = state.vit;
+    m_client_list[client_h]->m_dex = state.dex;
+    m_client_list[client_h]->m_mag = state.mag;
+    m_client_list[client_h]->m_charisma = state.chr;
+    m_client_list[client_h]->m_luck = state.luck;
+    m_client_list[client_h]->m_exp = state.exp;
+    m_client_list[client_h]->m_levelup_pool = state.lu_pool;
+    m_client_list[client_h]->m_enemy_kill_count = state.enemy_kill_count;
+    m_client_list[client_h]->m_player_kill_count = state.pk_count;
+    m_client_list[client_h]->m_reward_gold = state.reward_gold;
+    m_client_list[client_h]->m_down_skill_index = state.down_skill_index;
+    m_client_list[client_h]->m_char_id_num1 = (short)state.id_num1;
+    m_client_list[client_h]->m_char_id_num2 = (short)state.id_num2;
+    m_client_list[client_h]->m_char_id_num3 = (short)state.id_num3;
+    m_client_list[client_h]->m_sex = (char)state.sex;
+    m_client_list[client_h]->m_skin = (char)state.skin;
+    m_client_list[client_h]->m_hair_style = (char)state.hair_style;
+    m_client_list[client_h]->m_hair_color = (char)state.hair_color;
+    m_client_list[client_h]->m_underwear = (char)state.underwear;
+    m_client_list[client_h]->m_hunger_status = state.hunger_status;
+    m_client_list[client_h]->m_time_left_rating = state.timeleft_rating;
+    m_client_list[client_h]->m_time_left_force_recall = state.timeleft_force_recall;
+    m_client_list[client_h]->m_time_left_firm_stamina = state.timeleft_firm_stamina;
+    m_client_list[client_h]->m_penalty_block_year = state.penalty_block_year;
+    m_client_list[client_h]->m_penalty_block_month = state.penalty_block_month;
+    m_client_list[client_h]->m_penalty_block_day = state.penalty_block_day;
+    m_client_list[client_h]->m_quest = state.quest_number;
+    m_client_list[client_h]->m_quest_id = state.quest_id;
+    m_client_list[client_h]->m_cur_quest_count = state.current_quest_count;
+    m_client_list[client_h]->m_quest_reward_type = state.quest_reward_type;
+    m_client_list[client_h]->m_quest_reward_amount = state.quest_reward_amount;
+    m_client_list[client_h]->m_contribution = state.contribution;
+    m_client_list[client_h]->m_war_contribution = state.war_contribution;
+    m_client_list[client_h]->m_is_quest_completed = (state.quest_completed != 0);
+    m_client_list[client_h]->m_special_event_id = state.special_event_id;
+    m_client_list[client_h]->m_super_attack_left = state.super_attack_left;
+    m_client_list[client_h]->m_special_ability_time = state.special_ability_time;
+    std::memset(m_client_list[client_h]->m_locked_map_name, 0, sizeof(m_client_list[client_h]->m_locked_map_name));
+    std::snprintf(m_client_list[client_h]->m_locked_map_name, sizeof(m_client_list[client_h]->m_locked_map_name), "%s", state.locked_map_name);
+    m_client_list[client_h]->m_locked_map_time = state.locked_map_time;
+    m_client_list[client_h]->m_crusade_duty = state.crusade_job;
+    m_client_list[client_h]->m_crusade_guid = state.crusade_guid;
+    m_client_list[client_h]->m_construction_point = state.construct_point;
+    m_client_list[client_h]->m_dead_penalty_time = state.dead_penalty_time;
+    m_client_list[client_h]->m_party_id = state.party_id;
+    m_client_list[client_h]->m_gizon_item_upgrade_left = state.gizon_item_upgrade_left;
+    m_client_list[client_h]->m_appearance = state.appearance;
 
-	for(int i = 0; i < hb::shared::limits::MaxItems; i++) {
-		if (m_client_list[client_h]->m_item_list[i] != 0) {
-			delete m_client_list[client_h]->m_item_list[i];
-			m_client_list[client_h]->m_item_list[i] = 0;
-		}
-		m_client_list[client_h]->m_item_pos_list[i].x = 40;
-		m_client_list[client_h]->m_item_pos_list[i].y = 30;
-		m_client_list[client_h]->m_is_item_equipped[i] = false;
-	}
+    // === NUEVO: SISTEMA DE TALENTOS ===
+    m_client_list[client_h]->m_status.talent_points = state.talent_points;
+    std::memcpy(m_client_list[client_h]->m_status.talents, state.talents, sizeof(state.talents));
+    // ==================================
 
-	for(int i = 0; i < hb::shared::limits::MaxBankItems; i++) {
-		if (m_client_list[client_h]->m_item_in_bank_list[i] != 0) {
-			delete m_client_list[client_h]->m_item_in_bank_list[i];
-			m_client_list[client_h]->m_item_in_bank_list[i] = 0;
-		}
-	}
+    for(int i = 0; i < hb::shared::limits::MaxItems; i++) {
+        if (m_client_list[client_h]->m_item_list[i] != 0) {
+            delete m_client_list[client_h]->m_item_list[i];
+            m_client_list[client_h]->m_item_list[i] = 0;
+        }
+        m_client_list[client_h]->m_item_pos_list[i].x = 40;
+        m_client_list[client_h]->m_item_pos_list[i].y = 30;
+        m_client_list[client_h]->m_is_item_equipped[i] = false;
+    }
 
-	std::vector<AccountDbIndexedValue> positionsX;
-	std::vector<AccountDbIndexedValue> positionsY;
-	LoadCharacterItemPositions(db, m_client_list[client_h]->m_char_name, positionsX, positionsY);
-	for (size_t i = 0; i < positionsX.size(); i++) {
-		int slot = positionsX[i].index;
-		if (slot >= 0 && slot < hb::shared::limits::MaxItems) {
-			m_client_list[client_h]->m_item_pos_list[slot].x = positionsX[i].value;
-			m_client_list[client_h]->m_item_pos_list[slot].y = positionsY[i].value;
-		}
-	}
+    for(int i = 0; i < hb::shared::limits::MaxBankItems; i++) {
+        if (m_client_list[client_h]->m_item_in_bank_list[i] != 0) {
+            delete m_client_list[client_h]->m_item_in_bank_list[i];
+            m_client_list[client_h]->m_item_in_bank_list[i] = 0;
+        }
+    }
 
-	std::vector<AccountDbItemRow> items;
-	LoadCharacterItems(db, m_client_list[client_h]->m_char_name, items);
-	for (const auto& item : items) {
-		if (item.slot < 0 || item.slot >= hb::shared::limits::MaxItems) {
-			continue;
-		}
-		if (m_client_list[client_h]->m_item_list[item.slot] != 0) {
-			delete m_client_list[client_h]->m_item_list[item.slot];
-		}
-		m_client_list[client_h]->m_item_list[item.slot] = new CItem;
-		if (m_item_manager->init_item_attr(m_client_list[client_h]->m_item_list[item.slot], item.item_id) == false) {
-			delete m_client_list[client_h]->m_item_list[item.slot];
-			m_client_list[client_h]->m_item_list[item.slot] = 0;
-			continue;
-		}
-		m_client_list[client_h]->m_item_list[item.slot]->m_instance.count = item.count;
-		m_client_list[client_h]->m_item_list[item.slot]->m_instance.touch_effect_type = item.touch_effect_type;
-		m_client_list[client_h]->m_item_list[item.slot]->m_instance.touch_effect_value1 = item.touch_effect_value1;
-		m_client_list[client_h]->m_item_list[item.slot]->m_instance.touch_effect_value2 = item.touch_effect_value2;
-		m_client_list[client_h]->m_item_list[item.slot]->m_instance.touch_effect_value3 = item.touch_effect_value3;
-		m_client_list[client_h]->m_item_list[item.slot]->m_instance.item_color = item.item_color;
-		m_client_list[client_h]->m_item_list[item.slot]->m_instance.special_effect_value1 = item.spec_effect_value1;
-		m_client_list[client_h]->m_item_list[item.slot]->m_instance.special_effect_value2 = item.spec_effect_value2;
-		m_client_list[client_h]->m_item_list[item.slot]->m_instance.special_effect_value3 = item.spec_effect_value3;
-		m_client_list[client_h]->m_item_list[item.slot]->m_instance.cur_durability = (short)item.cur_durability;
-		m_client_list[client_h]->m_item_list[item.slot]->load_attributes_from(item);
+    std::vector<AccountDbIndexedValue> positionsX;
+    std::vector<AccountDbIndexedValue> positionsY;
+    LoadCharacterItemPositions(db, m_client_list[client_h]->m_char_name, positionsX, positionsY);
+    for (size_t i = 0; i < positionsX.size(); i++) {
+        int slot = positionsX[i].index;
+        if (slot >= 0 && slot < hb::shared::limits::MaxItems) {
+            m_client_list[client_h]->m_item_pos_list[slot].x = positionsX[i].value;
+            m_client_list[client_h]->m_item_pos_list[slot].y = positionsY[i].value;
+        }
+    }
 
-		if (m_client_list[client_h]->m_item_list[item.slot]->m_instance.custom_made) {
-			m_client_list[client_h]->m_item_list[item.slot]->m_durability = m_client_list[client_h]->m_item_list[item.slot]->m_instance.special_effect_value1;
-		}
-		m_item_manager->adjust_rare_item_value(m_client_list[client_h]->m_item_list[item.slot]);
-		if (m_client_list[client_h]->m_item_list[item.slot]->m_instance.cur_durability > m_client_list[client_h]->m_item_list[item.slot]->m_durability) {
-			m_client_list[client_h]->m_item_list[item.slot]->m_instance.cur_durability = m_client_list[client_h]->m_item_list[item.slot]->m_durability;
-		}
-		m_item_manager->check_and_convert_plus_weapon_item(client_h, item.slot);
-	}
+    std::vector<AccountDbItemRow> items;
+    LoadCharacterItems(db, m_client_list[client_h]->m_char_name, items);
+    for (const auto& item : items) {
+        if (item.slot < 0 || item.slot >= hb::shared::limits::MaxItems) {
+            continue;
+        }
+        if (m_client_list[client_h]->m_item_list[item.slot] != 0) {
+            delete m_client_list[client_h]->m_item_list[item.slot];
+        }
+        m_client_list[client_h]->m_item_list[item.slot] = new CItem;
+        if (m_item_manager->init_item_attr(m_client_list[client_h]->m_item_list[item.slot], item.item_id) == false) {
+            delete m_client_list[client_h]->m_item_list[item.slot];
+            m_client_list[client_h]->m_item_list[item.slot] = 0;
+            continue;
+        }
+        m_client_list[client_h]->m_item_list[item.slot]->m_instance.count = item.count;
+        m_client_list[client_h]->m_item_list[item.slot]->m_instance.touch_effect_type = item.touch_effect_type;
+        m_client_list[client_h]->m_item_list[item.slot]->m_instance.touch_effect_value1 = item.touch_effect_value1;
+        m_client_list[client_h]->m_item_list[item.slot]->m_instance.touch_effect_value2 = item.touch_effect_value2;
+        m_client_list[client_h]->m_item_list[item.slot]->m_instance.touch_effect_value3 = item.touch_effect_value3;
+        m_client_list[client_h]->m_item_list[item.slot]->m_instance.item_color = item.item_color;
+        m_client_list[client_h]->m_item_list[item.slot]->m_instance.special_effect_value1 = item.spec_effect_value1;
+        m_client_list[client_h]->m_item_list[item.slot]->m_instance.special_effect_value2 = item.spec_effect_value2;
+        m_client_list[client_h]->m_item_list[item.slot]->m_instance.special_effect_value3 = item.spec_effect_value3;
+        m_client_list[client_h]->m_item_list[item.slot]->m_instance.cur_durability = (short)item.cur_durability;
+        m_client_list[client_h]->m_item_list[item.slot]->load_attributes_from(item);
 
-	std::vector<AccountDbBankItemRow> bankItems;
-	LoadCharacterBankItems(db, m_client_list[client_h]->m_char_name, bankItems);
-	for (const auto& item : bankItems) {
-		if (item.slot < 0 || item.slot >= hb::shared::limits::MaxBankItems) {
-			continue;
-		}
-		if (m_client_list[client_h]->m_item_in_bank_list[item.slot] != 0) {
-			delete m_client_list[client_h]->m_item_in_bank_list[item.slot];
-		}
-		m_client_list[client_h]->m_item_in_bank_list[item.slot] = new CItem;
-		if (m_item_manager->init_item_attr(m_client_list[client_h]->m_item_in_bank_list[item.slot], item.item_id) == false) {
-			delete m_client_list[client_h]->m_item_in_bank_list[item.slot];
-			m_client_list[client_h]->m_item_in_bank_list[item.slot] = 0;
-			continue;
-		}
-		m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.count = item.count;
-		m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.touch_effect_type = item.touch_effect_type;
-		m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.touch_effect_value1 = item.touch_effect_value1;
-		m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.touch_effect_value2 = item.touch_effect_value2;
-		m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.touch_effect_value3 = item.touch_effect_value3;
-		m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.item_color = item.item_color;
-		m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.special_effect_value1 = item.spec_effect_value1;
-		m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.special_effect_value2 = item.spec_effect_value2;
-		m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.special_effect_value3 = item.spec_effect_value3;
-		m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.cur_durability = (short)item.cur_durability;
-		m_client_list[client_h]->m_item_in_bank_list[item.slot]->load_attributes_from(item);
-		if (m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.custom_made) {
-			m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_durability = m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.special_effect_value1;
-		}
-		m_item_manager->adjust_rare_item_value(m_client_list[client_h]->m_item_in_bank_list[item.slot]);
-		if (m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.cur_durability > m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_durability) {
-			m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.cur_durability = m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_durability;
-		}
-	}
+        if (m_client_list[client_h]->m_item_list[item.slot]->m_instance.custom_made) {
+            m_client_list[client_h]->m_item_list[item.slot]->m_durability = m_client_list[client_h]->m_item_list[item.slot]->m_instance.special_effect_value1;
+        }
+        m_item_manager->adjust_rare_item_value(m_client_list[client_h]->m_item_list[item.slot]);
+        if (m_client_list[client_h]->m_item_list[item.slot]->m_instance.cur_durability > m_client_list[client_h]->m_item_list[item.slot]->m_durability) {
+            m_client_list[client_h]->m_item_list[item.slot]->m_instance.cur_durability = m_client_list[client_h]->m_item_list[item.slot]->m_durability;
+        }
+        m_item_manager->check_and_convert_plus_weapon_item(client_h, item.slot);
+    }
 
-	std::vector<AccountDbIndexedValue> equips;
-	LoadCharacterItemEquips(db, m_client_list[client_h]->m_char_name, equips);
-	for (const auto& equip : equips) {
-		if (equip.index >= 0 && equip.index < hb::shared::limits::MaxItems) {
-			m_client_list[client_h]->m_is_item_equipped[equip.index] = (equip.value != 0);
-		}
-	}
+    std::vector<AccountDbBankItemRow> bankItems;
+    LoadCharacterBankItems(db, m_client_list[client_h]->m_char_name, bankItems);
+    for (const auto& item : bankItems) {
+        if (item.slot < 0 || item.slot >= hb::shared::limits::MaxBankItems) {
+            continue;
+        }
+        if (m_client_list[client_h]->m_item_in_bank_list[item.slot] != 0) {
+            delete m_client_list[client_h]->m_item_in_bank_list[item.slot];
+        }
+        m_client_list[client_h]->m_item_in_bank_list[item.slot] = new CItem;
+        if (m_item_manager->init_item_attr(m_client_list[client_h]->m_item_in_bank_list[item.slot], item.item_id) == false) {
+            delete m_client_list[client_h]->m_item_in_bank_list[item.slot];
+            m_client_list[client_h]->m_item_in_bank_list[item.slot] = 0;
+            continue;
+        }
+        m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.count = item.count;
+        m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.touch_effect_type = item.touch_effect_type;
+        m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.touch_effect_value1 = item.touch_effect_value1;
+        m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.touch_effect_value2 = item.touch_effect_value2;
+        m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.touch_effect_value3 = item.touch_effect_value3;
+        m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.item_color = item.item_color;
+        m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.special_effect_value1 = item.spec_effect_value1;
+        m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.special_effect_value2 = item.spec_effect_value2;
+        m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.special_effect_value3 = item.spec_effect_value3;
+        m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.cur_durability = (short)item.cur_durability;
+        m_client_list[client_h]->m_item_in_bank_list[item.slot]->load_attributes_from(item);
+        if (m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.custom_made) {
+            m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_durability = m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.special_effect_value1;
+        }
+        m_item_manager->adjust_rare_item_value(m_client_list[client_h]->m_item_in_bank_list[item.slot]);
+        if (m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.cur_durability > m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_durability) {
+            m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_instance.cur_durability = m_client_list[client_h]->m_item_in_bank_list[item.slot]->m_durability;
+        }
+    }
 
-	int packedIndex = 0;
-	for(int i = 0; i < hb::shared::limits::MaxItems; i++) {
-		if (m_client_list[client_h]->m_item_list[i] == 0) {
-			continue;
-		}
-		if (i != packedIndex) {
-			m_client_list[client_h]->m_item_list[packedIndex] = m_client_list[client_h]->m_item_list[i];
-			m_client_list[client_h]->m_item_list[i] = 0;
-			m_client_list[client_h]->m_item_pos_list[packedIndex] = m_client_list[client_h]->m_item_pos_list[i];
-			m_client_list[client_h]->m_is_item_equipped[packedIndex] = m_client_list[client_h]->m_is_item_equipped[i];
-		}
-		packedIndex++;
-	}
-	for(int i = packedIndex; i < hb::shared::limits::MaxItems; i++) {
-		m_client_list[client_h]->m_item_pos_list[i].x = 40;
-		m_client_list[client_h]->m_item_pos_list[i].y = 30;
-		m_client_list[client_h]->m_is_item_equipped[i] = false;
-	}
+    std::vector<AccountDbIndexedValue> equips;
+    LoadCharacterItemEquips(db, m_client_list[client_h]->m_char_name, equips);
+    for (const auto& equip : equips) {
+        if (equip.index >= 0 && equip.index < hb::shared::limits::MaxItems) {
+            m_client_list[client_h]->m_is_item_equipped[equip.index] = (equip.value != 0);
+        }
+    }
 
-	packedIndex = 0;
-	for(int i = 0; i < hb::shared::limits::MaxBankItems; i++) {
-		if (m_client_list[client_h]->m_item_in_bank_list[i] == 0) {
-			continue;
-		}
-		if (i != packedIndex) {
-			m_client_list[client_h]->m_item_in_bank_list[packedIndex] = m_client_list[client_h]->m_item_in_bank_list[i];
-			m_client_list[client_h]->m_item_in_bank_list[i] = 0;
-		}
-		packedIndex++;
-	}
-	for(int i = packedIndex; i < hb::shared::limits::MaxBankItems; i++) {
-		m_client_list[client_h]->m_item_in_bank_list[i] = 0;
-	}
+    int packedIndex = 0;
+    for(int i = 0; i < hb::shared::limits::MaxItems; i++) {
+        if (m_client_list[client_h]->m_item_list[i] == 0) {
+            continue;
+        }
+        if (i != packedIndex) {
+            m_client_list[client_h]->m_item_list[packedIndex] = m_client_list[client_h]->m_item_list[i];
+            m_client_list[client_h]->m_item_list[i] = 0;
+            m_client_list[client_h]->m_item_pos_list[packedIndex] = m_client_list[client_h]->m_item_pos_list[i];
+            m_client_list[client_h]->m_is_item_equipped[packedIndex] = m_client_list[client_h]->m_is_item_equipped[i];
+        }
+        packedIndex++;
+    }
+    for(int i = packedIndex; i < hb::shared::limits::MaxItems; i++) {
+        m_client_list[client_h]->m_item_pos_list[i].x = 40;
+        m_client_list[client_h]->m_item_pos_list[i].y = 30;
+        m_client_list[client_h]->m_is_item_equipped[i] = false;
+    }
 
-	for(int i = 0; i < DEF_MAXITEMEQUIPPOS; i++) {
-		m_client_list[client_h]->m_item_equipment_status[i] = -1;
-	}
+    packedIndex = 0;
+    for(int i = 0; i < hb::shared::limits::MaxBankItems; i++) {
+        if (m_client_list[client_h]->m_item_in_bank_list[i] == 0) {
+            continue;
+        }
+        if (i != packedIndex) {
+            m_client_list[client_h]->m_item_in_bank_list[packedIndex] = m_client_list[client_h]->m_item_in_bank_list[i];
+            m_client_list[client_h]->m_item_in_bank_list[i] = 0;
+        }
+        packedIndex++;
+    }
+    for(int i = packedIndex; i < hb::shared::limits::MaxBankItems; i++) {
+        m_client_list[client_h]->m_item_in_bank_list[i] = 0;
+    }
 
-	for(int i = 0; i < hb::shared::limits::MaxItems; i++) {
-		if ((m_client_list[client_h]->m_item_list[i] != 0) && m_client_list[client_h]->m_is_item_equipped[i]) {
-			if (m_client_list[client_h]->m_item_list[i]->get_item_type() == hb::shared::item::item_type::equipment) {
-				if (m_item_manager->equip_item_handler(client_h, i) == false) {
-					m_client_list[client_h]->m_is_item_equipped[i] = false;
-				}
-			}
-			else {
-				m_client_list[client_h]->m_is_item_equipped[i] = false;
-			}
-		}
-	}
+    for(int i = 0; i < DEF_MAXITEMEQUIPPOS; i++) {
+        m_client_list[client_h]->m_item_equipment_status[i] = -1;
+    }
 
-	for(int i = 0; i < hb::shared::limits::MaxMagicType; i++) {
-		m_client_list[client_h]->m_magic_mastery[i] = 0;
-	}
-	std::vector<AccountDbIndexedValue> magicMastery;
-	LoadCharacterMagicMastery(db, m_client_list[client_h]->m_char_name, magicMastery);
-	for (const auto& entry : magicMastery) {
-		if (entry.index >= 0 && entry.index < hb::shared::limits::MaxMagicType) {
-			m_client_list[client_h]->m_magic_mastery[entry.index] = (char)entry.value;
-		}
-	}
+    for(int i = 0; i < hb::shared::limits::MaxItems; i++) {
+        if ((m_client_list[client_h]->m_item_list[i] != 0) && m_client_list[client_h]->m_is_item_equipped[i]) {
+            if (m_client_list[client_h]->m_item_list[i]->get_item_type() == hb::shared::item::item_type::equipment) {
+                if (m_item_manager->equip_item_handler(client_h, i) == false) {
+                    m_client_list[client_h]->m_is_item_equipped[i] = false;
+                }
+            }
+            else {
+                m_client_list[client_h]->m_is_item_equipped[i] = false;
+            }
+        }
+    }
 
-	for(int i = 0; i < hb::shared::limits::MaxSkillType; i++) {
-		m_client_list[client_h]->m_skill_mastery[i] = 0;
-		m_client_list[client_h]->m_skill_progress[i] = 0;
-	}
-	std::vector<AccountDbIndexedValue> skillMastery;
-	LoadCharacterSkillMastery(db, m_client_list[client_h]->m_char_name, skillMastery);
-	for (const auto& entry : skillMastery) {
-		if (entry.index >= 0 && entry.index < hb::shared::limits::MaxSkillType) {
-			m_client_list[client_h]->m_skill_mastery[entry.index] = (unsigned char)entry.value;
-		}
-	}
+    for(int i = 0; i < hb::shared::limits::MaxMagicType; i++) {
+        m_client_list[client_h]->m_magic_mastery[i] = 0;
+    }
+    std::vector<AccountDbIndexedValue> magicMastery;
+    LoadCharacterMagicMastery(db, m_client_list[client_h]->m_char_name, magicMastery);
+    for (const auto& entry : magicMastery) {
+        if (entry.index >= 0 && entry.index < hb::shared::limits::MaxMagicType) {
+            m_client_list[client_h]->m_magic_mastery[entry.index] = (char)entry.value;
+        }
+    }
 
-	std::vector<AccountDbIndexedValue> skillSsn;
-	LoadCharacterSkillSSN(db, m_client_list[client_h]->m_char_name, skillSsn);
-	for (const auto& entry : skillSsn) {
-		if (entry.index >= 0 && entry.index < hb::shared::limits::MaxSkillType) {
-			m_client_list[client_h]->m_skill_progress[entry.index] = entry.value;
-		}
-	}
+    for(int i = 0; i < hb::shared::limits::MaxSkillType; i++) {
+        m_client_list[client_h]->m_skill_mastery[i] = 0;
+        m_client_list[client_h]->m_skill_progress[i] = 0;
+    }
+    std::vector<AccountDbIndexedValue> skillMastery;
+    LoadCharacterSkillMastery(db, m_client_list[client_h]->m_char_name, skillMastery);
+    for (const auto& entry : skillMastery) {
+        if (entry.index >= 0 && entry.index < hb::shared::limits::MaxSkillType) {
+            m_client_list[client_h]->m_skill_mastery[entry.index] = (unsigned char)entry.value;
+        }
+    }
 
-	short tmp_type = 0;
-	if (m_client_list[client_h]->m_sex == 1) {
-		tmp_type = 1;
-	}
-	else if (m_client_list[client_h]->m_sex == 2) {
-		tmp_type = 4;
-	}
-	switch (m_client_list[client_h]->m_skin) {
-	case 1:
-		break;
-	case 2:
-		tmp_type += 1;
-		break;
-	case 3:
-		tmp_type += 2;
-		break;
-	}
-	m_client_list[client_h]->m_type = tmp_type;
-	m_client_list[client_h]->m_appearance.hair_style = m_client_list[client_h]->m_hair_style;
-	m_client_list[client_h]->m_appearance.hair_color = m_client_list[client_h]->m_hair_color;
-	m_client_list[client_h]->m_appearance.underwear_type = m_client_list[client_h]->m_underwear;
+    std::vector<AccountDbIndexedValue> skillSsn;
+    LoadCharacterSkillSSN(db, m_client_list[client_h]->m_char_name, skillSsn);
+    for (const auto& entry : skillSsn) {
+        if (entry.index >= 0 && entry.index < hb::shared::limits::MaxSkillType) {
+            m_client_list[client_h]->m_skill_progress[entry.index] = entry.value;
+        }
+    }
 
-	if (m_client_list[client_h]->m_char_id_num1 == 0) {
-		int temp1 = 1;
-		int temp2 = 1;
-		for(int i = 0; i < 10; i++) {
-			temp1 += m_client_list[client_h]->m_char_name[i];
-			temp2 += abs(m_client_list[client_h]->m_char_name[i] ^ m_client_list[client_h]->m_char_name[i]);
-		}
-		m_client_list[client_h]->m_char_id_num1 = (short)GameClock::GetTimeMS();
-		m_client_list[client_h]->m_char_id_num2 = (short)temp1;
-		m_client_list[client_h]->m_char_id_num3 = (short)temp2;
-	}
+    short tmp_type = 0;
+    if (m_client_list[client_h]->m_sex == 1) {
+        tmp_type = 1;
+    }
+    else if (m_client_list[client_h]->m_sex == 2) {
+        tmp_type = 4;
+    }
+    switch (m_client_list[client_h]->m_skin) {
+    case 1:
+        break;
+    case 2:
+        tmp_type += 1;
+        break;
+    case 3:
+        tmp_type += 2;
+        break;
+    }
+    m_client_list[client_h]->m_type = tmp_type;
+    m_client_list[client_h]->m_appearance.hair_style = m_client_list[client_h]->m_hair_style;
+    m_client_list[client_h]->m_appearance.hair_color = m_client_list[client_h]->m_hair_color;
+    m_client_list[client_h]->m_appearance.underwear_type = m_client_list[client_h]->m_underwear;
 
-	m_client_list[client_h]->m_speed_hack_check_exp = m_client_list[client_h]->m_exp;
-	if (memcmp(m_client_list[client_h]->m_location, "NONE", 4) == 0) {
-		m_client_list[client_h]->m_is_neutral = true;
-	}
+    if (m_client_list[client_h]->m_char_id_num1 == 0) {
+        int temp1 = 1;
+        int temp2 = 1;
+        for(int i = 0; i < 10; i++) {
+            temp1 += m_client_list[client_h]->m_char_name[i];
+            temp2 += abs(m_client_list[client_h]->m_char_name[i] ^ m_client_list[client_h]->m_char_name[i]);
+        }
+        m_client_list[client_h]->m_char_id_num1 = (short)GameClock::GetTimeMS();
+        m_client_list[client_h]->m_char_id_num2 = (short)temp1;
+        m_client_list[client_h]->m_char_id_num3 = (short)temp2;
+    }
 
-	// Load block list
-	m_client_list[client_h]->m_blocked_accounts.clear();
-	m_client_list[client_h]->m_blocked_accounts_list.clear();
-	m_client_list[client_h]->m_block_list_dirty = false;
-	std::vector<std::pair<std::string, std::string>> blocks;
-	if (LoadBlockList(db, blocks)) {
-		for (const auto& entry : blocks) {
-			m_client_list[client_h]->m_blocked_accounts.insert(entry.first);
-			m_client_list[client_h]->m_blocked_accounts_list.push_back(entry);
-		}
-	}
+    m_client_list[client_h]->m_speed_hack_check_exp = m_client_list[client_h]->m_exp;
+    if (memcmp(m_client_list[client_h]->m_location, "NONE", 4) == 0) {
+        m_client_list[client_h]->m_is_neutral = true;
+    }
 
-	CloseAccountDatabase(db);
-	return true;
+    // Load block list
+    m_client_list[client_h]->m_blocked_accounts.clear();
+    m_client_list[client_h]->m_blocked_accounts_list.clear();
+    m_client_list[client_h]->m_block_list_dirty = false;
+    std::vector<std::pair<std::string, std::string>> blocks;
+    if (LoadBlockList(db, blocks)) {
+        for (const auto& entry : blocks) {
+            m_client_list[client_h]->m_blocked_accounts.insert(entry.first);
+            m_client_list[client_h]->m_blocked_accounts_list.push_back(entry);
+        }
+    }
+
+    CloseAccountDatabase(db);
+    return true;
 }
 
 void CGame::init_player_data(int client_h, char* data, uint32_t size)
@@ -6398,10 +6403,10 @@ void CGame::client_common_handler(int client_h, char* data)
 		break;
 
 #ifdef TESTER_ONLY
-	// TESTER MENU — all tester handlers
 	case CommonType::TesterAction:
 	{
-		// No permission check — tester menu is available to all players
+		// Validacion estricta de seguridad: solo administradores nivel 1000[cite: 15]
+		if (m_client_list[client_h] == nullptr || m_client_list[client_h]->m_admin_level < 1000) break;
 
 		int action_id = v1;
 		switch (action_id)
@@ -9306,60 +9311,67 @@ uint32_t CGame::get_level_exp(int level)
 *****************************************************************/
 bool CGame::check_level_up(int client_h)
 {
+    if (m_client_list[client_h] == 0) return false;
 
-	if (m_client_list[client_h] == 0) return false;
+    while (m_client_list[client_h]->m_exp >= m_client_list[client_h]->m_next_level_exp)
+    {
+        if (m_client_list[client_h]->m_level < m_max_level)
+        {
+            // Traveler cap — block level-up past 19 for unjoineded characters
+            if (m_client_list[client_h]->m_level + 1 > 19
+                && memcmp(m_client_list[client_h]->m_location, "NONE", 4) == 0)
+            {
+                m_client_list[client_h]->m_exp = m_client_list[client_h]->m_next_level_exp - 1;
+                send_notify_msg(0, client_h, Notify::TravelerLimitedLevel, 0, 0, 0, 0);
+                break;
+            }
 
-	while (m_client_list[client_h]->m_exp >= m_client_list[client_h]->m_next_level_exp)
-	{
-		if (m_client_list[client_h]->m_level < m_max_level)
-		{
-			// Traveler cap — block level-up past 19 for unjoineded characters
-			if (m_client_list[client_h]->m_level + 1 > 19
-				&& memcmp(m_client_list[client_h]->m_location, "NONE", 4) == 0)
-			{
-				m_client_list[client_h]->m_exp = m_client_list[client_h]->m_next_level_exp - 1;
-				send_notify_msg(0, client_h, Notify::TravelerLimitedLevel, 0, 0, 0, 0);
-				break;
-			}
+            // Carry over remainder exp into the next level
+            m_client_list[client_h]->m_exp -= m_client_list[client_h]->m_next_level_exp;
 
-			// Carry over remainder exp into the next level
-			m_client_list[client_h]->m_exp -= m_client_list[client_h]->m_next_level_exp;
+            m_client_list[client_h]->m_level++;
+            m_client_list[client_h]->m_levelup_pool += m_levelup_stat_gain;
 
-			m_client_list[client_h]->m_level++;
-			m_client_list[client_h]->m_levelup_pool += m_levelup_stat_gain;
+            // === NUEVO: SISTEMA DE TALENTOS ===
+            // Otorgar 1 punto de talento cada 10 niveles exactos
+            if (m_client_list[client_h]->m_level % 10 == 0)
+            {
+                m_client_list[client_h]->m_status.talent_points++;
+            }
+            // ==================================
 
-			if (m_client_list[client_h]->m_str > CharPointLimit)      m_client_list[client_h]->m_str = CharPointLimit;
-			if (m_client_list[client_h]->m_dex > CharPointLimit)      m_client_list[client_h]->m_dex = CharPointLimit;
-			if (m_client_list[client_h]->m_vit > CharPointLimit)      m_client_list[client_h]->m_vit = CharPointLimit;
-			if (m_client_list[client_h]->m_int > CharPointLimit)      m_client_list[client_h]->m_int = CharPointLimit;
-			if (m_client_list[client_h]->m_mag > CharPointLimit)      m_client_list[client_h]->m_mag = CharPointLimit;
-			if (m_client_list[client_h]->m_charisma > CharPointLimit) m_client_list[client_h]->m_charisma = CharPointLimit;
+            if (m_client_list[client_h]->m_str > CharPointLimit)      m_client_list[client_h]->m_str = CharPointLimit;
+            if (m_client_list[client_h]->m_dex > CharPointLimit)      m_client_list[client_h]->m_dex = CharPointLimit;
+            if (m_client_list[client_h]->m_vit > CharPointLimit)      m_client_list[client_h]->m_vit = CharPointLimit;
+            if (m_client_list[client_h]->m_int > CharPointLimit)      m_client_list[client_h]->m_int = CharPointLimit;
+            if (m_client_list[client_h]->m_mag > CharPointLimit)      m_client_list[client_h]->m_mag = CharPointLimit;
+            if (m_client_list[client_h]->m_charisma > CharPointLimit) m_client_list[client_h]->m_charisma = CharPointLimit;
 
-			// New 17/05/2004
-			if (m_client_list[client_h]->m_level > 100)
-				if (m_client_list[client_h]->m_is_player_civil)
-					force_change_play_mode(client_h, true);
+            // New 17/05/2004
+            if (m_client_list[client_h]->m_level > 100)
+                if (m_client_list[client_h]->m_is_player_civil)
+                    force_change_play_mode(client_h, true);
 
-			send_notify_msg(0, client_h, Notify::SuperAttackLeft, 0, 0, 0, 0);
-			send_notify_msg(0, client_h, Notify::LevelUp, 0, 0, 0, 0);
-			send_notify_msg(0, client_h, Notify::LevelUpPoints, 0, 0, 0, 0);
+            send_notify_msg(0, client_h, Notify::SuperAttackLeft, 0, 0, 0, 0);
+            send_notify_msg(0, client_h, Notify::LevelUp, 0, 0, 0, 0);
+            send_notify_msg(0, client_h, Notify::LevelUpPoints, 0, 0, 0, 0);
 
-			m_client_list[client_h]->m_next_level_exp = m_level_exp_table[m_client_list[client_h]->m_level + 1];
+            m_client_list[client_h]->m_next_level_exp = m_level_exp_table[m_client_list[client_h]->m_level + 1];
 
-			m_item_manager->calc_total_item_effect(client_h, -1, false);
-		}
-		else {
-			// Majestic — carry over remainder, award upgrade point
-			m_client_list[client_h]->m_exp -= m_client_list[client_h]->m_next_level_exp;
-			m_client_list[client_h]->m_gizon_item_upgrade_left++;
+            m_item_manager->calc_total_item_effect(client_h, -1, false);
+        }
+        else {
+            // Majestic — carry over remainder, award upgrade point
+            m_client_list[client_h]->m_exp -= m_client_list[client_h]->m_next_level_exp;
+            m_client_list[client_h]->m_gizon_item_upgrade_left++;
 
-			m_client_list[client_h]->m_next_level_exp = m_level_exp_table[m_max_level + 1];
+            m_client_list[client_h]->m_next_level_exp = m_level_exp_table[m_max_level + 1];
 
-			send_notify_msg(0, client_h, Notify::GizonItemUpgradeLeft, m_client_list[client_h]->m_gizon_item_upgrade_left, 1, 0, 0);
-		}
-	}
+            send_notify_msg(0, client_h, Notify::GizonItemUpgradeLeft, m_client_list[client_h]->m_gizon_item_upgrade_left, 1, 0, 0);
+        }
+    }
 
-	return false;
+    return false;
 }
 // 2003-04-14      ...
 void CGame::state_change_handler(int client_h, char* data, size_t msg_size)

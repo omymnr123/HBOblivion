@@ -90,6 +90,13 @@ struct HB_PACKED PlayerStatus
 	char guild_name[20];
 	int8_t guild_rank;
 
+	// Administrator level for permission checks and tester menu visibility
+	int32_t admin_level;
+
+	// === SISTEMA DE TALENTOS ===
+	uint8_t talent_points; // Puntos sin gastar
+	uint8_t talents[8];    // Nivel de cada talento (0 a 3). Índices 0-3: Rama 1 | Índices 4-7: Rama 2
+
 	bool HasAngelType() const
 	{
 		return angel_str || angel_dex || angel_int || angel_mag;

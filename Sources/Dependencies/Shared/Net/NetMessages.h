@@ -142,6 +142,7 @@ namespace CommonType
 		EnchantItem                             = 0x0A73,
 		UpgradeEnchant                          = 0x0A74,
 		DisenchantItem                          = 0x0A75,
+		RequestUpgradeTalent                    = 0x0A7A,
 #ifdef TESTER_ONLY
 		// TESTER MENU — tester-only commands
 		TesterAction                            = 0x0A76,
@@ -330,6 +331,7 @@ namespace Notify
 		LevelUpPoints                           = 0x0BFA,
 		ForceStatRefresh                        = 0x0BFB,
 		ForceMasteryRefresh                     = 0x0BFC,
+		NotifyTalentData                        = 0x0BFD,
 		RepairAllPrices                         = 0x0F11,
 		MobKills                                = 0x0A68,
 #ifdef TESTER_ONLY
