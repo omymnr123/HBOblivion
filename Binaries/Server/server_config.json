@@ -1,17 +1,17 @@
 {
     "drop_rates": {
-        "primary": 1.0,
-        "gold": 1.0,
-        "secondary": 1.0,
+        "primary": 1,
+        "gold": 1,
+        "secondary": 1,
         "rep_modifier": 5
     },
     "exp_rates": {
-        "npc_kill": 4.0
+        "npc_kill": 5
     },
     "skill_rates": {
-        "weapon_skill_multiplier": 10.0,
-        "shield_skill_multiplier": 10.0,
-        "magic_skill_multiplier": 10.0
+        "weapon_skill_multiplier": 10,
+        "shield_skill_multiplier": 10,
+        "magic_skill_multiplier": 10
     },
     "timing": {
         "client_timeout_ms": 30000,
