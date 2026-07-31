@@ -1,5 +1,5 @@
 #!/bin/bash
-# Linux build script for Helbreath Server
+# Linux build script for Helbreath Server Manager
 # Usage:
 #   ./build_linux.sh                 Build (incremental, Debug)
 #   ./build_linux.sh debug           Build Debug

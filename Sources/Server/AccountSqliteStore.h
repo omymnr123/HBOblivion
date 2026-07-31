@@ -9,13 +9,14 @@ struct sqlite3;
 
 struct AccountDbAccountData
 {
-    char name[11];
-    char password_hash[65];
-    char password_salt[33];
-    char email[52];
+    char name[12]; // O hb::shared::limits::AccountNameLen si el include está arriba
+    char password_hash[65]; // PasswordHash::HashHexLen
+    char password_salt[33]; // PasswordHash::SaltHexLen
+    char email[33];         // AccountEmailLen
     char created_at[32];
     char password_changed_at[32];
-    char last_ip[32];
+    char last_ip[21];
+    long long ban_until; // <--- Campo de baneo añadido de forma limpia
 };
 
 struct AccountDbCharacterData

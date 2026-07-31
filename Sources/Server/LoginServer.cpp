@@ -178,27 +178,43 @@ void LoginServer::get_char_list(string acc, char*& cp2, const std::vector<Accoun
 
 LogIn LoginServer::AccountLogIn(string acc, string pass, std::vector<AccountDbCharacterSummary>& chars)
 {
-	if (acc.size() == 0)
-		return LogIn::NoAcc;
+    if (acc.size() == 0)
+        return LogIn::NoAcc;
 
-	if (pass.size() == 0)
-		return LogIn::NoPass;
+    if (pass.size() == 0)
+        return LogIn::NoPass;
 
-	sqlite3* db = nullptr;
-	if (!OpenAccountDatabaseIfExists(acc.c_str(), &db)) {
-		return LogIn::NoAcc;
-	}
+    sqlite3* db = nullptr;
+    if (!OpenAccountDatabaseIfExists(acc.c_str(), &db)) {
+        return LogIn::NoAcc;
+    }
 
-	AccountDbAccountData account = {};
-	if (!LoadAccountRecord(db, acc.c_str(), account)) {
-		CloseAccountDatabase(db);
-		return LogIn::NoAcc;
-	}
+    // Comprobación de baneo al iniciar sesión
+    sqlite3_stmt* banStmt = nullptr;
+    if (sqlite3_prepare_v2(db, "SELECT ban_until FROM account_bans;", -1, &banStmt, nullptr) == SQLITE_OK) {
+        if (sqlite3_step(banStmt) == SQLITE_ROW) {
+            long long ban_until = sqlite3_column_int64(banStmt, 0);
+            sqlite3_finalize(banStmt);
+            if (ban_until > 0 && std::time(nullptr) < ban_until) {
+                CloseAccountDatabase(db);
+                hb::logger::log("Account login rejected: Account '{}' is banned until timestamp {}", acc, ban_until);
+                return LogIn::NoPass;
+            }
+        } else {
+            sqlite3_finalize(banStmt);
+        }
+    }
 
-	if (!PasswordHash::VerifyPassword(pass.c_str(), account.password_salt, account.password_hash)) {
-		CloseAccountDatabase(db);
-		return LogIn::NoPass;
-	}
+    AccountDbAccountData account = {};
+    if (!LoadAccountRecord(db, acc.c_str(), account)) {
+        CloseAccountDatabase(db);
+        return LogIn::NoAcc;
+    }
+
+    if (!PasswordHash::VerifyPassword(pass.c_str(), account.password_salt, account.password_hash)) {
+        CloseAccountDatabase(db);
+        return LogIn::NoPass;
+    }
 
 	chars.clear();
 	if (!ListCharacterSummaries(db, acc.c_str(), chars)) {
@@ -933,10 +949,31 @@ void LoginServer::request_enter_game(int h, char* data)
 	lvl = req->level;
 	std::memcpy(ws_name, req->world_name, sizeof(req->world_name));
 
+	// --- COMPROBACIÓN DE BANEO EN ENTER-GAME ---
+	sqlite3* checkDb = nullptr;
+	if (OpenAccountDatabaseIfExists(acc, &checkDb)) {
+		sqlite3_stmt* banStmt = nullptr;
+		if (sqlite3_prepare_v2(checkDb, "SELECT ban_until FROM account_bans;", -1, &banStmt, nullptr) == SQLITE_OK) {
+			if (sqlite3_step(banStmt) == SQLITE_ROW) {
+				long long ban_until = sqlite3_column_int64(banStmt, 0);
+				sqlite3_finalize(banStmt);
+				if (ban_until > 0 && std::time(nullptr) < ban_until) {
+					CloseAccountDatabase(checkDb);
+					hb::logger::log("Enter-game rejected: Account '{}' is banned until timestamp {}", acc, ban_until);
+					send_login_msg(LogResMsg::PasswordMismatch, LogResMsg::PasswordMismatch, 0, 0, h);
+					return;
+				}
+			} else {
+				sqlite3_finalize(banStmt);
+			}
+		}
+		CloseAccountDatabase(checkDb);
+	}
+	// ------------------------------------------
+
 	char resp_data[112] = {};
 	if (string(ws_name) != WORLDNAMELS)
 	{
-		//SendEventToWLS(ENTERGAMERESTYPE_REJECT, ENTERGAMERESTYPE_REJECT, 0, 0, h);
 		return;
 	}
 
