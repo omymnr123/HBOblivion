@@ -269,8 +269,8 @@ bool DialogBox_SellList::on_item_drop()
 		return false;
 	}
 
-	// Can't sell broken items
-	if (player().m_item_list[item_id]->m_instance.cur_durability == 0)
+	// Can't sell broken items (solo comprobamos ítems que realmente tengan durabilidad)
+	if (player().m_item_list[item_id]->m_durability > 0 && player().m_item_list[item_id]->m_instance.cur_durability == 0)
 	{
 		std::string G_cTxt;
 		auto itemInfo2 = item_name_formatter::get().format(player().m_item_list[item_id].get());

@@ -2613,8 +2613,14 @@ void ItemManager::req_sell_item_handler(int client_h, char item_id, char sell_to
 	if (m_game->m_client_list[client_h]->m_is_init_complete == false) return;
 	if ((item_id < 0) || (item_id >= 50)) return;
 	if (m_game->m_client_list[client_h]->m_item_list[item_id] == 0) return;
-	if (num <= 0) return;
-	if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_instance.count < static_cast<uint32_t>(num)) return;
+if (num <= 0) return;
+
+    // PARCHE: Si un GM ha creado el item, su cantidad estará bugeada en 0. La forzamos a 1 para poder venderlo.
+    if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_instance.count == 0) {
+        m_game->m_client_list[client_h]->m_item_list[item_id]->m_instance.count = 1;
+    }
+
+    if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_instance.count < static_cast<uint32_t>(num)) return;
 
 	// Can't sell gold
 	if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_id_num == hb::shared::item::ItemId::Gold)
@@ -2634,10 +2640,11 @@ void ItemManager::req_sell_item_handler(int client_h, char item_id, char sell_to
 	switch (sell_to_whom) {
 	case 15:
 	case 24:
-		if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_sell_price == 0) {
-			m_game->send_notify_msg(0, client_h, Notify::CannotSellItem, item_id, 1, 0, m_game->m_client_list[client_h]->m_item_list[item_id]->m_name);
-			break;
-		}
+		//if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_sell_price == 0) {
+		//	m_game->send_notify_msg(0, client_h, Notify::CannotSellItem, item_id, 1, 0, m_game->m_client_list[client_h]->m_item_list[item_id]->m_name);
+		//	break;
+		//}
+		
 
 		if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_durability > 0) {
 			// Equipment with durability: price scaled by remaining durability
@@ -2756,7 +2763,7 @@ void ItemManager::req_sell_item_handler(int client_h, char item_id, char sell_to
 		}
 		else {
 			// Non-durability items: flat half-price
-			price = m_game->m_client_list[client_h]->m_item_list[item_id]->m_sell_price / 2;
+			price = m_game->m_client_list[client_h]->m_item_list[item_id]->m_sell_price;
 			price = price * num;
 
 			if (neutral) price = price / 2;
@@ -2778,219 +2785,220 @@ void ItemManager::req_sell_item_handler(int client_h, char item_id, char sell_to
 
 void ItemManager::req_sell_item_confirm_handler(int client_h, char item_id, int num, const char* string)
 {
-	CItem* item_gold;
-	short remain_life;
-	int   price;
-	double d1, d2, d3;
-	uint32_t mul1, mul2, swe_type, swe_value, add_price1, add_price2;
-	int    erase_req, ret;
-	bool   neutral;
+    CItem* item_gold;
+    short remain_life;
+    int   price;
+    double d1, d2, d3;
+    uint32_t mul1, mul2, swe_type, swe_value, add_price1, add_price2;
+    int    erase_req, ret;
+    bool   neutral;
 
-	if (m_game->m_client_list[client_h] == 0) return;
-	if (m_game->m_client_list[client_h]->m_is_init_complete == false) return;
-	if ((item_id < 0) || (item_id >= 50)) return;
-	if (m_game->m_client_list[client_h]->m_item_list[item_id] == 0) return;
-	if (num <= 0) return;
-	if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_instance.count < static_cast<uint32_t>(num)) return;
+    if (m_game->m_client_list[client_h] == 0) return;
+    if (m_game->m_client_list[client_h]->m_is_init_complete == false) return;
+    if ((item_id < 0) || (item_id >= 50)) return;
+    if (m_game->m_client_list[client_h]->m_item_list[item_id] == 0) return;
+    
+    if (num <= 0) return;
 
-	// Can't sell gold
-	if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_id_num == hb::shared::item::ItemId::Gold) return;
+    // PARCHE: Si un GM ha creado el item, su cantidad estará bugeada en 0. La forzamos a 1.
+    if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_instance.count == 0) {
+        m_game->m_client_list[client_h]->m_item_list[item_id]->m_instance.count = 1;
+    }
 
-	// New 18/05/2004
-	if (m_game->m_client_list[client_h]->m_is_processing_allowed == false) return;
+    if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_instance.count < static_cast<uint32_t>(num)) return;
 
-	if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_sell_price == 0) return;
+    // Can't sell gold
+    if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_id_num == hb::shared::item::ItemId::Gold) return;
 
-	m_game->calc_total_weight(client_h);
+    if (m_game->m_client_list[client_h]->m_is_processing_allowed == false) return;
 
-	// v1.42
-	neutral = false;
-	if (memcmp(m_game->m_client_list[client_h]->m_location, "NONE", 4) == 0) neutral = true;
+    CItem* target_item = m_game->m_client_list[client_h]->m_item_list[item_id];
 
-	price = 0;
-	if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_durability > 0) {
-		// Equipment with durability: price scaled by remaining durability + attribute bonuses
-		remain_life = m_game->m_client_list[client_h]->m_item_list[item_id]->m_instance.cur_durability;
+    // CÁLCULO INTELIGENTE DE PRECIO SI ES 0 (AUTO-PRECIO)
+    int base_sell_price = target_item->m_sell_price;
+    if (base_sell_price == 0) {
+        if (target_item->m_weight > 0) {
+            base_sell_price = std::max(10, static_cast<int>(target_item->m_weight * 2));
+        } else {
+            base_sell_price = 20;
+        }
+    }
 
-		if (remain_life <= 0) {
-			return;
-		}
-		else {
-			d1 = (double)remain_life;
-			if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_durability != 0)
-				d2 = (double)m_game->m_client_list[client_h]->m_item_list[item_id]->m_durability;
-			else d2 = 1.0f;
-			d3 = (d1 / d2) * 0.5f;
-			d2 = (double)m_game->m_client_list[client_h]->m_item_list[item_id]->m_sell_price;
-			d3 = d3 * d2;
+    m_game->calc_total_weight(client_h);
 
-			price = (short)d3;
-			price = price * num;
+    neutral = false;
+    if (memcmp(m_game->m_client_list[client_h]->m_location, "NONE", 4) == 0) neutral = true;
 
-			add_price1 = 0;
-			add_price2 = 0;
-			if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_instance.prefix_type != static_cast<uint8_t>(hb::shared::item::AttributePrefixType::None)) {
-				swe_type = static_cast<int>(m_game->m_client_list[client_h]->m_item_list[item_id]->m_instance.prefix_type);
-				swe_value = m_game->m_client_list[client_h]->m_item_list[item_id]->m_instance.prefix_value;
+    price = 0;
+    if (target_item->m_durability > 0) {
+        remain_life = target_item->m_instance.cur_durability;
 
-				// 0-None 1- 2- 3- 4-
-				// 5- 6- 7- 8- 9-
-				switch (swe_type) {
-				case 6: mul1 = 2; break;
-				case 8: mul1 = 2; break;
-				case 5: mul1 = 3; break;
-				case 1: mul1 = 4; break;
-				case 7: mul1 = 5; break;
-				case 2: mul1 = 6; break;
-				case 3: mul1 = 15; break;
-				case 9: mul1 = 20; break;
-				default: mul1 = 1; break;
-				}
+        if (remain_life <= 0) {
+            return;
+        }
+        else {
+            d1 = (double)remain_life;
+            d2 = (target_item->m_durability != 0) ? (double)target_item->m_durability : 1.0f;
+            d3 = (d1 / d2) * 0.5f;
+            d2 = (double)base_sell_price;
+            d3 = d3 * d2;
 
-				d1 = (double)price * mul1;
-				switch (swe_value) {
-				case 1: d2 = 10.0f; break;
-				case 2: d2 = 20.0f; break;
-				case 3: d2 = 30.0f; break;
-				case 4: d2 = 35.0f; break;
-				case 5: d2 = 40.0f; break;
-				case 6: d2 = 50.0f; break;
-				case 7: d2 = 100.0f; break;
-				case 8: d2 = 200.0f; break;
-				case 9: d2 = 300.0f; break;
-				case 10: d2 = 400.0f; break;
-				case 11: d2 = 500.0f; break;
-				case 12: d2 = 700.0f; break;
-				case 13: d2 = 900.0f; break;
-				default: d2 = 0.0f; break;
-				}
-				d3 = d1 * (d2 / 100.0f);
-				add_price1 = (int)(d1 + d3);
-			}
+            price = (short)d3;
+            price = price * num;
 
-			if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_instance.secondary_type != static_cast<uint8_t>(hb::shared::item::SecondaryEffectType::None)) {
-				swe_type = static_cast<int>(m_game->m_client_list[client_h]->m_item_list[item_id]->m_instance.secondary_type);
-				swe_value = m_game->m_client_list[client_h]->m_item_list[item_id]->m_instance.secondary_value;
+            add_price1 = 0;
+            add_price2 = 0;
+            if (target_item->m_instance.prefix_type != static_cast<uint8_t>(hb::shared::item::AttributePrefixType::None)) {
+                swe_type = static_cast<int>(target_item->m_instance.prefix_type);
+                swe_value = target_item->m_instance.prefix_value;
 
-				// (1),  (2),  (3), HP  (4), SP  (5)
-				// MP  (6),  (7),   (8),   (9)
-				// (10),   (11),  Gold(12)
-				switch (swe_type) {
-				case 1:
-				case 12: mul2 = 2; break;
+                switch (swe_type) {
+                case 6: mul1 = 2; break;
+                case 8: mul1 = 2; break;
+                case 5: mul1 = 3; break;
+                case 1: mul1 = 4; break;
+                case 7: mul1 = 5; break;
+                case 2: mul1 = 6; break;
+                case 3: mul1 = 15; break;
+                case 9: mul1 = 20; break;
+                default: mul1 = 1; break;
+                }
 
-				case 2:
-				case 3:
-				case 4:
-				case 5:
-				case 6:
-				case 7: mul2 = 4; break;
+                d1 = (double)price * mul1;
+                switch (swe_value) {
+                case 1: d2 = 10.0f; break;
+                case 2: d2 = 20.0f; break;
+                case 3: d2 = 30.0f; break;
+                case 4: d2 = 35.0f; break;
+                case 5: d2 = 40.0f; break;
+                case 6: d2 = 50.0f; break;
+                case 7: d2 = 100.0f; break;
+                case 8: d2 = 200.0f; break;
+                case 9: d2 = 300.0f; break;
+                case 10: d2 = 400.0f; break;
+                case 11: d2 = 500.0f; break;
+                case 12: d2 = 700.0f; break;
+                case 13: d2 = 900.0f; break;
+                default: d2 = 0.0f; break;
+                }
+                d3 = d1 * (d2 / 100.0f);
+                add_price1 = (int)(d1 + d3);
+            }
 
-				case 8:
-				case 9:
-				case 10:
-				case 11: mul2 = 6; break;
-				}
+            if (target_item->m_instance.secondary_type != static_cast<uint8_t>(hb::shared::item::SecondaryEffectType::None)) {
+                swe_type = static_cast<int>(target_item->m_instance.secondary_type);
+                swe_value = target_item->m_instance.secondary_value;
 
-				d1 = (double)price * mul2;
-				switch (swe_value) {
-				case 1: d2 = 10.0f; break;
-				case 2: d2 = 20.0f; break;
-				case 3: d2 = 30.0f; break;
-				case 4: d2 = 35.0f; break;
-				case 5: d2 = 40.0f; break;
-				case 6: d2 = 50.0f; break;
-				case 7: d2 = 100.0f; break;
-				case 8: d2 = 200.0f; break;
-				case 9: d2 = 300.0f; break;
-				case 10: d2 = 400.0f; break;
-				case 11: d2 = 500.0f; break;
-				case 12: d2 = 700.0f; break;
-				case 13: d2 = 900.0f; break;
-				default: d2 = 0.0f; break;
-				}
-				d3 = d1 * (d2 / 100.0f);
-				add_price2 = (int)(d1 + d3);
-			}
+                switch (swe_type) {
+                case 1:
+                case 12: mul2 = 2; break;
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7: mul2 = 4; break;
+                case 8:
+                case 9:
+                case 10:
+                case 11: mul2 = 6; break;
+                }
 
-			price = price + (add_price1 - (add_price1 / 3)) + (add_price2 - (add_price2 / 3));
+                d1 = (double)price * mul2;
+                switch (swe_value) {
+                case 1: d2 = 10.0f; break;
+                case 2: d2 = 20.0f; break;
+                case 3: d2 = 30.0f; break;
+                case 4: d2 = 35.0f; break;
+                case 5: d2 = 40.0f; break;
+                case 6: d2 = 50.0f; break;
+                case 7: d2 = 100.0f; break;
+                case 8: d2 = 200.0f; break;
+                case 9: d2 = 300.0f; break;
+                case 10: d2 = 400.0f; break;
+                case 11: d2 = 500.0f; break;
+                case 12: d2 = 700.0f; break;
+                case 13: d2 = 900.0f; break;
+                default: d2 = 0.0f; break;
+                }
+                d3 = d1 * (d2 / 100.0f);
+                add_price2 = (int)(d1 + d3);
+            }
 
-			if (neutral) price = price / 2;
-			if (price <= 0) price = 1;
-			if (price > 1000000) price = 1000000; // New 06/05/2004
+            price = price + (add_price1 - (add_price1 / 3)) + (add_price2 - (add_price2 / 3));
 
-			m_game->send_notify_msg(0, client_h, Notify::ItemSold, item_id, 0, 0, 0);
+            if (neutral) price = price / 2;
+            if (price <= 0) price = 1;
+            if (price > 1000000) price = 1000000;
 
-			item_log(ItemLogAction::Sell, client_h, (int)-1, m_game->m_client_list[client_h]->m_item_list[item_id]);
+            m_game->send_notify_msg(0, client_h, Notify::ItemSold, item_id, 0, 0, 0);
 
-			if (m_game->m_client_list[client_h]->m_item_list[item_id]->is_stackable()) {
-				// v1.41 !!!
-				set_item_count(client_h, item_id, m_game->m_client_list[client_h]->m_item_list[item_id]->m_instance.count - num);
-			}
-			else item_deplete_handler(client_h, item_id, false);
-		}
-	}
-	else {
-		// Non-durability items: flat half-price
-		price = m_game->m_client_list[client_h]->m_item_list[item_id]->m_sell_price / 2;
-		price = price * num;
+            item_log(ItemLogAction::Sell, client_h, (int)-1, target_item);
 
-		if (neutral) price = price / 2;
-		if (price <= 0) price = 1;
-		if (price > 1000000) price = 1000000;
+            if (target_item->is_stackable()) {
+                set_item_count(client_h, item_id, target_item->m_instance.count - num);
+            }
+            else item_deplete_handler(client_h, item_id, false);
+        }
+    }
+    else {
+        // Non-durability items: flat half-price based on our auto-price or real price
+        price = base_sell_price;
+        price = price * num;
 
-		m_game->send_notify_msg(0, client_h, Notify::ItemSold, item_id, 0, 0, 0);
+        if (neutral) price = price / 2;
+        if (price <= 0) price = 1;
+        if (price > 1000000) price = 1000000;
 
-		item_log(ItemLogAction::Sell, client_h, (int)-1, m_game->m_client_list[client_h]->m_item_list[item_id]);
+        m_game->send_notify_msg(0, client_h, Notify::ItemSold, item_id, 0, 0, 0);
 
-		if (m_game->m_client_list[client_h]->m_item_list[item_id]->is_stackable()) {
-			set_item_count(client_h, item_id, m_game->m_client_list[client_h]->m_item_list[item_id]->m_instance.count - num);
-		}
-		else item_deplete_handler(client_h, item_id, false);
-	}
+        item_log(ItemLogAction::Sell, client_h, (int)-1, target_item);
 
-	// Gold .    0     .
-	if (price <= 0) return;
+        if (target_item->is_stackable()) {
+            set_item_count(client_h, item_id, target_item->m_instance.count - num);
+        }
+        else item_deplete_handler(client_h, item_id, false);
+    }
 
-	item_gold = new CItem;
-	init_item_attr(item_gold, hb::shared::item::ItemId::Gold);
-	item_gold->m_instance.count = price;
+    if (price <= 0) return;
 
-	if (add_client_item_list(client_h, item_gold, &erase_req)) {
+    item_gold = new CItem;
+    init_item_attr(item_gold, hb::shared::item::ItemId::Gold);
+    item_gold->m_instance.count = price;
 
-		ret = send_item_notify_msg(client_h, Notify::ItemObtained, item_gold, 0);
+    if (add_client_item_list(client_h, item_gold, &erase_req)) {
+        ret = send_item_notify_msg(client_h, Notify::ItemObtained, item_gold, 0);
+        m_game->calc_total_weight(client_h);
 
-		m_game->calc_total_weight(client_h);
+        switch (ret) {
+        case sock::Event::QueueFull:
+        case sock::Event::SocketError:
+        case sock::Event::CriticalError:
+        case sock::Event::SocketClosed:
+            m_game->delete_client(client_h, true, true);
+            break;
+        }
+    }
+    else {
+        m_game->m_map_list[m_game->m_client_list[client_h]->m_map_index]->set_item(m_game->m_client_list[client_h]->m_x,
+            m_game->m_client_list[client_h]->m_y, item_gold);
 
-		switch (ret) {
-		case sock::Event::QueueFull:
-		case sock::Event::SocketError:
-		case sock::Event::CriticalError:
-		case sock::Event::SocketClosed:
-			m_game->delete_client(client_h, true, true);
-			break;
-		}
-	}
-	else {
-		m_game->m_map_list[m_game->m_client_list[client_h]->m_map_index]->set_item(m_game->m_client_list[client_h]->m_x,
-			m_game->m_client_list[client_h]->m_y, item_gold);
+        m_game->send_ground_item_event(CommonType::ItemDrop, m_game->m_client_list[client_h]->m_map_index,
+            m_game->m_client_list[client_h]->m_x, m_game->m_client_list[client_h]->m_y, item_gold);
 
-		m_game->send_ground_item_event(CommonType::ItemDrop, m_game->m_client_list[client_h]->m_map_index,
-			m_game->m_client_list[client_h]->m_x, m_game->m_client_list[client_h]->m_y, item_gold);
+        m_game->calc_total_weight(client_h);
 
-		m_game->calc_total_weight(client_h);
+        ret = send_item_notify_msg(client_h, Notify::CannotCarryMoreItem, 0, 0);
 
-		ret = send_item_notify_msg(client_h, Notify::CannotCarryMoreItem, 0, 0);
-
-		switch (ret) {
-		case sock::Event::QueueFull:
-		case sock::Event::SocketError:
-		case sock::Event::CriticalError:
-		case sock::Event::SocketClosed:
-			m_game->delete_client(client_h, true, true);
-			return;
-		}
-	}
+        switch (ret) {
+        case sock::Event::QueueFull:
+        case sock::Event::SocketError:
+        case sock::Event::CriticalError:
+        case sock::Event::SocketClosed:
+            m_game->delete_client(client_h, true, true);
+            return;
+        }
+    }
 }
 
 void ItemManager::req_repair_item_handler(int client_h, char item_id, char repair_whom, const char* string)
