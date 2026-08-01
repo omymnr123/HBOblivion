@@ -4919,19 +4919,24 @@ void CGame::init_player_data(int client_h, char* data, uint32_t size)
 
 	total_points = 0;
 	for(int i = 0; i < hb::shared::limits::MaxSkillType; i++)
-		total_points += m_client_list[client_h]->m_skill_mastery[i];
+	total_points += m_client_list[client_h]->m_skill_mastery[i];
 #ifndef TESTER_ONLY
-	// Skill point validation — disabled in tester builds for tester menu "Max all skills"
-	if ((total_points - 21 > MaxSkillPoints) ) {
-		try
-		{
-			hb::logger::warn<log_channel::security>("Packet editing: IP={} player={}, exceeds allowed skill points ({})", m_client_list[client_h]->m_ip_address, m_client_list[client_h]->m_char_name, total_points);
-			delete_client(client_h, true, true);
+	// === NUEVO: Excepción de antitrampas para Game Masters ===
+	// Verificamos que el jugador NO sea administrador (admin_level == 0)
+	if (m_client_list[client_h]->m_admin_level == 0) 
+	{
+		// Skill point validation — disabled in tester builds for tester menu "Max all skills"
+		if ((total_points - 21 > MaxSkillPoints) ) {
+			try
+			{
+				hb::logger::warn<log_channel::security>("Packet editing: IP={} player={}, exceeds allowed skill points ({})", m_client_list[client_h]->m_ip_address, m_client_list[client_h]->m_char_name, total_points);
+				delete_client(client_h, true, true);
+			}
+			catch (...)
+			{
+			}
+			return;
 		}
-		catch (...)
-		{
-		}
-		return;
 	}
 #endif
 

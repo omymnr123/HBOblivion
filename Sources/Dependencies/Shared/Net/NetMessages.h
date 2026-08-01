@@ -334,9 +334,10 @@ namespace Notify
 		NotifyTalentData                        = 0x0BFD,
 		RepairAllPrices                         = 0x0F11,
 		MobKills                                = 0x0A68,
+		Contribution                            = 0x0A69, // <-- ¡Fuera del Tester!
+
 #ifdef TESTER_ONLY
 		// TESTER MENU — tester-only notifications
-		Contribution                            = 0x0A69,
 		TesterItemSearchResult                  = 0x0A6A,
 		TesterMapListResult                     = 0x0A6B,
 #endif // TESTER_ONLY

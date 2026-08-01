@@ -477,6 +477,47 @@ PressResult DialogBox_Inventory::on_press()
 			// Pixel-perfect collision check with margin for small items
 			if (check_item_collision(inv_draw.sprite, itemDrawX, itemDrawY, inv_draw.frame, mouse_x, mouse_y, item_hit_margin))
 			{
+				// === NUEVO: EQUIPAR SET COMPLETO APILADO CON CTRL + CLICK ===
+				// Usamos GetAsyncKeyState nativo de Windows
+				if (GetAsyncKeyState(VK_CONTROL) & 0x8000) 
+				{
+					int target_x = item->m_x;
+					int target_y = item->m_y;
+
+					for (int j = 0; j < hb::shared::limits::MaxItems; j++)
+					{
+						int loop_id = m_game->m_item_order[j];
+						if (loop_id == -1) continue;
+						
+						CItem* loop_item = player().m_item_list[loop_id].get();
+						if (loop_item == nullptr) continue;
+						
+						// Saltamos los items que ya estén equipados o bloqueados
+						if (m_game->m_is_item_equipped[loop_id]) continue;
+						if (inventory_manager::get().is_locked(loop_id)) continue;
+
+						// Tolerancia de 15 píxeles por si los ítems no están en el píxel exacto
+						int diff_x = loop_item->m_x - target_x;
+						int diff_y = loop_item->m_y - target_y;
+
+						if (diff_x >= -15 && diff_x <= 15 && diff_y >= -15 && diff_y <= 15)
+						{
+							CItem* loop_cfg = m_game->get_item_config(loop_item->m_id_num);
+							
+							// Solo equipamos si el objeto es de tipo "equipment" (armas, armaduras, escudos...)
+							if (loop_cfg && loop_cfg->get_item_type() == hb::shared::item::item_type::equipment)
+							{
+								// Simulamos que el jugador arrastra y suelta el objeto en la pestaña de personaje
+								CursorTarget::set_selection(SelectedObjectType::Item, static_cast<short>(loop_id), 0, 0);
+								m_game->get_dialog_box_manager().get_dialog_box(DialogBoxId::CharacterInfo)->on_item_drop();
+								CursorTarget::clear_selection();
+							}
+						}
+					}
+					// Retornamos Normal para evitar que inicie la acción de "arrastrar" un ítem
+					return PressResult::Normal; 
+				}
+				// ============================================================
 				// Bring item to top of order
 				inventory_manager::get().set_item_order(0, item_id);
 

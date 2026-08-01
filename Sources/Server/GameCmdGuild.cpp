@@ -40,10 +40,14 @@ bool GameCmdGuild::execute(CGame* game, int client_h, const char* args)
 	std::string subcmd;
 	iss >> subcmd;
 
-	if (hb_strnicmp(subcmd.c_str(), "create", 6) == 0)
+if (hb_strnicmp(subcmd.c_str(), "create", 6) == 0)
 	{
 		std::string guild_name;
-		iss >> guild_name;
+		// Limpiamos los espacios sobrantes después de la palabra "create"
+		iss >> std::ws; 
+		// Capturamos el resto de la línea entera (con espacios incluidos)
+		std::getline(iss, guild_name);
+		
 		if (guild_name.empty())
 		{
 			game->send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "Usage: /guild create <Name>");

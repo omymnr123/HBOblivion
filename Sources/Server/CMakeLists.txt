@@ -132,7 +132,7 @@ target_include_directories(HelbreathServer PRIVATE
 # ---------------------------------------------------------------------------
 # Preprocessor definitions
 # ---------------------------------------------------------------------------
-target_compile_definitions(HelbreathServer PRIVATE TESTER_ONLY)
+#target_compile_definitions(HelbreathServer PRIVATE TESTER_ONLY)
 
 # ---------------------------------------------------------------------------
 # Linux link libraries

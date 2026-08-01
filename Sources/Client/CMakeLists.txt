@@ -134,7 +134,7 @@ target_include_directories(HelbreathClient PRIVATE ${COMMON_INCLUDE_DIRS})
 # ---------------------------------------------------------------------------
 target_compile_definitions(SFMLEngine PRIVATE SFML_STATIC SFML_ENGINE)
 target_compile_definitions(HelbreathClient PRIVATE SFML_STATIC SFML_ENGINE)
-target_compile_definitions(HelbreathClient PRIVATE TESTER_ONLY)
+#target_compile_definitions(HelbreathClient PRIVATE TESTER_ONLY)
 
 # ---------------------------------------------------------------------------
 # Find SFML 3 — try system install first, fall back to FetchContent
