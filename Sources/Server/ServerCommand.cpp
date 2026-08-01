@@ -16,6 +16,7 @@
 #include <cstring>
 #include <cstdio>
 #include "StringCompat.h"
+#include "GameCmdSetSkills.h"
 
 ServerCommandManager& ServerCommandManager::get()
 {

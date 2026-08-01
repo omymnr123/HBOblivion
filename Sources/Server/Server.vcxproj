@@ -183,6 +183,7 @@
     <ClInclude Include="ServerConfig.h" />
     <ClInclude Include="GlobalDef.h" />
     <ClInclude Include="MapInfoSqliteStore.h" />
+    <ClInclude Include="GameCmdSetSkills.h" />
 
     <ClInclude Include="Item.h" />
     <ClInclude Include="LoginServer.h" />
@@ -366,6 +367,7 @@
     <ClCompile Include="GameCmdSetLevel.cpp" />
     <ClCompile Include="GameCmdKill.cpp" />
     <ClCompile Include="GameCmdRevive.cpp" />
+    <ClCompile Include="GameCmdSetSkills.cpp" />
     <ClCompile Include="..\Dependencies\Shared\Net\ASIOSocket.cpp" />
     <ClCompile Include="..\Dependencies\Shared\Net\IOServicePool.cpp" />
     <ClCompile Include="..\Dependencies\Shared\Log\LogBackend.cpp" />

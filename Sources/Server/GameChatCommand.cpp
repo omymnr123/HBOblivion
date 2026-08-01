@@ -26,6 +26,7 @@
 #include "GameCmdSetLevel.h"
 #include "GameCmdKill.h"
 #include "GameCmdRevive.h"
+#include "GameCmdSetSkills.h"
 
 using namespace hb::shared::net;
 GameChatCommandManager& GameChatCommandManager::get()
@@ -141,6 +142,7 @@ void GameChatCommandManager::register_built_in_commands()
 	register_command(std::make_unique<GameCmdSetLevel>());
 	register_command(std::make_unique<GameCmdKill>());
 	register_command(std::make_unique<GameCmdRevive>());
+	register_command(std::make_unique<GameCmdSetSkills>());
 }
 
 void GameChatCommandManager::seed_command_permissions()
