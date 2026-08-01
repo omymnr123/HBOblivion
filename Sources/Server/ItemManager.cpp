@@ -3705,7 +3705,10 @@ case ItemEffectType::Dye:
 		if ((dest_item_id >= 0) && (dest_item_id < hb::shared::limits::MaxItems)) {
 			if (m_game->m_client_list[client_h]->m_item_list[dest_item_id] != 0) {
 				auto* dest = m_game->m_client_list[client_h]->m_item_list[dest_item_id];
-				if (dest->m_is_dyeable != 0 && dest->m_armor_class == armor_class::armor) {
+				const bool is_allowed_armor_dye_target =
+					(dest->m_is_dyeable != 0 && dest->m_armor_class == armor_class::armor) ||
+					(dest->m_id_num == 752 || dest->m_id_num == 753 || dest->m_id_num == 756 || dest->m_id_num == 757);
+				if (is_allowed_armor_dye_target) {
 					dest->m_instance.item_color =
 						static_cast<char>(m_game->m_client_list[client_h]->m_item_list[item_index]->m_item_effect_value1);
 					m_game->send_notify_msg(0, client_h, Notify::ItemColorChange, dest_item_id, dest->m_instance.item_color, 0, 0);
