@@ -6,7 +6,7 @@
         "masterVolume": 21,
         "musicEnabled": false,
         "musicVolume": 15,
-        "soundEnabled": true,
+        "soundEnabled": false,
         "soundVolume": 22,
         "uiEnabled": false,
         "uiVolume": 14

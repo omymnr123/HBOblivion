@@ -566,5 +566,6 @@
   "1108": "AngelicPandent(STR)",
   "1109": "AngelicPandent(DEX)",
   "1110": "AngelicPandent(INT)",
-  "1111": "AngelicPandent(MAG)"
+  "1111": "AngelicPandent(MAG)",
+  "2000": "Haste Manual"
 }
