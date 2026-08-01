@@ -32,12 +32,12 @@
         "zoomMap": false
     },
     "shortcuts": {
-        "magic": 12,
+        "magic": 50,
         "slots": [
             -1,
             -1,
-            157,
-            147,
+            21,
+            14,
             -1
         ]
     },

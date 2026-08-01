@@ -826,8 +826,8 @@ void Screen_OnGame::on_render()
 
 void Screen_OnGame::render_item_tooltip()
 {
-	std::string G_cTxt;
-	short target_id = CursorTarget::get_selected_id();
+    std::string G_cTxt;
+    short target_id = CursorTarget::get_selected_id();
     CItem* item = m_game->m_player->m_item_list[target_id].get();
     if (!item) return;
     CItem* cfg = m_game->get_item_config(item->m_id_num);
@@ -902,7 +902,6 @@ void Screen_OnGame::render_item_tooltip()
     }
 
     // 3. Base combat stats with inline modifiers
-    // Collect inline modifiers from effects
     std::string damage_mod_str;
     std::string defense_mod_str;
     std::string weight_mod_str;
@@ -967,7 +966,7 @@ void Screen_OnGame::render_item_tooltip()
             tooltip.add_dual_line(eff.label, GameColors::InfoGrayLight, eff.value, GameColors::UIItemName_Special);
     }
 
-    // 5. Consumable info — HP/MP/SP potions and food
+    // 5. Consumable info
     auto effectType = cfg->get_item_effect_type();
     if (effectType == ItemEffectType::HP)
     {
@@ -1018,7 +1017,7 @@ void Screen_OnGame::render_item_tooltip()
         tooltip.add_line(G_cTxt, GameColors::InfoGrayLight);
     }
 
-    // 7. Weight — using shared weight functions, inline light modifier
+    // 7. Weight
     if (cfg->m_weight > 0)
     {
         float unit_stones = CItem::weight_to_stones(eff_weight);
@@ -1043,7 +1042,6 @@ void Screen_OnGame::render_item_tooltip()
     {
         if (!durability_mod_str.empty())
         {
-            // Strong prefix: show boosted durability with green values
             int boost_pct = 0;
             try { boost_pct = std::stoi(durability_mod_str.substr(1)); } catch (...) {}
             int boosted_max = cfg->m_durability * (100 + boost_pct) / 100;
@@ -1063,19 +1061,24 @@ void Screen_OnGame::render_item_tooltip()
         tooltip.add_line(G_cTxt, GameColors::InfoGrayLight);
     }
 
-    // 9. Stack count
-    if (cfg->is_stackable())
+    // 9. Total Quantity in Inventory (AQUÍ ESTÁ LA MAGIA)
+    int total_quantity = 0;
+    
+    // Escaneamos toda la bolsa buscando objetos que compartan el mismo ID
+    for (const auto& inv_item : m_game->m_player->m_item_list)
     {
-        auto count = std::count_if(m_game->m_player->m_item_list.begin(), m_game->m_player->m_item_list.end(),
-            [item](const std::unique_ptr<CItem>& otherItem) {
-                return otherItem != nullptr && otherItem->m_id_num == item->m_id_num;
-            });
-
-        if (count > 1)
+        if (inv_item != nullptr && inv_item->m_id_num == item->m_id_num)
         {
-            G_cTxt = std::format(DEF_MSG_TOTAL_NUMBER, static_cast<int>(count));
-            tooltip.add_line(G_cTxt, GameColors::UIDescription);
+            // Sumamos la cantidad interna (por si es oro/flechas) o contamos 1 (para pociones separadas)
+            total_quantity += (inv_item->m_instance.count > 0) ? inv_item->m_instance.count : 1;
         }
+    }
+
+    // Si la suma total es mayor a 1, dibujamos la línea final en el tooltip
+    if (total_quantity > 1)
+    {
+        std::string qty_str = std::format("Quantity: {}", total_quantity);
+        tooltip.add_line(qty_str, GameColors::InfoGrayLight);
     }
 
     tooltip.draw(m_sMsX, m_sMsY + 25, m_game->m_Renderer);
