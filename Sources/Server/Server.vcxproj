@@ -234,6 +234,10 @@
     <ClInclude Include="PasswordHash.h" />
     <ClInclude Include="StringCompat.h" />
     <ClInclude Include="TimeUtils.h" />
+    <ClInclude Include="GameCmdTeleport.h" />
+    <ClInclude Include="GameCmdSetLevel.h" />
+    <ClInclude Include="GameCmdKill.h" />
+    <ClInclude Include="GameCmdRevive.h" />
     <ClInclude Include="..\Dependencies\Shared\Net\ASIOSocket.h" />
     <ClInclude Include="..\Dependencies\Shared\Entity\ActionID.h" />
     <ClInclude Include="..\Dependencies\Shared\Game\AdminLevel.h" />
@@ -358,6 +362,10 @@
     <ClCompile Include="CmdSaveAll.cpp" />
     <ClCompile Include="CmdShutdown.cpp" />
     <ClCompile Include="GameCmdReroll.cpp" />
+    <ClCompile Include="GameCmdTeleport.cpp" />
+    <ClCompile Include="GameCmdSetLevel.cpp" />
+    <ClCompile Include="GameCmdKill.cpp" />
+    <ClCompile Include="GameCmdRevive.cpp" />
     <ClCompile Include="..\Dependencies\Shared\Net\ASIOSocket.cpp" />
     <ClCompile Include="..\Dependencies\Shared\Net\IOServicePool.cpp" />
     <ClCompile Include="..\Dependencies\Shared\Log\LogBackend.cpp" />

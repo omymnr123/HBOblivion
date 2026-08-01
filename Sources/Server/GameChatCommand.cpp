@@ -22,6 +22,10 @@
 #include "Log.h"
 #include "StringCompat.h"
 #include "TimeUtils.h"
+#include "GameCmdTeleport.h"
+#include "GameCmdSetLevel.h"
+#include "GameCmdKill.h"
+#include "GameCmdRevive.h"
 
 using namespace hb::shared::net;
 GameChatCommandManager& GameChatCommandManager::get()
@@ -133,6 +137,10 @@ void GameChatCommandManager::register_built_in_commands()
 	register_command(std::make_unique<GameCmdSaveAll>());
 	register_command(std::make_unique<GameCmdGuild>());
 	register_command(std::make_unique<GameCmdReroll>());
+	register_command(std::make_unique<GameCmdTeleport>());
+	register_command(std::make_unique<GameCmdSetLevel>());
+	register_command(std::make_unique<GameCmdKill>());
+	register_command(std::make_unique<GameCmdRevive>());
 }
 
 void GameChatCommandManager::seed_command_permissions()
