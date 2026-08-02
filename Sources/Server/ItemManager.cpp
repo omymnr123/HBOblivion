@@ -2642,11 +2642,8 @@ void ItemManager::req_sell_item_handler(int client_h, char item_id, char sell_to
 
     int base_sell_price = target_item->m_sell_price;
     if (base_sell_price == 0) {
-        if (target_item->m_weight > 0) {
-            base_sell_price = std::max(10, static_cast<int>(target_item->m_weight * 2));
-        } else {
-            base_sell_price = 20;
-        }
+        // AUTO-PRECIO: Valor entre 10 y 250, matemático y fijo para cada tipo de ítem.
+        base_sell_price = 10 + (static_cast<int>(target_item->m_id_num) * 17) % 241;
     }
 
     switch (sell_to_whom) {
@@ -2754,6 +2751,7 @@ void ItemManager::req_sell_item_handler(int client_h, char item_id, char sell_to
 
             price = price + (add_price1 - (add_price1 / 3)) + (add_price2 - (add_price2 / 3));
 
+            // if (neutral) price = price / 2;
             if (price <= 0) price = 1;
             if (price > 1000000) price = 1000000;
 
@@ -2766,6 +2764,7 @@ void ItemManager::req_sell_item_handler(int client_h, char item_id, char sell_to
             price = base_sell_price;
             price = price * num;
 
+            // if (neutral) price = price / 2;
             if (price <= 0) price = 1;
             if (price > 1000000) price = 1000000;
 
@@ -2792,10 +2791,10 @@ void ItemManager::req_sell_item_confirm_handler(int client_h, char item_id, int 
     int    erase_req, ret;
     bool   neutral;
 
-    if (m_game->m_client_list[client_h] == 0) return;
+    if (m_game->m_client_list[client_h] == nullptr) return;
     if (m_game->m_client_list[client_h]->m_is_init_complete == false) return;
     if ((item_id < 0) || (item_id >= 50)) return;
-    if (m_game->m_client_list[client_h]->m_item_list[item_id] == 0) return;
+    if (m_game->m_client_list[client_h]->m_item_list[item_id] == nullptr) return;
     
     if (num <= 0) return;
 
@@ -2813,14 +2812,10 @@ void ItemManager::req_sell_item_confirm_handler(int client_h, char item_id, int 
 
     CItem* target_item = m_game->m_client_list[client_h]->m_item_list[item_id];
 
-    // CÁLCULO INTELIGENTE DE PRECIO SI ES 0 (AUTO-PRECIO)
     int base_sell_price = target_item->m_sell_price;
     if (base_sell_price == 0) {
-        if (target_item->m_weight > 0) {
-            base_sell_price = std::max(10, static_cast<int>(target_item->m_weight * 2));
-        } else {
-            base_sell_price = 20;
-        }
+        // AUTO-PRECIO: Valor entre 10 y 250, matemático y fijo para cada tipo de ítem.
+        base_sell_price = 10 + (static_cast<int>(target_item->m_id_num) * 17) % 241;
     }
 
     m_game->calc_total_weight(client_h);
@@ -2901,6 +2896,7 @@ void ItemManager::req_sell_item_confirm_handler(int client_h, char item_id, int 
                 case 9:
                 case 10:
                 case 11: mul2 = 6; break;
+                default: mul2 = 1; break;
                 }
 
                 d1 = (double)price * mul2;
@@ -2926,7 +2922,7 @@ void ItemManager::req_sell_item_confirm_handler(int client_h, char item_id, int 
 
             price = price + (add_price1 - (add_price1 / 3)) + (add_price2 - (add_price2 / 3));
 
-            if (neutral) price = price / 2;
+            // if (neutral) price = price / 2;
             if (price <= 0) price = 1;
             if (price > 1000000) price = 1000000;
 
@@ -2941,11 +2937,10 @@ void ItemManager::req_sell_item_confirm_handler(int client_h, char item_id, int 
         }
     }
     else {
-        // Non-durability items: flat half-price based on our auto-price or real price
         price = base_sell_price;
         price = price * num;
 
-        if (neutral) price = price / 2;
+        // if (neutral) price = price / 2;
         if (price <= 0) price = 1;
         if (price > 1000000) price = 1000000;
 
