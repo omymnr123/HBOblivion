@@ -47,15 +47,18 @@ namespace hb::updater
 	{
 		std::error_code ec;
 
-		if (is_executable)
+		// Comprobamos si el archivo ejecutable que se está actualizando es EL PROPIO ACTUALIZADOR (updater.exe)
+		bool is_self = (fs::absolute(final_path) == fs::absolute(get_exe_path()));
+
+		if (is_executable && is_self)
 		{
-			// For executables, place as .update — swap happens on next launch
+			// Si es el actualizador en marcha, lo guardamos como .update para renombrarlo al reiniciar
 			std::string update_path = final_path + exe_update_suffix;
 			fs::copy_file(staged_path, update_path, fs::copy_options::overwrite_existing, ec);
 		}
 		else
 		{
-			// For data files, overwrite directly
+			// Para archivos de datos y para cualquier otro exe (como Game_x64_win.exe), se sobrescriben directamente
 			auto parent = fs::path(final_path).parent_path();
 			if (!parent.empty())
 				fs::create_directories(parent, ec);
