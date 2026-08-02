@@ -963,8 +963,22 @@ void Screen_OnGame::draw_npc_name(short screen_x, short screen_y, short owner_ty
     // 1. Dibujado del nombre principal del NPC
     hb::shared::text::draw_text(GameFont::Default, screen_x, screen_y, text.c_str(), hb::shared::text::TextStyle::with_shadow(GameColors::UIWhite));
 
-    // 2. Dibujado del Subtítulo y validación de Élite
+    // 2. Validación de Élite
     bool isElite = status.hero; 
+
+    // === NUEVO: Aviso superior "Elites Spawned!" con Cooldown ===
+    if (isElite) {
+        // Variable estática que guarda la última vez que mostramos el aviso (compartida por todos los élites en pantalla)
+        static uint32_t last_elite_msg_time = 0;
+        uint32_t current_time = GameClock::get_time_ms();
+        
+        // Si han pasado más de 45 segundos desde la última vez que saltó el cartel...
+        if (current_time - last_elite_msg_time > 45000) {
+            m_game->set_top_msg((char*)"Elites Spawned!", 5);
+            last_elite_msg_time = current_time; // Reseteamos el temporizador
+        }
+    }
+    // ==============================================================
 
     if (m_is_observer_mode == true) {
         hb::shared::text::draw_text(GameFont::Default, screen_x, subtitle_y, text.c_str(), hb::shared::text::TextStyle::with_shadow(GameColors::NeutralNamePlate));
@@ -977,7 +991,6 @@ void Screen_OnGame::draw_npc_name(short screen_x, short screen_y, short owner_ty
         std::string sub_text;
         hb::shared::render::Color sub_color;
 
-        // Si es Elite, sobrescribimos el string por defecto y le añadimos el " - Elite" dentro del paréntesis
         if (IsHostile(status.relationship)) {
             sub_text = isElite ? "(Enemy - Elite)" : DRAW_OBJECT_NAME90; 
             sub_color = GameColors::EnemyNamePlate;
@@ -991,7 +1004,7 @@ void Screen_OnGame::draw_npc_name(short screen_x, short screen_y, short owner_ty
             sub_color = GameColors::NeutralNamePlate;
         }
 
-        // Se dibuja unificado con el color correspondiente (Rojo, Azul o Gris)
+        // Se dibuja unificado con el color correspondiente
         hb::shared::text::draw_text(GameFont::Default, screen_x, subtitle_y, sub_text.c_str(), hb::shared::text::TextStyle::with_shadow(sub_color));
     }
 
