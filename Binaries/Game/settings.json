@@ -15,7 +15,7 @@
         "backgroundFpsThrottle": false,
         "borderless": false,
         "captureMouse": true,
-        "detailLevel": 0,
+        "detailLevel": 2,
         "dialogTransparency": false,
         "fpsLimit": 0,
         "fullscreen": true,

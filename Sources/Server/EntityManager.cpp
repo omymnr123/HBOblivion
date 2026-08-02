@@ -2570,128 +2570,6 @@ void CEntityManager::delete_npc_internal(int npc_h)
 		
 		auto& spot = m_map_list[map_idx]->m_spot_mob_generator[spot_idx];
 		spot.cur_mobs--;
-
-		// === SISTEMA DE NPCS ÉLITE ===
-		uint32_t currentTime = GameClock::GetTimeMS();
-		if (currentTime >= spot.elite_block_until_time) {
-			spot.elite_kill_counter++;
-			
-			if (spot.elite_kill_counter >= 40) { // Usando 5 para tus pruebas
-				spot.elite_kill_counter = 0; 
-				spot.elite_block_until_time = currentTime + (30 * 1000); // Bloqueo de 30 segundos
-
-				// 1. Limpiar el resto de mobs normales vivos de este spot
-				for (int i = 1; i < hb::server::config::MaxNpcs; i++) {
-					if (m_npc_list[i] != nullptr && 
-						m_npc_list[i]->m_map_index == map_idx && 
-						m_npc_list[i]->m_spot_mob_index == spot_idx && 
-						!m_npc_list[i]->m_is_killed &&
-						i != npc_h) { // IMPORTANTE: no borrar el actual que ya está muriendo
-						
-						m_npc_list[i]->m_hp = 0;
-						m_npc_list[i]->m_is_killed = true;
-						delete_npc_internal(i); // Borrado seguro
-					}
-				}
-
-				// 2. Spawnear los 3 Mobs Elite separados, en el centro del Spot y patrullando al instante
-					
-					// === NUEVO: Calculamos el Centro exacto del Spot ===
-					// Por defecto cogemos la posicion del mob que murio por si hay algun error
-					int baseX = static_cast<int>(m_npc_list[npc_h]->m_x);
-					int baseY = static_cast<int>(m_npc_list[npc_h]->m_y);
-					
-					// Si el spot tiene un area definida (ancho y alto), sacamos su centro matematico
-					if (spot.rcRect.width > 0 && spot.rcRect.height > 0) {
-						baseX = spot.rcRect.x + (spot.rcRect.width / 2);
-						baseY = spot.rcRect.y + (spot.rcRect.height / 2);
-					}
-					// ====================================================
-
-					// Preparamos los limites de movimiento del Spot original para restaurarlo despues
-					char waypoint[11] = {0};
-					char realMoveType = MoveType::Random; 
-					hb::shared::geometry::GameRectangle* pArea = nullptr;
-
-					if (spot.type == 1) { // RANDOMAREA
-						realMoveType = MoveType::RandomArea;
-						pArea = &spot.rcRect;
-					} else if (spot.type == 2) { // RANDOMWAYPOINT
-						realMoveType = MoveType::RandomWaypoint;
-						for (int k = 0; k < 10; k++) waypoint[k] = spot.waypoints[k];
-					}
-
-					char uniqueName[21];
-					for (int e = 0; e < 3; e++) {
-						std::snprintf(uniqueName, sizeof(uniqueName), "Elite_%d", e);
-						
-						// Separacion base: Centro (0), Izquierda (-2), Derecha (+2)
-						int targetX = baseX;
-						if (e == 1) targetX -= 2;
-						else if (e == 2) targetX += 2;
-
-						int targetY = baseY;
-
-						int eliteHandle = -1;
-						int attempts = 0;
-						int outX = 0, outY = 0;
-
-						// BUCLE ANTI-COLISION: Buscamos un area valida de 2x2. 
-						// Si choca con pared/agua, desliza 1 tile y reintenta (max 10 veces)
-						while (eliteHandle <= 0 && attempts < 10) {
-							hb::shared::geometry::GameRectangle exactArea;
-							exactArea.x = (targetX < 0) ? 0 : targetX;
-							exactArea.y = (targetY < 0) ? 0 : targetY;
-							exactArea.width = 2; // Margen minimo de 2x2 para el motor
-							exactArea.height = 2;
-
-							// IMPORTANTE: Pasamos MoveType::RandomArea y nuestra exactArea de 2x2
-							eliteHandle = create_entity(
-								spot.npc_config_id, uniqueName, m_map_list[map_idx]->m_name,
-								0, 0, MoveType::RandomArea, &outX, &outY, waypoint, 
-								&exactArea, spot_idx, -1, false, false, true, true, 0
-							);
-
-							if (eliteHandle <= 0) {
-								targetX += 1;
-								targetY += 1;
-								attempts++;
-							}
-						}
-
-						// Si el spawn fue exitoso
-						if (eliteHandle > 0 && m_npc_list[eliteHandle] != nullptr) {
-							CNpc* eliteMob = m_npc_list[eliteHandle];
-							
-							// Restauramos su area real de patrullaje para todo el spot original
-							eliteMob->m_move_type = realMoveType;
-							if (pArea != nullptr) {
-								eliteMob->m_random_area = *pArea;
-							}
-
-							// Stats x2
-							eliteMob->m_hp_min *= 2;
-							eliteMob->m_hp_max *= 2;
-							eliteMob->m_hp = eliteMob->m_hp_max;
-							eliteMob->m_max_hp = eliteMob->m_hp_max;
-
-							eliteMob->m_min_damage *= 2;
-							eliteMob->m_max_damage *= 2;
-
-							// Flag de Red
-							eliteMob->m_status.hero = true; 
-							
-							// Caducidad
-							eliteMob->m_summoned_time = GameClock::GetTimeMS();
-
-							// === NUEVO: Forzar patrullaje inmediato ===
-							eliteMob->m_behavior_turn_count = 0; 
-							calc_next_waypoint_destination(eliteHandle); // Fuerza a elegir ruta YA
-							// ==========================================
-						}
-					}
-			}
-		}
 	}
 
 	m_game->m_combat_manager->remove_from_target(npc_h, hb::shared::owner_class::Npc);
@@ -2736,6 +2614,133 @@ void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char a
         return;
     }
 
+    // === NUEVO: SISTEMA DE ELITES (Ejecutado al milisegundo en que HP = 0) ===
+    if (m_npc_list[npc_h]->m_spot_mob_index != 0) {
+        int spot_idx = m_npc_list[npc_h]->m_spot_mob_index;
+        int map_idx = m_npc_list[npc_h]->m_map_index;
+        auto& spot = m_map_list[map_idx]->m_spot_mob_generator[spot_idx];
+
+        if (m_npc_list[npc_h]->m_status.hero) {
+            // Si el que acaba de morir es un Elite, desbloqueamos el spot al instante
+            spot.elite_block_until_time = 0;
+        } 
+        else {
+            uint32_t currentTime = GameClock::GetTimeMS();
+            if (currentTime >= spot.elite_block_until_time) {
+                spot.elite_kill_counter++;
+
+                // Cuando la vida del bicho numero 40 llega a 0:
+                if (spot.elite_kill_counter >= 40) { 
+                    spot.elite_kill_counter = 0;
+                    
+                    // === BLOQUEO EXACTO DE 30 SEGUNDOS ===
+                    // El spot no volverá a escupir NPCs normales hasta que pasen 30 segundos
+                    spot.elite_block_until_time = currentTime + (30 * 1000); 
+
+                    // 1. Spawneamos a los 3 Elites de inmediato en el centro
+                    int baseX = static_cast<int>(m_npc_list[npc_h]->m_x);
+                    int baseY = static_cast<int>(m_npc_list[npc_h]->m_y);
+                    
+                    if (spot.rcRect.width > 0 && spot.rcRect.height > 0) {
+                        baseX = spot.rcRect.x + (spot.rcRect.width / 2);
+                        baseY = spot.rcRect.y + (spot.rcRect.height / 2);
+                    }
+
+                    char waypoint[11] = {0};
+                    char realMoveType = MoveType::Random; 
+                    hb::shared::geometry::GameRectangle* pArea = nullptr;
+
+                    if (spot.type == 1) { 
+                        realMoveType = MoveType::RandomArea;
+                        pArea = &spot.rcRect;
+                    } else if (spot.type == 2) { 
+                        realMoveType = MoveType::RandomWaypoint;
+                        for (int k = 0; k < 10; k++) waypoint[k] = spot.waypoints[k];
+                    }
+
+                    char uniqueName[21];
+                    for (int e = 0; e < 3; e++) {
+                        std::snprintf(uniqueName, sizeof(uniqueName), "Elite_%d", e);
+                        
+                        int targetX = baseX;
+                        if (e == 1) targetX -= 2;
+                        else if (e == 2) targetX += 2;
+                        int targetY = baseY;
+
+                        int eliteHandle = -1;
+                        int attempts = 0;
+                        int outX = 0, outY = 0;
+
+                        while (eliteHandle <= 0 && attempts < 10) {
+                            hb::shared::geometry::GameRectangle exactArea;
+                            exactArea.x = (targetX < 0) ? 0 : targetX;
+                            exactArea.y = (targetY < 0) ? 0 : targetY;
+                            exactArea.width = 2;
+                            exactArea.height = 2;
+
+                            eliteHandle = create_entity(
+                                spot.npc_config_id, uniqueName, m_map_list[map_idx]->m_name,
+                                0, 0, MoveType::RandomArea, &outX, &outY, waypoint, 
+                                &exactArea, spot_idx, -1, false, false, true, true, 0
+                            );
+
+                            if (eliteHandle <= 0) {
+                                targetX += 1;
+                                targetY += 1;
+                                attempts++;
+                            }
+                        }
+
+                        if (eliteHandle > 0 && m_npc_list[eliteHandle] != nullptr) {
+                            CNpc* eliteMob = m_npc_list[eliteHandle];
+                            
+                            eliteMob->m_move_type = realMoveType;
+                            if (pArea != nullptr) {
+                                eliteMob->m_random_area = *pArea;
+                            }
+
+                            eliteMob->m_hp_min *= 2;
+                            eliteMob->m_hp_max *= 2;
+                            eliteMob->m_hp = eliteMob->m_hp_max;
+                            eliteMob->m_max_hp = eliteMob->m_hp_max;
+                            eliteMob->m_min_damage *= 2;
+                            eliteMob->m_max_damage *= 2;
+
+                            eliteMob->m_status.hero = true; 
+                            eliteMob->m_summoned_time = GameClock::GetTimeMS();
+
+                            eliteMob->m_behavior_turn_count = 0; 
+                            calc_next_waypoint_destination(eliteHandle); 
+                        }
+                    }
+
+                    // 2. LIMPIEZA PERFECTA DE LOS NPCs NORMALES RESTANTES
+                    for (int i = 1; i < hb::server::config::MaxNpcs; i++) {
+                        if (m_npc_list[i] != nullptr && 
+                            m_npc_list[i]->m_map_index == map_idx && 
+                            m_npc_list[i]->m_spot_mob_index == spot_idx && 
+                            i != npc_h && 
+                            !m_npc_list[i]->m_status.hero &&
+                            !m_npc_list[i]->m_is_killed && 
+                            m_npc_list[i]->m_hp > 0) {
+                            
+                            // EL TRUCO: Solo le quitamos la vida y el objetivo.
+                            // NO ponemos m_is_killed = true. 
+                            m_npc_list[i]->m_hp = 0;
+                            m_npc_list[i]->m_target_index = 0;
+                            
+                            // Al dejarlos con 0 HP pero sin marcar como "muertos", el motor 
+                            // central los procesará de forma 100% natural en el siguiente tick:
+                            // 1. Enviará la animación de caer muertos a los jugadores (y dejarán cadáver).
+                            // 2. Restará correctamente la cantidad del spot mob generator (cur_mobs--).
+                        }
+                    }
+                }
+            }
+        }
+    }
+    // =========================================================================
+
     const DropTable* table = m_game->m_item_manager->get_drop_table(m_npc_list[npc_h]->m_drop_table_id);
 
     // Apply drop rate multipliers to base chances
@@ -2753,12 +2758,12 @@ void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char a
         }
     }
 
-    // === NUEVO: Multiplicador x1.5 para NPCs Élite ===
+    // === Multiplicador para NPCs Élite ===
     if (m_npc_list[npc_h]->m_status.hero) {
         primaryChance = static_cast<uint32_t>(static_cast<float>(primaryChance) * 3.5f);
         goldChance = static_cast<uint32_t>(static_cast<float>(goldChance) * 3.5f);
     }
-    // ==================================================
+    // =====================================
 
     bool droppedGold = false;
     if (m_game->dice(1, 10000) <= goldChance) {
@@ -2815,11 +2820,11 @@ void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char a
         double effectiveSecondary = baseSecondary * static_cast<double>(m_game->m_secondary_drop_rate);
         effectiveSecondary *= cazador_bonus;
 
-        // === NUEVO: Multiplicador x1.5 secundario para NPCs Élite ===
+        // === Multiplicador secundario para NPCs Élite ===
         if (m_npc_list[npc_h]->m_status.hero) {
             effectiveSecondary *= 3.5;
         }
-        // ============================================================
+        // ================================================
 
         if (effectiveSecondary > 10000.0) effectiveSecondary = 10000.0;
         if (effectiveSecondary < 0.0) effectiveSecondary = 0.0;
