@@ -21,25 +21,30 @@ void DialogBox_GuildOperation::on_draw()
 	short sX = m_x;
 	short sY = m_y;
 
+	// Dibujamos el fondo del diálogo de creación de guild
 	m_game->draw_new_dialog_box(InterfaceNdGame2, sX, sY, 0);
 
+	// Texto de instrucción superior
 	hb::shared::text::draw_text(GameFont::Default, sX + 30, sY + 80, DRAW_DIALOGBOX_GUILDMENU18, hb::shared::text::TextStyle::with_shadow(hb::shared::render::Color(255, 255, 255)));
 
     short mx = static_cast<short>(hb::shared::input::get_mouse_x());
     short my = static_cast<short>(hb::shared::input::get_mouse_y());
 
-	// Create Button
-    hb::shared::render::Color color_create = hb::shared::render::Color(150, 150, 150);
-    if (mx >= sX + 50 && mx <= sX + 110 && my >= sY + 160 && my <= sY + 180)
-        color_create = hb::shared::render::Color(255, 255, 255);
-	hb::shared::text::draw_text(GameFont::Default, sX + 60, sY + 165, "Create", hb::shared::text::TextStyle::with_shadow(color_create));
+	// Coordenadas estándar para los botones
+	int btn1_x = sX + 35;
+	int btn1_y = sY + 160;
+	int btn2_x = sX + 145;
+	int btn2_y = sY + 160;
 
-	// Cancel Button
-    hb::shared::render::Color color_cancel = hb::shared::render::Color(150, 150, 150);
-    if (mx >= sX + 150 && mx <= sX + 210 && my >= sY + 160 && my <= sY + 180)
-        color_cancel = hb::shared::render::Color(255, 255, 255);
-	hb::shared::text::draw_text(GameFont::Default, sX + 160, sY + 165, "Cancel", hb::shared::text::TextStyle::with_shadow(color_cancel));
+	// Botón 1: Accept (Gráfico puro, sin texto superpuesto)
+	// Frames 8 y 9 suelen ser Accept en HB. Si en tu cliente sale otro botón, prueba 4/5 o 12/13.
+	bool btn1_hover = (mx >= btn1_x && mx <= btn1_x + 95 && my >= btn1_y && my <= btn1_y + 23);
+	m_game->draw_new_dialog_box(InterfaceNdButton, btn1_x, btn1_y, btn1_hover ? 19 : 18);
 
+	// Botón 2: Decline (Gráfico puro, sin texto superpuesto)
+	// Frames 10 y 11 suelen ser Decline.
+	bool btn2_hover = (mx >= btn2_x && mx <= btn2_x + 95 && my >= btn2_y && my <= btn2_y + 23);
+	m_game->draw_new_dialog_box(InterfaceNdButton, btn2_x, btn2_y, btn2_hover ? 3 : 2);
 }
 
 bool DialogBox_GuildOperation::on_click()
@@ -49,9 +54,14 @@ bool DialogBox_GuildOperation::on_click()
     short mx = static_cast<short>(hb::shared::input::get_mouse_x());
     short my = static_cast<short>(hb::shared::input::get_mouse_y());
 
-	if (mx >= sX + 50 && mx <= sX + 110 && my >= sY + 160 && my <= sY + 180)
+	int btn1_x = sX + 35;
+	int btn1_y = sY + 160;
+	int btn2_x = sX + 145;
+	int btn2_y = sY + 160;
+
+	// Click en Botón 1 (Accept)
+	if (mx >= btn1_x && mx <= btn1_x + 95 && my >= btn1_y && my <= btn1_y + 23)
 	{
-		// Create clicked
 		if (!m_guild_name.empty()) {
             audio_manager::get().play_game_sound(sound_type::effect, 14, 5);
 			m_game->send_chat_message(std::format("/guild create {}", m_guild_name).c_str());
@@ -59,9 +69,9 @@ bool DialogBox_GuildOperation::on_click()
 		}
 		return true;
 	}
-	else if (mx >= sX + 150 && mx <= sX + 210 && my >= sY + 160 && my <= sY + 180)
+	// Click en Botón 2 (Decline)
+	else if (mx >= btn2_x && mx <= btn2_x + 95 && my >= btn2_y && my <= btn2_y + 23)
 	{
-		// Cancel clicked
         audio_manager::get().play_game_sound(sound_type::effect, 14, 5);
 		m_game->get_dialog_box_manager().disable_dialog_box(DialogBoxId::GuildOperation);
 		return true;

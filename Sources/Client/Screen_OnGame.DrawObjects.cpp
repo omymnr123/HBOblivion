@@ -1170,7 +1170,7 @@ void Screen_OnGame::draw_object_name(short screen_x, short screen_y, const char*
 		}
 
 		std::string guild_full_text = std::string(status.guild_name) + " " + guild_rank_str;
-		hb::shared::text::draw_text(GameFont::Default, screen_x, next_text_y, guild_full_text.c_str(), hb::shared::text::TextStyle::with_shadow(hb::shared::render::Color(100, 100, 100)));
+		hb::shared::text::draw_text(GameFont::Default, screen_x, next_text_y, guild_full_text.c_str(), hb::shared::text::TextStyle::with_shadow(hb::shared::render::Color(200, 200, 200)));
 		next_text_y += 12;
 	}
 
