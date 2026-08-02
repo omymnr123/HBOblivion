@@ -2698,12 +2698,12 @@ void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char a
                                 eliteMob->m_random_area = *pArea;
                             }
 
-                            eliteMob->m_hp_min *= 2;
-                            eliteMob->m_hp_max *= 2;
+                            eliteMob->m_hp_min *= 4;
+                            eliteMob->m_hp_max *= 4;
                             eliteMob->m_hp = eliteMob->m_hp_max;
                             eliteMob->m_max_hp = eliteMob->m_hp_max;
-                            eliteMob->m_min_damage *= 2;
-                            eliteMob->m_max_damage *= 2;
+                            eliteMob->m_min_damage *= 4;
+                            eliteMob->m_max_damage *= 4;
 
                             eliteMob->m_status.hero = true; 
                             eliteMob->m_summoned_time = GameClock::GetTimeMS();
@@ -2749,8 +2749,8 @@ void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char a
 
     // === Multiplicador para NPCs Élite ===
     if (m_npc_list[npc_h]->m_status.hero) {
-        primaryChance = static_cast<uint32_t>(static_cast<float>(primaryChance) * 3.5f);
-        goldChance = static_cast<uint32_t>(static_cast<float>(goldChance) * 3.5f);
+        primaryChance = static_cast<uint32_t>(static_cast<float>(primaryChance) * 4.0f);
+        goldChance = static_cast<uint32_t>(static_cast<float>(goldChance) * 4.0f);
     }
     // =====================================
 
@@ -2811,7 +2811,7 @@ void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char a
 
         // === Multiplicador secundario para NPCs Élite ===
         if (m_npc_list[npc_h]->m_status.hero) {
-            effectiveSecondary *= 3.5;
+            effectiveSecondary *= 5.0f;
         }
         // ================================================
 
