@@ -14,7 +14,7 @@
 #define VER_SERVER_MAJOR         0
 #define VER_SERVER_MINOR         1
 #define VER_SERVER_PATCH         24
-#define VER_SERVER_BUILD         402
-#define VER_SERVER_FILEVERSION   0,1,24,402
+#define VER_SERVER_BUILD         404
+#define VER_SERVER_FILEVERSION   0,1,24,404
 #define VER_SERVER_DISPLAY       "0.1.24-alpha"
-#define VER_SERVER_FULL          "0.1.24-alpha+build.402"
+#define VER_SERVER_FULL          "0.1.24-alpha+build.404"

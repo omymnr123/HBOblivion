@@ -2659,7 +2659,7 @@ if (num <= 0) return;
 			if (m_game->m_client_list[client_h]->m_item_list[item_id]->m_durability != 0)
 				d2 = (double)m_game->m_client_list[client_h]->m_item_list[item_id]->m_durability;
 			else d2 = 1.0f;
-			d3 = (d1 / d2) * 0.5f;
+			d3 = (d1 / d2);
 			d2 = (double)m_game->m_client_list[client_h]->m_item_list[item_id]->m_sell_price;
 			d3 = d3 * d2;
 
@@ -2762,7 +2762,7 @@ if (num <= 0) return;
 			else m_game->send_notify_msg(0, client_h, Notify::SellItemPrice, item_id, remain_life, price, m_game->m_client_list[client_h]->m_item_list[item_id]->m_name, num);
 		}
 		else {
-			// Non-durability items: flat half-price
+			// Non-durability items: full price
 			price = m_game->m_client_list[client_h]->m_item_list[item_id]->m_sell_price;
 			price = price * num;
 
@@ -2839,7 +2839,7 @@ void ItemManager::req_sell_item_confirm_handler(int client_h, char item_id, int 
         else {
             d1 = (double)remain_life;
             d2 = (target_item->m_durability != 0) ? (double)target_item->m_durability : 1.0f;
-            d3 = (d1 / d2) * 0.5f;
+            d3 = (d1 / d2);
             d2 = (double)base_sell_price;
             d3 = d3 * d2;
 
