@@ -239,6 +239,7 @@
     <ClInclude Include="GameCmdSetLevel.h" />
     <ClInclude Include="GameCmdKill.h" />
     <ClInclude Include="GameCmdRevive.h" />
+    <ClInclude Include="GameCmdWho.h" />
     <ClInclude Include="..\Dependencies\Shared\Net\ASIOSocket.h" />
     <ClInclude Include="..\Dependencies\Shared\Entity\ActionID.h" />
     <ClInclude Include="..\Dependencies\Shared\Game\AdminLevel.h" />
@@ -368,6 +369,7 @@
     <ClCompile Include="GameCmdKill.cpp" />
     <ClCompile Include="GameCmdRevive.cpp" />
     <ClCompile Include="GameCmdSetSkills.cpp" />
+    <ClCompile Include="GameCmdWho.cpp" />
     <ClCompile Include="..\Dependencies\Shared\Net\ASIOSocket.cpp" />
     <ClCompile Include="..\Dependencies\Shared\Net\IOServicePool.cpp" />
     <ClCompile Include="..\Dependencies\Shared\Log\LogBackend.cpp" />
