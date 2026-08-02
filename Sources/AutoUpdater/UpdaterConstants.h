@@ -3,8 +3,8 @@
 namespace hb::updater
 {
 	// Server configuration
-	constexpr const char* update_server_host = "127.0.0.1";
-	constexpr int update_server_port = 8080;
+	constexpr const char* update_server_host = "89.141.115.207";
+	constexpr int update_server_port = 8081;
 	constexpr const char* manifest_path = "/update.manifest.json";
 
 	// Timeouts (seconds)

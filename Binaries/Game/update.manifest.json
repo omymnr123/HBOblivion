@@ -2,19 +2,19 @@
     "version": {
         "major": 0,
         "minor": 1,
-        "patch": 1
+        "patch": 5
     },
     "files": [
         {
             "path": "Game_x64_win.exe",
-            "sha256": "6798f55e6984db6d39f5a6b1d650fe83155df82be73d5957dba61ff4bd3f9422",
+            "sha256": "2b5cfb301667b82be5e789375ebaa4f4588e32f27b70b2b7bcb7401081db23aa",
             "size": 3651584,
             "executable": true,
             "platform": "windows"
         },
         {
             "path": "Game_x64_win_online.exe",
-            "sha256": "9a05dbc1440453db7d349cc346871fd348ba55842c9eb37cd119cb72302682cd",
+            "sha256": "f7101936de81dc4ba25588629d8e326772854ab4f072e4636e53b1ed2e4aad9e",
             "size": 3651584,
             "executable": true,
             "platform": "windows"
