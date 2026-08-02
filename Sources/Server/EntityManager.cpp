@@ -2633,8 +2633,7 @@ void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char a
                 if (spot.elite_kill_counter >= 40) { 
                     spot.elite_kill_counter = 0;
                     
-                    // === BLOQUEO EXACTO DE 30 SEGUNDOS ===
-                    // El spot no volverá a escupir NPCs normales hasta que pasen 30 segundos
+                    // Bloqueo exacto de 30 segundos del spot
                     spot.elite_block_until_time = currentTime + (30 * 1000); 
 
                     // 1. Spawneamos a los 3 Elites de inmediato en el centro
@@ -2714,25 +2713,15 @@ void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char a
                         }
                     }
 
-                    // 2. LIMPIEZA PERFECTA DE LOS NPCs NORMALES RESTANTES
+                    // 2. Limpiar y eliminar instantáneamente al resto de NPCs normales de este spot
                     for (int i = 1; i < hb::server::config::MaxNpcs; i++) {
                         if (m_npc_list[i] != nullptr && 
                             m_npc_list[i]->m_map_index == map_idx && 
                             m_npc_list[i]->m_spot_mob_index == spot_idx && 
                             i != npc_h && 
-                            !m_npc_list[i]->m_status.hero &&
-                            !m_npc_list[i]->m_is_killed && 
-                            m_npc_list[i]->m_hp > 0) {
+                            !m_npc_list[i]->m_status.hero) {
                             
-                            // EL TRUCO: Solo le quitamos la vida y el objetivo.
-                            // NO ponemos m_is_killed = true. 
-                            m_npc_list[i]->m_hp = 0;
-                            m_npc_list[i]->m_target_index = 0;
-                            
-                            // Al dejarlos con 0 HP pero sin marcar como "muertos", el motor 
-                            // central los procesará de forma 100% natural en el siguiente tick:
-                            // 1. Enviará la animación de caer muertos a los jugadores (y dejarán cadáver).
-                            // 2. Restará correctamente la cantidad del spot mob generator (cur_mobs--).
+                            delete_npc_internal(i);
                         }
                     }
                 }
