@@ -135,6 +135,10 @@ public:
 		int  prob_sa;
 		int  kind_sa;
 
+		// === NUEVO: Sistema de NPCs Élite ===
+		int  elite_kill_counter = 0;          // Conteo de muertes normales (hasta 100)
+		uint32_t elite_block_until_time = 0;  // Bloqueo de spawn de 2 minutos para el spot
+
 	} m_spot_mob_generator[hb::server::map::MaxSpotMobGenerator];
 
 	hb::shared::geometry::GamePoint m_waypoint_list[hb::server::map::MaxWaypointCfg];

@@ -1182,6 +1182,18 @@ void CEntityManager::process_entities()
             }
             // FIN TICK DE VENENO PARA NPCs
 
+            // === NUEVO: Despawn de NPCs Élite por inactividad (1 minuto) ===
+            if (m_npc_list[i]->m_status.hero && m_npc_list[i]->m_is_killed == false) {
+                if ((time - m_npc_list[i]->m_summoned_time) > 60000) { // 60,000 ms = 1 minuto
+                    m_npc_list[i]->m_hp = 0;
+                    m_npc_list[i]->m_is_killed = true;
+                    
+                    delete_npc_internal(i); // Lo borramos instantáneamente y en silencio (sin drop)
+                    continue; // IMPORTANTÍSIMO: Saltar el bucle para evitar crasheos por puntero nulo
+                }
+            }
+            // ===============================================================
+
             switch (m_npc_list[i]->m_behavior) {
             case Behavior::Dead:
                 update_dead_behavior(i);
@@ -1368,7 +1380,10 @@ void CEntityManager::npc_behavior_move(int npc_h)
 			m_npc_list[npc_h]->m_map_index, m_npc_list[npc_h]->m_turn, &m_npc_list[npc_h]->m_tmp_error);
 
 		if (dir == 0) {
-			if (m_game->dice(1, 10) == 3) calc_next_waypoint_destination(npc_h);
+			// === NUEVO: Los Élites buscan nueva ruta al instante (100%), los normales tienen 10% de chance ===
+			if (m_npc_list[npc_h]->m_status.hero || m_game->dice(1, 10) == 3) {
+				calc_next_waypoint_destination(npc_h);
+			}
 		}
 		else {
 			dX = m_npc_list[npc_h]->m_x + _tmp_cTmpDirX[dir];
@@ -1555,6 +1570,22 @@ void CEntityManager::npc_behavior_attack(int npc_h)
 		dY = m_npc_list[m_npc_list[npc_h]->m_target_index]->m_y;
 		break;
 	}
+	// === NUEVO: ANTI-KITING PARA ÉLITES ===
+	if (m_npc_list[npc_h]->m_status.hero && m_npc_list[npc_h]->m_move_type == MoveType::RandomArea) {
+		auto& rect = m_npc_list[npc_h]->m_random_area;
+		// Le damos un pequeño margen de gracia de 5 tiles fuera de su zona para que el movimiento sea fluido
+		if (dX < rect.x - 5 || dX > rect.x + rect.width + 5 ||
+			dY < rect.y - 5 || dY > rect.y + rect.height + 5) {
+			
+			// Si el objetivo intenta sacarlo del spot, el Élite cancela el ataque y se da la vuelta
+			m_npc_list[npc_h]->m_behavior_turn_count = 0;
+			m_npc_list[npc_h]->m_behavior = Behavior::Move;
+			m_npc_list[npc_h]->m_target_index = 0;
+			m_npc_list[npc_h]->m_target_type = 0;
+			return;
+		}
+	}
+	// ======================================
 
 	if ((m_game->m_combat_manager->get_danger_value(npc_h, dX, dY) > m_npc_list[npc_h]->m_bravery) &&
 		(m_npc_list[npc_h]->m_is_perm_attack_mode == false) &&
@@ -2536,7 +2567,94 @@ void CEntityManager::delete_npc_internal(int npc_h)
 	if (m_npc_list[npc_h]->m_spot_mob_index != 0) {
 		int spot_idx = m_npc_list[npc_h]->m_spot_mob_index;
 		int map_idx = m_npc_list[npc_h]->m_map_index;
-		m_map_list[map_idx]->m_spot_mob_generator[spot_idx].cur_mobs--;
+		
+		auto& spot = m_map_list[map_idx]->m_spot_mob_generator[spot_idx];
+		spot.cur_mobs--;
+
+		// === SISTEMA DE NPCS ÉLITE ===
+		uint32_t currentTime = GameClock::GetTimeMS();
+		if (currentTime >= spot.elite_block_until_time) {
+			spot.elite_kill_counter++;
+			
+			if (spot.elite_kill_counter >= 5) { // Usando 5 para tus pruebas
+				spot.elite_kill_counter = 0; 
+				spot.elite_block_until_time = currentTime + (30 * 1000); // Bloqueo de 30 segundos
+
+				// 1. Limpiar el resto de mobs normales vivos de este spot
+				for (int i = 1; i < hb::server::config::MaxNpcs; i++) {
+					if (m_npc_list[i] != nullptr && 
+						m_npc_list[i]->m_map_index == map_idx && 
+						m_npc_list[i]->m_spot_mob_index == spot_idx && 
+						!m_npc_list[i]->m_is_killed &&
+						i != npc_h) { // IMPORTANTE: no borrar el actual que ya está muriendo
+						
+						m_npc_list[i]->m_hp = 0;
+						m_npc_list[i]->m_is_killed = true;
+						delete_npc_internal(i); // Borrado seguro
+					}
+				}
+
+				// 2. Spawnear los 3 Mobs Elite 2 tiles por debajo y en formacion
+					int baseX = static_cast<int>(m_npc_list[npc_h]->m_x);
+					int baseY = static_cast<int>(m_npc_list[npc_h]->m_y + 2); 
+
+					// Preparamos los limites de movimiento del Spot original
+					char waypoint[11] = {0};
+					char realMoveType = MoveType::Random; 
+					hb::shared::geometry::GameRectangle* pArea = nullptr;
+
+					if (spot.type == 1) { // RANDOMAREA
+						realMoveType = MoveType::RandomArea;
+						pArea = &spot.rcRect;
+					} else if (spot.type == 2) { // RANDOMWAYPOINT
+						realMoveType = MoveType::RandomWaypoint;
+						for (int k = 0; k < 10; k++) waypoint[k] = spot.waypoints[k];
+					}
+
+					char uniqueName[21];
+					for (int e = 0; e < 3; e++) {
+						std::snprintf(uniqueName, sizeof(uniqueName), "Elite_%d", e);
+						
+						// Formacion: Centro(0), Izquierda(-1), Derecha(+1)
+						int eliteX = baseX + (e == 1 ? -1 : (e == 2 ? 1 : 0));
+						int eliteY = baseY;
+
+						// IMPORTANTE: Pasamos MoveType::Random y nullptr en el area temporalmente
+						// Esto fuerza al motor a nacer EXACTAMENTE en eliteX y eliteY sin aleatorizar
+						int eliteHandle = create_entity(
+							spot.npc_config_id, uniqueName, m_map_list[map_idx]->m_name,
+							0, 0, MoveType::Random, &eliteX, &eliteY, waypoint, 
+							nullptr, spot_idx, -1, false, false, true, false, 0
+						);
+
+						if (eliteHandle > 0 && m_npc_list[eliteHandle] != nullptr) {
+							CNpc* eliteMob = m_npc_list[eliteHandle];
+							
+							// AHORA le asignamos su comportamiento real para que patrulle la zona
+							eliteMob->m_move_type = realMoveType;
+							if (pArea != nullptr) {
+								eliteMob->m_random_area = *pArea;
+							}
+
+							// Duplicar vida
+							eliteMob->m_hp_min *= 2;
+							eliteMob->m_hp_max *= 2;
+							eliteMob->m_hp = eliteMob->m_hp_max;
+							eliteMob->m_max_hp = eliteMob->m_hp_max;
+
+							// Duplicar dano
+							eliteMob->m_min_damage *= 2;
+							eliteMob->m_max_damage *= 2;
+
+							// Flag de Red Seguro para que el cliente lo sepa
+							eliteMob->m_status.hero = true; 
+
+							// Guardamos el tiempo de nacimiento para su caducidad
+							eliteMob->m_summoned_time = GameClock::GetTimeMS();
+						}
+					}
+			}
+		}
 	}
 
 	m_game->m_combat_manager->remove_from_target(npc_h, hb::shared::owner_class::Npc);
@@ -2570,104 +2688,118 @@ static constexpr uint32_t BASE_SECONDARY_DROP_CHANCE = 500;  // 5% base secondar
 
 void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char attacker_type)
 {
-	if (m_npc_list[npc_h] == nullptr) return;
-	if ((attacker_type != hb::shared::owner_class::Player) || (m_npc_list[npc_h]->m_is_summoned)) return;
-	if (m_npc_list[npc_h]->m_is_unsummoned) return;
+    if (m_npc_list[npc_h] == nullptr) return;
+    if ((attacker_type != hb::shared::owner_class::Player) || (m_npc_list[npc_h]->m_is_summoned)) return;
+    if (m_npc_list[npc_h]->m_is_unsummoned) return;
 
-	switch (m_npc_list[npc_h]->m_type) {
-	case 21: // Guard
-	case 34: // Dummy
-	case 64: // Crop
-		return;
-	}
+    switch (m_npc_list[npc_h]->m_type) {
+    case 21: // Guard
+    case 34: // Dummy
+    case 64: // Crop
+        return;
+    }
 
-	const DropTable* table = m_game->m_item_manager->get_drop_table(m_npc_list[npc_h]->m_drop_table_id);
+    const DropTable* table = m_game->m_item_manager->get_drop_table(m_npc_list[npc_h]->m_drop_table_id);
 
-	// Apply drop rate multipliers to base chances
-	// At 1.0: normal, at 1.5: 150% more likely, at 2.0: 200%, etc.
-	uint32_t primaryChance = ApplyDropMultiplier(BASE_PRIMARY_DROP_CHANCE, m_game->m_primary_drop_rate);
-	uint32_t goldChance = ApplyDropMultiplier(BASE_GOLD_DROP_CHANCE, m_game->m_gold_drop_rate);
+    // Apply drop rate multipliers to base chances
+    // At 1.0: normal, at 1.5: 150% more likely, at 2.0: 200%, etc.
+    uint32_t primaryChance = ApplyDropMultiplier(BASE_PRIMARY_DROP_CHANCE, m_game->m_primary_drop_rate);
+    uint32_t goldChance = ApplyDropMultiplier(BASE_GOLD_DROP_CHANCE, m_game->m_gold_drop_rate);
 
-	float cazador_bonus = 1.0f;
-	if (attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[attacker_h] != nullptr) {
-		int cazador_level = m_game->m_guild_manager->get_player_guild_skill(attacker_h, static_cast<int>(GuildSkillId::Cazador));
-		if (cazador_level > 0) {
-			cazador_bonus = 1.0f + (cazador_level * GuildConfig::BONUS_DROP_RATE_PERCENT) / 100.0f;
-			primaryChance = static_cast<uint32_t>(primaryChance * cazador_bonus);
-			goldChance = static_cast<uint32_t>(goldChance * cazador_bonus);
-		}
-	}
+    float cazador_bonus = 1.0f;
+    if (attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[attacker_h] != nullptr) {
+        int cazador_level = m_game->m_guild_manager->get_player_guild_skill(attacker_h, static_cast<int>(GuildSkillId::Cazador));
+        if (cazador_level > 0) {
+            cazador_bonus = 1.0f + (cazador_level * GuildConfig::BONUS_DROP_RATE_PERCENT) / 100.0f;
+            primaryChance = static_cast<uint32_t>(primaryChance * cazador_bonus);
+            goldChance = static_cast<uint32_t>(goldChance * cazador_bonus);
+        }
+    }
 
-	bool droppedGold = false;
-	if (m_game->dice(1, 10000) <= goldChance) {
-		int minGold = static_cast<int>(m_npc_list[npc_h]->m_gold_dice_min);
-		int maxGold = static_cast<int>(m_npc_list[npc_h]->m_gold_dice_max);
-		if (minGold < 0) minGold = 0;
-		if (maxGold < minGold) maxGold = minGold;
-		if (maxGold > 0) {
-			int amount = minGold;
-			if (maxGold > minGold) {
-				amount = m_game->dice(1, (maxGold - minGold)) + minGold;
-			}
-			if (amount > 0) {
-				if ((attacker_type == hb::shared::owner_class::Player) &&
-					(m_game->m_client_list[attacker_h] != nullptr) &&
-					(m_game->m_client_list[attacker_h]->m_add_gold != 0)) {
-					double bonus = (double)m_game->m_client_list[attacker_h]->m_add_gold;
-					amount += static_cast<int>((bonus / 100.0f) * static_cast<double>(amount));
-				}
-				spawn_npc_drop_item(npc_h, 90, amount, amount);
-				droppedGold = true;
-			}
-		}
-	}
+    // === NUEVO: Multiplicador x1.5 para NPCs Élite ===
+    if (m_npc_list[npc_h]->m_status.hero) {
+        primaryChance = static_cast<uint32_t>(static_cast<float>(primaryChance) * 1.5f);
+        goldChance = static_cast<uint32_t>(static_cast<float>(goldChance) * 1.5f);
+    }
+    // ==================================================
 
-	// Primary item drop (from drop table tier 1) - uses same primary chance
-	if (!droppedGold && table != nullptr) {
-		if (m_game->dice(1, 10000) <= primaryChance) {
-			int min_count = 1;
-			int max_count = 1;
-			int item_id = roll_drop_table_item(table, 1, min_count, max_count);
-			if (item_id != 0) {
-				if (item_id == 90) {
-					min_count = static_cast<int>(m_npc_list[npc_h]->m_gold_dice_min);
-					max_count = static_cast<int>(m_npc_list[npc_h]->m_gold_dice_max);
-				}
-				spawn_npc_drop_item(npc_h, item_id, min_count, max_count);
-			}
-		}
-	}
+    bool droppedGold = false;
+    if (m_game->dice(1, 10000) <= goldChance) {
+        int minGold = static_cast<int>(m_npc_list[npc_h]->m_gold_dice_min);
+        int maxGold = static_cast<int>(m_npc_list[npc_h]->m_gold_dice_max);
+        if (minGold < 0) minGold = 0;
+        if (maxGold < minGold) maxGold = minGold;
+        if (maxGold > 0) {
+            int amount = minGold;
+            if (maxGold > minGold) {
+                amount = m_game->dice(1, (maxGold - minGold)) + minGold;
+            }
+            if (amount > 0) {
+                if ((attacker_type == hb::shared::owner_class::Player) &&
+                    (m_game->m_client_list[attacker_h] != nullptr) &&
+                    (m_game->m_client_list[attacker_h]->m_add_gold != 0)) {
+                    double bonus = (double)m_game->m_client_list[attacker_h]->m_add_gold;
+                    amount += static_cast<int>((bonus / 100.0f) * static_cast<double>(amount));
+                }
+                spawn_npc_drop_item(npc_h, 90, amount, amount);
+                droppedGold = true;
+            }
+        }
+    }
 
-	// Secondary/bonus drop (from drop table tier 2) - affected by secondary multiplier
-	if (table != nullptr) {
-		// Base secondary chance, modified by player rating
-		double ratingModifier = 0.0;
-		if (m_game->m_client_list[attacker_h] != nullptr) {
-			ratingModifier = m_game->m_client_list[attacker_h]->m_rating * m_game->m_rep_drop_modifier;
-			if (ratingModifier > 1000) ratingModifier = 1000;
-			if (ratingModifier < -1000) ratingModifier = -1000;
-		}
+    // Primary item drop (from drop table tier 1) - uses same primary chance
+    if (!droppedGold && table != nullptr) {
+        if (m_game->dice(1, 10000) <= primaryChance) {
+            int min_count = 1;
+            int max_count = 1;
+            int item_id = roll_drop_table_item(table, 1, min_count, max_count);
+            if (item_id != 0) {
+                if (item_id == 90) {
+                    min_count = static_cast<int>(m_npc_list[npc_h]->m_gold_dice_min);
+                    max_count = static_cast<int>(m_npc_list[npc_h]->m_gold_dice_max);
+                }
+                spawn_npc_drop_item(npc_h, item_id, min_count, max_count);
+            }
+        }
+    }
 
-		// Calculate effective secondary drop chance with rating modifier and multiplier
-		double baseSecondary = static_cast<double>(BASE_SECONDARY_DROP_CHANCE) - ratingModifier;
-		double effectiveSecondary = baseSecondary * static_cast<double>(m_game->m_secondary_drop_rate);
-		effectiveSecondary *= cazador_bonus;
-		if (effectiveSecondary > 10000.0) effectiveSecondary = 10000.0;
-		if (effectiveSecondary < 0.0) effectiveSecondary = 0.0;
+    // Secondary/bonus drop (from drop table tier 2) - affected by secondary multiplier
+    if (table != nullptr) {
+        // Base secondary chance, modified by player rating
+        double ratingModifier = 0.0;
+        if (m_game->m_client_list[attacker_h] != nullptr) {
+            ratingModifier = m_game->m_client_list[attacker_h]->m_rating * m_game->m_rep_drop_modifier;
+            if (ratingModifier > 1000) ratingModifier = 1000;
+            if (ratingModifier < -1000) ratingModifier = -1000;
+        }
 
-		if (m_game->dice(1, 10000) <= static_cast<uint32_t>(effectiveSecondary)) {
-			int min_count = 1;
-			int max_count = 1;
-			int item_id = roll_drop_table_item(table, 2, min_count, max_count);
-			if (item_id != 0) {
-				if (item_id == 90) {
-					min_count = static_cast<int>(m_npc_list[npc_h]->m_gold_dice_min);
-					max_count = static_cast<int>(m_npc_list[npc_h]->m_gold_dice_max);
-				}
-				spawn_npc_drop_item(npc_h, item_id, min_count, max_count);
-			}
-		}
-	}
+        // Calculate effective secondary drop chance with rating modifier and multiplier
+        double baseSecondary = static_cast<double>(BASE_SECONDARY_DROP_CHANCE) - ratingModifier;
+        double effectiveSecondary = baseSecondary * static_cast<double>(m_game->m_secondary_drop_rate);
+        effectiveSecondary *= cazador_bonus;
+
+        // === NUEVO: Multiplicador x1.5 secundario para NPCs Élite ===
+        if (m_npc_list[npc_h]->m_status.hero) {
+            effectiveSecondary *= 1.5;
+        }
+        // ============================================================
+
+        if (effectiveSecondary > 10000.0) effectiveSecondary = 10000.0;
+        if (effectiveSecondary < 0.0) effectiveSecondary = 0.0;
+
+        if (m_game->dice(1, 10000) <= static_cast<uint32_t>(effectiveSecondary)) {
+            int min_count = 1;
+            int max_count = 1;
+            int item_id = roll_drop_table_item(table, 2, min_count, max_count);
+            if (item_id != 0) {
+                if (item_id == 90) {
+                    min_count = static_cast<int>(m_npc_list[npc_h]->m_gold_dice_min);
+                    max_count = static_cast<int>(m_npc_list[npc_h]->m_gold_dice_max);
+                }
+                spawn_npc_drop_item(npc_h, item_id, min_count, max_count);
+            }
+        }
+    }
 }
 
 int CEntityManager::roll_drop_table_item(const DropTable* table, int tier, int& outMinCount, int& outMaxCount) const
@@ -3716,6 +3848,11 @@ void CEntityManager::process_spot_spawns(int map_index)
             m_map_list[map_index]->m_spot_mob_generator[j].cur_mobs) {
             continue;
         }
+		// === NUEVO: Bloquear spawn si hay un Élite activo ===
+        if (GameClock::GetTimeMS() < m_map_list[map_index]->m_spot_mob_generator[j].elite_block_until_time) {
+            continue;
+        }
+        // ====================================================
 
         if (m_game->dice(1, 3) != 2) continue;
 

@@ -907,129 +907,149 @@ void Screen_OnGame::draw_object_foe(int ix, int iy, int frame)
 
 void Screen_OnGame::draw_npc_name(short screen_x, short screen_y, short owner_type, const hb::shared::entity::PlayerStatus& status, short npc_config_id)
 {
-	std::string text, text2;
+    std::string text, text2;
 
-	auto npcName = [&]() -> const char* {
-		if (npc_config_id >= 0)
-			return m_game->get_npc_config_name_by_id(npc_config_id);
-		return "Unknown";
-		};
+    auto npcName = [&]() -> const char* {
+        if (npc_config_id >= 0)
+            return m_game->get_npc_config_name_by_id(npc_config_id);
+        return "Unknown";
+        };
 
-	// Crop subtypes override the base "Crop" name from config
-	if (owner_type == hb::shared::owner::Crops) {
-		static const char* cropNames[] = {
-			"Crop", "WaterMelon", "Pumpkin", "Garlic", "Barley", "Carrot",
-			"Radish", "Corn", "Chinese Bell Flower", "Melone", "Tomato",
-			"Grapes", "Blue Grape", "Mushroom", "Ginseng"
-		};
-		int sub = m_game->m_entity_state.m_appearance.sub_type;
-		if (sub >= 1 && sub <= 14)
-			text = cropNames[sub];
-		else
-			text = npcName();
-	}
-	// Crusade structure kit suffix
-	else if ((owner_type == hb::shared::owner::ArrowGuardTower || owner_type == hb::shared::owner::CannonGuardTower ||
-		owner_type == hb::shared::owner::ManaCollector || owner_type == hb::shared::owner::Detector) &&
-		m_game->m_entity_state.m_appearance.HasNpcSpecialState()) {
-		text = std::format("{} Kit", npcName());
-	}
-	else {
-		text = npcName();
-	}
-	if (status.berserk) text += DRAW_OBJECT_NAME50;//" Berserk"
-	if (status.frozen) text += DRAW_OBJECT_NAME51;//" Frozen"
+    // Crop subtypes override the base "Crop" name from config
+    if (owner_type == hb::shared::owner::Crops) {
+        static const char* cropNames[] = {
+            "Crop", "WaterMelon", "Pumpkin", "Garlic", "Barley", "Carrot",
+            "Radish", "Corn", "Chinese Bell Flower", "Melone", "Tomato",
+            "Grapes", "Blue Grape", "Mushroom", "Ginseng"
+        };
+        int sub = m_game->m_entity_state.m_appearance.sub_type;
+        if (sub >= 1 && sub <= 14)
+            text = cropNames[sub];
+        else
+            text = npcName();
+    }
+    // Crusade structure kit suffix
+    else if ((owner_type == hb::shared::owner::ArrowGuardTower || owner_type == hb::shared::owner::CannonGuardTower ||
+        owner_type == hb::shared::owner::ManaCollector || owner_type == hb::shared::owner::Detector) &&
+        m_game->m_entity_state.m_appearance.HasNpcSpecialState()) {
+        text = std::format("{} Kit", npcName());
+    }
+    else {
+        text = npcName();
+    }
+    if (status.berserk) text += DRAW_OBJECT_NAME50;//" Berserk"
+    if (status.frozen) text += DRAW_OBJECT_NAME51;//" Frozen"
 
-	int subtitle_y = screen_y + 14;
-	if (config_manager::get().is_hover_health_bar_enabled() && status.hp_percent > 0 && status.hp_percent <= 100) {
-		int bar_width = 48;
-		int bar_height = 5;
-		int bar_x = screen_x;
-		int bar_y = screen_y + 16;
+    int subtitle_y = screen_y + 14;
+    if (config_manager::get().is_hover_health_bar_enabled() && status.hp_percent > 0 && status.hp_percent <= 100) {
+        int bar_width = 48;
+        int bar_height = 5;
+        int bar_x = screen_x;
+        int bar_y = screen_y + 16;
 
-		m_game->m_Renderer->draw_rect_filled(bar_x - 1, bar_y - 1, bar_width + 2, bar_height + 2, GameColors::UIBlack);
-		
-		int hp_w = (bar_width * status.hp_percent) / 100;
-		
-		hb::shared::render::Color hpColor;
-		if (IsHostile(status.relationship)) hpColor = GameColors::EnemyNamePlate;
-		else if (IsFriendly(status.relationship)) hpColor = GameColors::FriendlyNamePlate;
-		else hpColor = GameColors::NeutralNamePlate;
+        m_game->m_Renderer->draw_rect_filled(bar_x - 1, bar_y - 1, bar_width + 2, bar_height + 2, GameColors::UIBlack);
+        
+        int hp_w = (bar_width * status.hp_percent) / 100;
+        
+        hb::shared::render::Color hpColor;
+        if (IsHostile(status.relationship)) hpColor = GameColors::EnemyNamePlate;
+        else if (IsFriendly(status.relationship)) hpColor = GameColors::FriendlyNamePlate;
+        else hpColor = GameColors::NeutralNamePlate;
 
-		m_game->m_Renderer->draw_rect_filled(bar_x, bar_y, hp_w, bar_height, hpColor);
-		subtitle_y += 10;
-	}
+        m_game->m_Renderer->draw_rect_filled(bar_x, bar_y, hp_w, bar_height, hpColor);
+        subtitle_y += 10;
+    }
 
-	hb::shared::text::draw_text(GameFont::Default, screen_x, screen_y, text.c_str(), hb::shared::text::TextStyle::with_shadow(GameColors::UIWhite));
-	if (m_is_observer_mode == true) hb::shared::text::draw_text(GameFont::Default, screen_x, subtitle_y, text.c_str(), hb::shared::text::TextStyle::with_shadow(GameColors::NeutralNamePlate));
-	else if (m_game->m_player->m_is_confusion || (m_ilusion_owner_h != 0))
-	{
-		text = DRAW_OBJECT_NAME87;//"(Unknown)"
-		hb::shared::text::draw_text(GameFont::Default, screen_x, subtitle_y, text.c_str(), hb::shared::text::TextStyle::with_shadow(GameColors::UIDisabled)); // v2.171
-	}
-	else
-	{
-		if (IsHostile(status.relationship))
-			hb::shared::text::draw_text(GameFont::Default, screen_x, subtitle_y, DRAW_OBJECT_NAME90, hb::shared::text::TextStyle::with_shadow(GameColors::EnemyNamePlate)); // "(Enemy)"
-		else if (IsFriendly(status.relationship))
-			hb::shared::text::draw_text(GameFont::Default, screen_x, subtitle_y, DRAW_OBJECT_NAME89, hb::shared::text::TextStyle::with_shadow(GameColors::FriendlyNamePlate)); // "(Friendly)"
-		else
-			hb::shared::text::draw_text(GameFont::Default, screen_x, subtitle_y, DRAW_OBJECT_NAME88, hb::shared::text::TextStyle::with_shadow(GameColors::NeutralNamePlate)); // "(Neutral)"
-	}
-	switch (status.angel_percent) {
-	case 0: break;
-	case 1: text2 = DRAW_OBJECT_NAME52; break;//"Clairvoyant"
-	case 2: text2 = DRAW_OBJECT_NAME53; break;//"Destruction of Magic Protection"
-	case 3: text2 = DRAW_OBJECT_NAME54; break;//"Anti-Physical Damage"
-	case 4: text2 = DRAW_OBJECT_NAME55; break;//"Anti-Magic Damage"
-	case 5: text2 = DRAW_OBJECT_NAME56; break;//"Poisonous"
-	case 6: text2 = DRAW_OBJECT_NAME57; break;//"Critical Poisonous"
-	case 7: text2 = DRAW_OBJECT_NAME58; break;//"Explosive"
-	case 8: text2 = DRAW_OBJECT_NAME59; break;//"Critical Explosive"
-	}
-	if (!text2.empty())
-		hb::shared::text::draw_text(GameFont::Default, screen_x, subtitle_y + 14, text2.c_str(), hb::shared::text::TextStyle::with_shadow(GameColors::MonsterStatusEffect));
+    // 1. Dibujado del nombre principal del NPC
+    hb::shared::text::draw_text(GameFont::Default, screen_x, screen_y, text.c_str(), hb::shared::text::TextStyle::with_shadow(GameColors::UIWhite));
 
-	// centu: no muestra la barra de hp de algunos npc
-	switch (owner_type) {
-	case hb::shared::owner::ShopKeeper:
-	case hb::shared::owner::Gandalf:
-	case hb::shared::owner::Howard:
-	case hb::shared::owner::Tom:
-	case hb::shared::owner::William:
-	case hb::shared::owner::Kennedy:
-	case hb::shared::owner::ManaStone:
-	case hb::shared::owner::Bunny:
-	case hb::shared::owner::Cat:
-	case hb::shared::owner::McGaffin:
-	case hb::shared::owner::Perry:
-	case hb::shared::owner::Devlin:
-	case hb::shared::owner::Crops:
-	{
-		switch (m_game->m_entity_state.m_appearance.sub_type) {
-		case 1:
-		case 2:
-		case 3:
-		case 4:
-		case 5:
-		case 6:
-		case 7:
-		case 8:
-		case 9:
-		case hb::shared::owner::Slime:
-		case hb::shared::owner::Skeleton:
-		case hb::shared::owner::StoneGolem:
-		case hb::shared::owner::Cyclops:
-		case hb::shared::owner::OrcMage:
-		default:
-			break;
-		}
-	}
-	case hb::shared::owner::Gail:
-		break;
-	default:
-		break;
-	}
+    // 2. Dibujado del Subtítulo y validación de Élite
+    bool isElite = status.hero; 
+
+    if (m_is_observer_mode == true) {
+        hb::shared::text::draw_text(GameFont::Default, screen_x, subtitle_y, text.c_str(), hb::shared::text::TextStyle::with_shadow(GameColors::NeutralNamePlate));
+    }
+    else if (m_game->m_player->m_is_confusion || (m_ilusion_owner_h != 0)) {
+        text = DRAW_OBJECT_NAME87;//"(Unknown)"
+        hb::shared::text::draw_text(GameFont::Default, screen_x, subtitle_y, text.c_str(), hb::shared::text::TextStyle::with_shadow(GameColors::UIDisabled)); // v2.171
+    }
+    else {
+        std::string sub_text;
+        hb::shared::render::Color sub_color;
+
+        // Si es Elite, sobrescribimos el string por defecto y le añadimos el " - Elite" dentro del paréntesis
+        if (IsHostile(status.relationship)) {
+            sub_text = isElite ? "(Enemy - Elite)" : DRAW_OBJECT_NAME90; 
+            sub_color = GameColors::EnemyNamePlate;
+        }
+        else if (IsFriendly(status.relationship)) {
+            sub_text = isElite ? "(Friendly - Elite)" : DRAW_OBJECT_NAME89; 
+            sub_color = GameColors::FriendlyNamePlate;
+        }
+        else {
+            sub_text = isElite ? "(Neutral - Elite)" : DRAW_OBJECT_NAME88; 
+            sub_color = GameColors::NeutralNamePlate;
+        }
+
+        // Se dibuja unificado con el color correspondiente (Rojo, Azul o Gris)
+        hb::shared::text::draw_text(GameFont::Default, screen_x, subtitle_y, sub_text.c_str(), hb::shared::text::TextStyle::with_shadow(sub_color));
+    }
+
+    // Efectos de estado adicionales
+    switch (status.angel_percent) {
+    case 0: break;
+    case 1: text2 = DRAW_OBJECT_NAME52; break;//"Clairvoyant"
+    case 2: text2 = DRAW_OBJECT_NAME53; break;//"Destruction of Magic Protection"
+    case 3: text2 = DRAW_OBJECT_NAME54; break;//"Anti-Physical Damage"
+    case 4: text2 = DRAW_OBJECT_NAME55; break;//"Anti-Magic Damage"
+    case 5: text2 = DRAW_OBJECT_NAME56; break;//"Poisonous"
+    case 6: text2 = DRAW_OBJECT_NAME57; break;//"Critical Poisonous"
+    case 7: text2 = DRAW_OBJECT_NAME58; break;//"Explosive"
+    case 8: text2 = DRAW_OBJECT_NAME59; break;//"Critical Explosive"
+    }
+    if (!text2.empty())
+        hb::shared::text::draw_text(GameFont::Default, screen_x, subtitle_y + 14, text2.c_str(), hb::shared::text::TextStyle::with_shadow(GameColors::MonsterStatusEffect));
+
+    // centu: no muestra la barra de hp de algunos npc
+    switch (owner_type) {
+    case hb::shared::owner::ShopKeeper:
+    case hb::shared::owner::Gandalf:
+    case hb::shared::owner::Howard:
+    case hb::shared::owner::Tom:
+    case hb::shared::owner::William:
+    case hb::shared::owner::Kennedy:
+    case hb::shared::owner::ManaStone:
+    case hb::shared::owner::Bunny:
+    case hb::shared::owner::Cat:
+    case hb::shared::owner::McGaffin:
+    case hb::shared::owner::Perry:
+    case hb::shared::owner::Devlin:
+    case hb::shared::owner::Crops:
+    {
+        switch (m_game->m_entity_state.m_appearance.sub_type) {
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+        case hb::shared::owner::Slime:
+        case hb::shared::owner::Skeleton:
+        case hb::shared::owner::StoneGolem:
+        case hb::shared::owner::Cyclops:
+        case hb::shared::owner::OrcMage:
+        default:
+            break;
+        }
+    }
+    case hb::shared::owner::Gail:
+        break;
+    default:
+        break;
+    }
 }
 
 void Screen_OnGame::draw_object_name(short screen_x, short screen_y, const char* name, const hb::shared::entity::PlayerStatus& status, uint16_t object_id)

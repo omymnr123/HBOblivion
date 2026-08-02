@@ -6,7 +6,7 @@
         "masterVolume": 21,
         "musicEnabled": false,
         "musicVolume": 15,
-        "soundEnabled": true,
+        "soundEnabled": false,
         "soundVolume": 22,
         "uiEnabled": false,
         "uiVolume": 14
@@ -15,7 +15,7 @@
         "backgroundFpsThrottle": false,
         "borderless": false,
         "captureMouse": true,
-        "detailLevel": 2,
+        "detailLevel": 0,
         "dialogTransparency": false,
         "fpsLimit": 0,
         "fullscreen": true,
@@ -32,7 +32,7 @@
         "zoomMap": false
     },
     "shortcuts": {
-        "magic": 50,
+        "magic": 60,
         "slots": [
             -1,
             -1,
