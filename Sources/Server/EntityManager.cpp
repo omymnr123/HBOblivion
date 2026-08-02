@@ -3882,19 +3882,21 @@ void CEntityManager::process_spot_spawns(int map_index)
     char cName_Master[11], waypoint[11];
     char sa;
 
+    // (Asegúrate de que la función anterior esté cerrada con su '}' antes de este bucle)
+
     // Loop through all spot mob generators
-    for(int j = 1; j < smap::MaxSpotMobGenerator; j++) {
+    for (int j = 1; j < smap::MaxSpotMobGenerator; j++) {
         if (!m_map_list[map_index]->m_spot_mob_generator[j].is_defined) continue;
+
+        // Bloquear spawn si el spot está en enfriamiento por el evento de Élites
+        if (GameClock::GetTimeMS() < m_map_list[map_index]->m_spot_mob_generator[j].elite_block_until_time) {
+            continue;
+        }
 
         if (m_map_list[map_index]->m_spot_mob_generator[j].max_mobs <=
             m_map_list[map_index]->m_spot_mob_generator[j].cur_mobs) {
             continue;
         }
-		// === NUEVO: Bloquear spawn si hay un Élite activo ===
-        if (GameClock::GetTimeMS() < m_map_list[map_index]->m_spot_mob_generator[j].elite_block_until_time) {
-            continue;
-        }
-        // ====================================================
 
         if (m_game->dice(1, 3) != 2) continue;
 
@@ -3935,7 +3937,7 @@ void CEntityManager::process_spot_spawns(int map_index)
                 break;
 
             case 2: // Waypoint-based spawn (RANDOMWAYPOINT)
-                for(int k = 0; k < 10; k++) {
+                for (int k = 0; k < 10; k++) {
                     waypoint[k] = (char)m_map_list[map_index]->m_spot_mob_generator[j].waypoints[k];
                 }
                 result = create_entity(
@@ -3953,8 +3955,8 @@ void CEntityManager::process_spot_spawns(int map_index)
         else {
             m_map_list[map_index]->m_spot_mob_generator[j].cur_mobs++;
         }
-    }
-}
+    } 
+} // <--- ESTA LLAVE CIERRA LA FUNCIÓN QUE CONTIENE EL BUCLE FOR
 
 bool CEntityManager::can_spawn_at_spot(int map_index, int spot_index) const
 {
