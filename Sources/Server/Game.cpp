@@ -6230,91 +6230,105 @@ void CGame::client_common_handler(int client_h, char* data)
 		break;
 	}
 	case CommonType::ReqClaimExtraLoot:
-	{
-		if (m_client_list[client_h] == nullptr) break;
-		uint32_t db_id = static_cast<uint32_t>(v1);
+    {
+        if (m_client_list[client_h] == nullptr) break;
+        uint32_t db_id = static_cast<uint32_t>(v1);
 
-		sqlite3* db = nullptr;
-		std::string dbPath;
-		if (EnsureAccountDatabase(m_client_list[client_h]->m_account_name, &db, dbPath)) {
-			std::vector<AccountDbExtraLootRow> loot;
-			if (LoadCharacterExtraLoot(db, m_client_list[client_h]->m_char_name, loot)) {
-				AccountDbExtraLootRow target_row{};
-				bool found = false;
-				for (const auto& row : loot) {
-					if (row.db_id == db_id) {
-						target_row = row;
-						found = true;
-						break;
-					}
-				}
-				
-				if (found) {
-					if (m_item_manager->get_item_space_left(client_h) <= 0) {
-						send_notify_msg(0, client_h, Notify::CannotCarryMoreItem, 0, 0, 0, 0);
-					}
-					else {
-						CItem* new_item = new CItem;
-						if (m_item_manager->init_item_attr(new_item, target_row.item_id)) {
-							new_item->m_instance.item_color = target_row.item_color;
-							new_item->m_special_effect_value1 = target_row.spec_effect_value1;
-							new_item->m_special_effect_value2 = target_row.spec_effect_value2;
-							new_item->m_item_effect_value1 = target_row.spec_effect_value3;
-							new_item->m_instance.prefix_type = target_row.prefix_type;
-							new_item->m_instance.prefix_value = target_row.prefix_value;
-							new_item->m_instance.secondary_type = target_row.secondary_type;
-							new_item->m_instance.secondary_value = target_row.secondary_value;
-							new_item->m_instance.enchant_bonus = target_row.enchant_bonus;
-							
-							int erase_req = 0;
-							if (m_item_manager->add_client_item_list(client_h, new_item, &erase_req)) {
-								m_item_manager->send_item_notify_msg(client_h, Notify::ItemObtained, new_item, 0);
-								DeleteCharacterExtraLoot(db, db_id);
-								
-								// Let the client know it succeeded
-								send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "Item claimed successfully!");
-								
-								// Auto refresh the list
-								std::vector<AccountDbExtraLootRow> updated_loot;
-								if (LoadCharacterExtraLoot(db, m_client_list[client_h]->m_char_name, updated_loot)) {
-									hb::net::PacketNotifyExtraLootList result{};
-									result.header.msg_id = MsgId::Notify;
-									result.header.msg_type = Notify::NotifyExtraLootList;
-									result.count = 0;
-									for (const auto& row : updated_loot) {
-										if (result.count >= 20) break;
-										auto& entry = result.entries[result.count];
-										entry.db_id = row.db_id;
-										entry.item_id = row.item_id;
-										entry.item_color = row.item_color;
-										entry.special_effect_value1 = row.spec_effect_value1;
-										entry.special_effect_value2 = row.spec_effect_value2;
-										entry.special_effect_value3 = row.spec_effect_value3;
-										entry.prefix_type = row.prefix_type;
-										entry.prefix_value = row.prefix_value;
-										entry.secondary_type = row.secondary_type;
-										entry.secondary_value = row.secondary_value;
-										entry.enchant_bonus = row.enchant_bonus;
-										result.count++;
-									}
-									m_client_list[client_h]->m_socket->send_msg(reinterpret_cast<char*>(&result), sizeof(result));
-								}
-							}
-							else {
-								if (erase_req) delete new_item;
-							}
-						}
-						else {
-							delete new_item;
-							send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "Failed to create item.");
-						}
-					}
-				}
-			}
-			CloseAccountDatabase(db);
-		}
-		break;
-	}
+        sqlite3* db = nullptr;
+        std::string dbPath;
+        if (EnsureAccountDatabase(m_client_list[client_h]->m_account_name, &db, dbPath)) {
+            std::vector<AccountDbExtraLootRow> loot;
+            if (LoadCharacterExtraLoot(db, m_client_list[client_h]->m_char_name, loot)) {
+                AccountDbExtraLootRow target_row{};
+                bool found = false;
+                for (const auto& row : loot) {
+                    if (row.db_id == db_id) {
+                        target_row = row;
+                        found = true;
+                        break;
+                    }
+                }
+                
+                if (found) {
+                    if (m_item_manager->get_item_space_left(client_h) <= 0) {
+                        send_notify_msg(0, client_h, Notify::CannotCarryMoreItem, 0, 0, 0, 0);
+                    }
+                    else {
+                        CItem* new_item = new CItem;
+                        if (m_item_manager->init_item_attr(new_item, target_row.item_id)) {
+                            // Asignamos el color temporalmente por si el motor lo requiere durante el check
+                            new_item->m_instance.item_color = target_row.item_color;
+                            
+                            int erase_req = 0;
+                            
+                            // 1. AÑADIMOS EL ÍTEM PRIMERO (Aquí es donde el motor convierte W a M y resetea stats)
+                            if (m_item_manager->add_client_item_list(client_h, new_item, &erase_req)) {
+                                
+                                // 2. SI EL ÍTEM NO SE "FUSIONÓ" CON OTRO (como flechas/oro), INYECTAMOS STATS
+                                if (erase_req == 0) {
+                                    new_item->m_instance.item_color = target_row.item_color;
+                                    new_item->m_instance.special_effect_value1 = target_row.spec_effect_value1;
+                                    new_item->m_instance.special_effect_value2 = target_row.spec_effect_value2;
+                                    new_item->m_instance.special_effect_value3 = target_row.spec_effect_value3;
+                                    
+                                    new_item->m_instance.prefix_type = target_row.prefix_type;
+                                    new_item->m_instance.prefix_value = target_row.prefix_value;
+                                    new_item->m_instance.secondary_type = target_row.secondary_type;
+                                    new_item->m_instance.secondary_value = target_row.secondary_value;
+                                    new_item->m_instance.enchant_bonus = target_row.enchant_bonus;
+
+                                    // 3. RECALCULAMOS LAS VARIABLES DEPENDIENTES (como m_durability)
+                                    m_item_manager->adjust_rare_item_value(new_item);
+                                }
+
+                                // 4. NOTIFICAMOS AL CLIENTE
+                                m_item_manager->send_item_notify_msg(client_h, Notify::ItemObtained, new_item, 0);
+                                DeleteCharacterExtraLoot(db, db_id);
+                                
+                                // Let the client know it succeeded
+                                send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "Item claimed successfully!");
+                                
+                                // Auto refresh the list
+                                std::vector<AccountDbExtraLootRow> updated_loot;
+                                if (LoadCharacterExtraLoot(db, m_client_list[client_h]->m_char_name, updated_loot)) {
+                                    hb::net::PacketNotifyExtraLootList result{};
+                                    result.header.msg_id = MsgId::Notify;
+                                    result.header.msg_type = Notify::NotifyExtraLootList;
+                                    result.count = 0;
+                                    for (const auto& row : updated_loot) {
+                                        if (result.count >= 20) break;
+                                        auto& entry = result.entries[result.count];
+                                        entry.db_id = row.db_id;
+                                        entry.item_id = row.item_id;
+                                        entry.item_color = row.item_color;
+                                        entry.special_effect_value1 = row.spec_effect_value1;
+                                        entry.special_effect_value2 = row.spec_effect_value2;
+                                        entry.special_effect_value3 = row.spec_effect_value3;
+                                        entry.prefix_type = row.prefix_type;
+                                        entry.prefix_value = row.prefix_value;
+                                        entry.secondary_type = row.secondary_type;
+                                        entry.secondary_value = row.secondary_value;
+                                        entry.enchant_bonus = row.enchant_bonus;
+                                        result.count++;
+                                    }
+                                    m_client_list[client_h]->m_socket->send_msg(reinterpret_cast<char*>(&result), sizeof(result));
+                                }
+                            }
+                            else {
+                                if (erase_req) delete new_item;
+                            }
+                        }
+                        else {
+                            delete new_item;
+                            send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "Failed to create item.");
+                        }
+                    }
+                }
+            }
+            CloseAccountDatabase(db);
+        }
+        break;
+    }
 
 		//50Cent - Repair All
 	case CommonType::ReqRepairAll:
