@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "PacketHeaders.h"
 #include "NetConstants.h"
@@ -883,6 +883,29 @@ namespace net {
 		char name[hb::shared::limits::ItemNameLen];
 		uint8_t padding[2];
 	};
+
+
+	// === EXTRA LOOT — packet structs ===
+	struct HB_PACKED ExtraLootEntry {
+		uint32_t db_id;
+		int16_t  item_id;
+		int8_t   item_color;
+		int16_t  special_effect_value1;
+		int16_t  special_effect_value2;
+		int16_t  special_effect_value3;
+		uint8_t  prefix_type;
+		uint8_t  prefix_value;
+		uint8_t  secondary_type;
+		uint8_t  secondary_value;
+		uint8_t  enchant_bonus;
+	};
+
+	struct HB_PACKED PacketNotifyExtraLootList : public packet_base {
+		PacketHeader header;
+		int16_t count;
+		ExtraLootEntry entries[20];
+	};
+	// ===================================
 
 #ifdef TESTER_ONLY
 	// TESTER MENU — tester-only packet structs

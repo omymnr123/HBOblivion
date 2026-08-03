@@ -182,6 +182,21 @@ struct AccountDbEquippedItem
     int item_color;
 };
 
+struct AccountDbExtraLootRow
+{
+    uint32_t db_id;
+    int item_id;
+    int item_color;
+    int spec_effect_value1;
+    int spec_effect_value2;
+    int spec_effect_value3;
+    int prefix_type;
+    int prefix_value;
+    int secondary_type;
+    int secondary_value;
+    int enchant_bonus;
+};
+
 class CClient;
 
 bool EnsureAccountDatabase(const char* account_name, sqlite3** outDb, std::string& outPath);
@@ -205,6 +220,9 @@ bool InsertCharacterItemEquips(sqlite3* db, const char* character_name, const st
 bool InsertCharacterMagicMastery(sqlite3* db, const char* character_name, const std::vector<AccountDbIndexedValue>& mastery);
 bool InsertCharacterSkillMastery(sqlite3* db, const char* character_name, const std::vector<AccountDbIndexedValue>& mastery);
 bool InsertCharacterSkillSSN(sqlite3* db, const char* character_name, const std::vector<AccountDbIndexedValue>& values);
+bool LoadCharacterExtraLoot(sqlite3* db, const char* character_name, std::vector<AccountDbExtraLootRow>& outLoot);
+bool InsertCharacterExtraLoot(sqlite3* db, const char* character_name, const AccountDbExtraLootRow& row);
+bool DeleteCharacterExtraLoot(sqlite3* db, uint32_t db_id);
 bool InsertAccountRecord(sqlite3* db, const AccountDbAccountData& data);
 bool InsertCharacterRecord(sqlite3* db, const AccountDbCharacterData& data);
 bool SaveCharacterSnapshot(sqlite3* db, const CClient* client);

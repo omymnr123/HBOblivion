@@ -58,7 +58,10 @@ namespace DialogBoxId
 #endif // TESTER_ONLY
 		Guild = 55,
 		GuildInvite = 56,
-		GuildDisbandConfirm = 57
+		GuildDisbandConfirm = 57,
+		// === NUEVO: ID de la ventana de Extra Loot ===
+		ExtraLoot = 58
+		// =============================================
 
 	};
 }

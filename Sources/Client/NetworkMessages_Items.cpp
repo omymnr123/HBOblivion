@@ -1,4 +1,4 @@
-﻿#include "Game.h"
+#include "Game.h"
 #include "BuildItemManager.h"
 #include "InventoryManager.h"
 #include "ItemNameFormatter.h"
@@ -10,6 +10,8 @@
 #include "DialogBox_ItemUpgrade.h"
 #include "DialogBox_SellOrRepair.h"
 #include "DialogBox_Exchange.h"
+#include "DialogBox_ExtraLoot.h"
+#include "DialogBox_StatusOverlay.h"
 #include <cstdio>
 #include <cstring>
 #include <cmath>
@@ -1087,6 +1089,51 @@ namespace NetworkMessageHandlers {
 	void HandleItemSold(CGame* game, char* data)
 	{
 		game->get_dialog_box_manager().disable_dialog_box(DialogBoxId::SellOrRepair);
+	}
+
+	void HandleNotifyExtraLootAvailable(CGame* game, char* data)
+	{
+		auto* hud = game->get_dialog_box_manager().get_dialog_as<DialogBox_StatusOverlay>(DialogBoxId::StatusOverlay);
+		if (hud) hud->m_show_extraloot = true;
+	}
+
+	void HandleReqExtraLootList(CGame* game, char* data)
+	{
+		auto* lootBox = game->get_dialog_box_manager().get_dialog_as<DialogBox_ExtraLoot>(DialogBoxId::ExtraLoot);
+		if (!lootBox) return;
+
+		const auto* pkt = hb::net::PacketCast<hb::net::PacketNotifyExtraLootList>(data, sizeof(hb::net::PacketNotifyExtraLootList));
+		if (!pkt) return;
+
+		lootBox->clear_loot();
+
+		int count = std::clamp(static_cast<int>(pkt->count), 0, 20);
+
+		auto* hud = game->get_dialog_box_manager().get_dialog_as<DialogBox_StatusOverlay>(DialogBoxId::StatusOverlay);
+		if (hud) {
+			hud->m_show_extraloot = (count > 0);
+		}
+
+		if (count == 0) {
+			game->get_dialog_box_manager().disable(DialogBoxId::ExtraLoot);
+		}
+
+		for (int i = 0; i < count; ++i)
+		{
+			const auto& entry = pkt->entries[i];
+			hb::shared::item::item_instance_data item_data{};
+			item_data.item_color = entry.item_color;
+			item_data.special_effect_value1 = entry.special_effect_value1;
+			item_data.special_effect_value2 = entry.special_effect_value2;
+			item_data.special_effect_value3 = entry.special_effect_value3;
+			item_data.prefix_type = entry.prefix_type;
+			item_data.prefix_value = entry.prefix_value;
+			item_data.secondary_type = entry.secondary_type;
+			item_data.secondary_value = entry.secondary_value;
+			item_data.enchant_bonus = entry.enchant_bonus;
+
+			lootBox->add_loot(entry.db_id, entry.item_id, item_data);
+		}
 	}
 }
 

@@ -107,6 +107,8 @@ namespace NetworkMessageHandlers {
 	void HandleGizonItemChange(CGame* game, char* data);
 	void HandleItemPosList(CGame* game, char* data);
 	void HandleItemSold(CGame* game, char* data);
+	void HandleNotifyExtraLootAvailable(CGame* game, char* data);
+	void HandleReqExtraLootList(CGame* game, char* data);
 
 	// Apocalypse
 	void HandleApocGateStart(CGame* game, char* data);
@@ -287,6 +289,8 @@ bool NetworkMessageManager::process_message(uint32_t msg_id, char* data, uint32_
 		case Notify::GizoneItemChange: NetworkMessageHandlers::HandleGizonItemChange(m_game, data); return true;
 		case Notify::ItemPosList: NetworkMessageHandlers::HandleItemPosList(m_game, data); return true;
 		case Notify::ItemSold: NetworkMessageHandlers::HandleItemSold(m_game, data); return true;
+		case Notify::NotifyExtraLootAvailable: NetworkMessageHandlers::HandleNotifyExtraLootAvailable(m_game, data); return true;
+		case Notify::NotifyExtraLootList: NetworkMessageHandlers::HandleReqExtraLootList(m_game, data); return true;
 
 		// Bank
 		case Notify::ItemToBank: NetworkMessageHandlers::HandleItemToBank(m_game, data); return true;

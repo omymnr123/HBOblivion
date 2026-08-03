@@ -16,6 +16,8 @@ public:
 	bool is_draggable() const override { return false; }
 	bool cancels_text_input_on_enable() const override { return false; }
 
+	bool m_show_extraloot = false; // <-- Movido a public para acceso externo
+
 private:
 	static constexpr int padding = 10;
 	static constexpr int gap = 4;

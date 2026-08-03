@@ -18,6 +18,8 @@ namespace hb::shared::net { class IOServicePool; }
 extern hb::shared::net::IOServicePool* G_pIOPool;
 extern bool G_bRunning;
 
+
+
 #include "ASIOSocket.h"
 #include "Client.h"
 #include "Npc.h"
@@ -856,5 +858,6 @@ public:
 	int get_required_level_for_upgrade(uint32_t value);
 
 	//50Cent - Repair All
-
+	// Extra Loot system
+	void add_extra_loot(int client_h, class CItem* item);
 };

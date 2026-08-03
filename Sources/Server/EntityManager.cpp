@@ -16,6 +16,8 @@
 #include "Log.h"
 #include "StringCompat.h"
 #include "TimeUtils.h"
+#include <vector>
+#include <algorithm>
 
 using namespace hb::shared::net;
 using namespace hb::shared::action;
@@ -2731,6 +2733,97 @@ void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char a
     // =========================================================================
 
     const DropTable* table = m_game->m_item_manager->get_drop_table(m_npc_list[npc_h]->m_drop_table_id);
+
+    // =========================================================================
+    // EXTRA LOOT SYSTEM
+    // =========================================================================
+    // Probabilidad de que el monstruo de Extra Loot. 
+    // Funciona de 1 a 10000 (Ejemplo: 10000 = 100%, 5000 = 50%, 100 = 1%).
+    // Lo dejamos al 10000 (100%) para que te salga todo el rato y puedas probarlo.
+    // Cuando vayas a abrir el servidor, cambialo por algo como 50 (0.5%) o 100 (1%).
+    int extra_loot_chance = 10000; 
+
+    if (table != nullptr && attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[attacker_h] != nullptr) {
+        if (m_game->dice(1, 10000) <= extra_loot_chance) {
+            std::vector<int> eligible_members;
+            int party_id = m_game->m_client_list[attacker_h]->m_party_id;
+            
+        // Find eligible members (party members on same map, or just the attacker)
+        if (party_id != 0 && m_game->m_party_info[party_id].total_members > 0) {
+            for (int i = 0; i < m_game->m_party_info[party_id].total_members; i++) {
+                int iH = m_game->m_party_info[party_id].index[i];
+                if (m_game->m_client_list[iH] != nullptr && m_game->m_client_list[iH]->m_hp > 0) {
+                    if (m_game->m_client_list[iH]->m_map_index == m_game->m_client_list[attacker_h]->m_map_index) {
+                        eligible_members.push_back(iH);
+                    }
+                }
+            }
+        } else {
+            eligible_members.push_back(attacker_h);
+        }
+
+        // Calculate max drops based on party size (1 per 10 members)
+        int max_drops = static_cast<int>(eligible_members.size() / 10);
+        if (max_drops < 1) max_drops = 1;
+
+        // Collect valid items from the drop table
+        std::vector<int> valid_items;
+        for (int tier = 1; tier <= 2; tier++) {
+            for (const auto& entry : table->tierEntries[tier]) {
+                // Check for duplicates
+                bool exists = false;
+                for (int vid : valid_items) {
+                    if (vid == entry.item_id) { exists = true; break; }
+                }
+                if (exists) continue;
+
+                CItem temp_config;
+                if (m_game->m_item_manager->init_item_attr(&temp_config, entry.item_id)) {
+                    if (temp_config.m_item_sub_type == hb::shared::item::item_sub_type::weapon ||
+                        temp_config.m_item_sub_type == hb::shared::item::item_sub_type::armor ||
+                        temp_config.m_item_sub_type == hb::shared::item::item_sub_type::accessory ||
+                        temp_config.m_id_num == 650 || // ZemstoneOfSacrifice
+                        temp_config.m_id_num == 656 || // XelimaStone
+                        temp_config.m_id_num == 657)   // MerienStone
+                    {
+                        valid_items.push_back(entry.item_id);
+                    }
+                }
+            }
+        }
+
+        if (!valid_items.empty()) {
+            // Shuffle eligible members to distribute loot randomly
+            for (size_t i = 0; i < eligible_members.size(); ++i) {
+                size_t j = static_cast<size_t>(m_game->dice(1, static_cast<int>(eligible_members.size()))) - 1;
+                std::swap(eligible_members[i], eligible_members[j]);
+            }
+            
+            // Limit max drops to available unique items and available members
+            if (max_drops > static_cast<int>(eligible_members.size())) max_drops = static_cast<int>(eligible_members.size());
+            if (max_drops > static_cast<int>(valid_items.size())) max_drops = static_cast<int>(valid_items.size());
+
+            // Shuffle valid items
+            for (size_t i = 0; i < valid_items.size(); ++i) {
+                size_t j = static_cast<size_t>(m_game->dice(1, static_cast<int>(valid_items.size()))) - 1;
+                std::swap(valid_items[i], valid_items[j]);
+            }
+
+            for (int i = 0; i < max_drops; i++) {
+                int winner_h = eligible_members[i];
+                int chosen_item_id = valid_items[i];
+                
+                CItem* extra_loot_item = new CItem;
+                if (m_game->m_item_manager->init_item_attr(extra_loot_item, chosen_item_id)) {
+                    m_game->m_item_manager->generate_item_attributes(extra_loot_item);
+                    m_game->add_extra_loot(winner_h, extra_loot_item);
+                }
+                delete extra_loot_item;
+            }
+        }
+    }
+        }
+    // =========================================================================
 
     // Apply drop rate multipliers to base chances
     // At 1.0: normal, at 1.5: 150% more likely, at 2.0: 200%, etc.

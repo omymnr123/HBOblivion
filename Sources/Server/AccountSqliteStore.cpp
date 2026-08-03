@@ -336,6 +336,35 @@ static bool MigrateItemNamesToIds(sqlite3* db)
         return false;
     }
 
+    // === NUEVO: TABLA PARA EXTRA LOOT ===
+    const char* createExtraLootSql =
+        "CREATE TABLE IF NOT EXISTS character_extra_loot ("
+        " id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        " character_name TEXT NOT NULL,"
+        " item_id INTEGER NOT NULL,"
+        " item_color INTEGER NOT NULL DEFAULT 0,"
+        " spec_effect_value1 INTEGER NOT NULL DEFAULT 0,"
+        " spec_effect_value2 INTEGER NOT NULL DEFAULT 0,"
+        " spec_effect_value3 INTEGER NOT NULL DEFAULT 0,"
+        " prefix_type INTEGER NOT NULL DEFAULT 0,"
+        " prefix_value INTEGER NOT NULL DEFAULT 0,"
+        " secondary_type INTEGER NOT NULL DEFAULT 0,"
+        " secondary_value INTEGER NOT NULL DEFAULT 0,"
+        " enchant_bonus INTEGER NOT NULL DEFAULT 0,"
+        " FOREIGN KEY(character_name) REFERENCES characters(character_name) ON DELETE CASCADE"
+        ");";
+
+    // Ejecutamos la creacion de la tabla (Asegurate de usar la variable de conexion correcta, suele ser 'db' o 'm_db')
+    sqlite3_exec(db, createExtraLootSql, nullptr, nullptr, nullptr);
+    
+    // Add columns if they do not exist (migration)
+    sqlite3_exec(db, "ALTER TABLE character_extra_loot ADD COLUMN prefix_type INTEGER NOT NULL DEFAULT 0;", nullptr, nullptr, nullptr);
+    sqlite3_exec(db, "ALTER TABLE character_extra_loot ADD COLUMN prefix_value INTEGER NOT NULL DEFAULT 0;", nullptr, nullptr, nullptr);
+    sqlite3_exec(db, "ALTER TABLE character_extra_loot ADD COLUMN secondary_type INTEGER NOT NULL DEFAULT 0;", nullptr, nullptr, nullptr);
+    sqlite3_exec(db, "ALTER TABLE character_extra_loot ADD COLUMN secondary_value INTEGER NOT NULL DEFAULT 0;", nullptr, nullptr, nullptr);
+    sqlite3_exec(db, "ALTER TABLE character_extra_loot ADD COLUMN enchant_bonus INTEGER NOT NULL DEFAULT 0;", nullptr, nullptr, nullptr);
+    // ====================================
+
     // Commit transaction
     if (!ExecSql(db, "COMMIT;")) {
         return false;
@@ -431,6 +460,21 @@ bool EnsureAccountDatabase(const char* account_name, sqlite3** outDb, std::strin
         " pos_y INTEGER NOT NULL,"
         " is_equipped INTEGER NOT NULL,"
         " PRIMARY KEY(character_name, slot),"
+        " FOREIGN KEY(character_name) REFERENCES characters(character_name) ON DELETE CASCADE"
+        ");"
+        "CREATE TABLE IF NOT EXISTS character_extra_loot ("
+        " id INTEGER PRIMARY KEY AUTOINCREMENT,"
+        " character_name TEXT NOT NULL,"
+        " item_id INTEGER NOT NULL,"
+        " item_color INTEGER NOT NULL DEFAULT 0,"
+        " spec_effect_value1 INTEGER NOT NULL DEFAULT 0,"
+        " spec_effect_value2 INTEGER NOT NULL DEFAULT 0,"
+        " spec_effect_value3 INTEGER NOT NULL DEFAULT 0,"
+        " prefix_type INTEGER NOT NULL DEFAULT 0,"
+        " prefix_value INTEGER NOT NULL DEFAULT 0,"
+        " secondary_type INTEGER NOT NULL DEFAULT 0,"
+        " secondary_value INTEGER NOT NULL DEFAULT 0,"
+        " enchant_bonus INTEGER NOT NULL DEFAULT 0,"
         " FOREIGN KEY(character_name) REFERENCES characters(character_name) ON DELETE CASCADE"
         ");"
         "CREATE TABLE IF NOT EXISTS character_bank_items ("
@@ -2059,6 +2103,85 @@ bool AccountNameExists(const char* account_name)
     }
 
     return found;
+}
+
+bool LoadCharacterExtraLoot(sqlite3* db, const char* character_name, std::vector<AccountDbExtraLootRow>& outLoot)
+{
+    if (db == nullptr || character_name == nullptr) return false;
+
+    const char* sql =
+        "SELECT id, item_id, item_color, spec_effect_value1, spec_effect_value2, spec_effect_value3, "
+        "prefix_type, prefix_value, secondary_type, secondary_value, enchant_bonus "
+        "FROM character_extra_loot WHERE character_name = ? COLLATE NOCASE ORDER BY id;";
+
+    sqlite3_stmt* stmt = nullptr;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) return false;
+
+    PrepareAndBindText(&stmt, 1, character_name);
+    outLoot.clear();
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        AccountDbExtraLootRow row = {};
+        int col = 0;
+        row.db_id = sqlite3_column_int(stmt, col++);
+        row.item_id = sqlite3_column_int(stmt, col++);
+        row.item_color = sqlite3_column_int(stmt, col++);
+        row.spec_effect_value1 = sqlite3_column_int(stmt, col++);
+        row.spec_effect_value2 = sqlite3_column_int(stmt, col++);
+        row.spec_effect_value3 = sqlite3_column_int(stmt, col++);
+        row.prefix_type = sqlite3_column_int(stmt, col++);
+        row.prefix_value = sqlite3_column_int(stmt, col++);
+        row.secondary_type = sqlite3_column_int(stmt, col++);
+        row.secondary_value = sqlite3_column_int(stmt, col++);
+        row.enchant_bonus = sqlite3_column_int(stmt, col++);
+        outLoot.push_back(row);
+    }
+
+    sqlite3_finalize(stmt);
+    return true;
+}
+
+bool InsertCharacterExtraLoot(sqlite3* db, const char* character_name, const AccountDbExtraLootRow& row)
+{
+    if (db == nullptr || character_name == nullptr) return false;
+
+    const char* sql = 
+        "INSERT INTO character_extra_loot (character_name, item_id, item_color, spec_effect_value1, spec_effect_value2, spec_effect_value3, "
+        "prefix_type, prefix_value, secondary_type, secondary_value, enchant_bonus) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);";
+
+    sqlite3_stmt* stmt = nullptr;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) return false;
+
+    sqlite3_bind_text(stmt, 1, character_name, -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(stmt, 2, row.item_id);
+    sqlite3_bind_int(stmt, 3, row.item_color);
+    sqlite3_bind_int(stmt, 4, row.spec_effect_value1);
+    sqlite3_bind_int(stmt, 5, row.spec_effect_value2);
+    sqlite3_bind_int(stmt, 6, row.spec_effect_value3);
+    sqlite3_bind_int(stmt, 7, row.prefix_type);
+    sqlite3_bind_int(stmt, 8, row.prefix_value);
+    sqlite3_bind_int(stmt, 9, row.secondary_type);
+    sqlite3_bind_int(stmt, 10, row.secondary_value);
+    sqlite3_bind_int(stmt, 11, row.enchant_bonus);
+
+    bool result = (sqlite3_step(stmt) == SQLITE_DONE);
+    sqlite3_finalize(stmt);
+    return result;
+}
+
+bool DeleteCharacterExtraLoot(sqlite3* db, uint32_t db_id)
+{
+    if (db == nullptr) return false;
+
+    const char* sql = "DELETE FROM character_extra_loot WHERE id = ?;";
+    sqlite3_stmt* stmt = nullptr;
+    if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) return false;
+
+    sqlite3_bind_int(stmt, 1, db_id);
+
+    bool result = (sqlite3_step(stmt) == SQLITE_DONE);
+    sqlite3_finalize(stmt);
+    return result;
 }
 
 bool LoadBlockList(sqlite3* db, std::vector<std::pair<std::string, std::string>>& outBlocks)

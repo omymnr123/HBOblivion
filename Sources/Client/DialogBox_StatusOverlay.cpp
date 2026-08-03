@@ -19,6 +19,8 @@ DialogBox_StatusOverlay::DialogBox_StatusOverlay(CGame* game)
 
 const char* DialogBox_StatusOverlay::get_primary_text() const
 {
+	bool show_extra = m_show_extraloot && !m_game->get_dialog_box_manager().is_enabled(DialogBoxId::ExtraLoot);
+	if (show_extra) return "Extra Loot!";
 	if (m_show_levelup) return "Level Up!";
 	if (m_show_restart) return "Restart";
 	return nullptr;
@@ -34,7 +36,9 @@ void DialogBox_StatusOverlay::on_update()
 		(m_game->m_player->m_hp <= 0) &&
 		(m_game->m_restart_count == -1);
 
-	bool has_primary = m_show_levelup || m_show_restart;
+	bool show_extra = m_show_extraloot && !m_game->get_dialog_box_manager().is_enabled(DialogBoxId::ExtraLoot);
+	// No deshabilitamos el botón aunque la ventana esté abierta
+	bool has_primary = show_extra || m_show_levelup || m_show_restart;
 
 #ifdef TESTER_ONLY
 	// En el cliente, si el usuario tiene privilegios o modo GM activo se habilita el botón
@@ -117,7 +121,8 @@ void DialogBox_StatusOverlay::on_update()
 
 void DialogBox_StatusOverlay::on_draw()
 {
-	bool has_primary = m_show_levelup || m_show_restart;
+	bool show_extra = m_show_extraloot && !m_game->get_dialog_box_manager().is_enabled(DialogBoxId::ExtraLoot);
+	bool has_primary = show_extra || m_show_levelup || m_show_restart;
 
 #ifdef TESTER_ONLY
 	if (!has_primary && !m_show_tester) return;
@@ -150,7 +155,8 @@ void DialogBox_StatusOverlay::on_draw()
 
 bool DialogBox_StatusOverlay::on_click()
 {
-	bool has_primary = m_show_levelup || m_show_restart;
+	bool show_extra = m_show_extraloot && !m_game->get_dialog_box_manager().is_enabled(DialogBoxId::ExtraLoot);
+	bool has_primary = show_extra || m_show_levelup || m_show_restart;
 
 #ifdef TESTER_ONLY
 	if (m_show_tester && mouse_in(m_tester_btn))
@@ -164,7 +170,12 @@ bool DialogBox_StatusOverlay::on_click()
 
 	if (has_primary && mouse_in(m_primary_btn))
 	{
-		if (m_show_levelup)
+		if (show_extra)
+		{
+			enable_dialog_box(DialogBoxId::ExtraLoot, 0, 0, 0);
+			audio_manager::get().play_game_sound(sound_type::effect, 14, 5);
+		}
+		else if (m_show_levelup)
 		{
 			enable_dialog_box(DialogBoxId::LevelUpSetting, 0, 0, 0);
 			audio_manager::get().play_game_sound(sound_type::effect, 14, 5);

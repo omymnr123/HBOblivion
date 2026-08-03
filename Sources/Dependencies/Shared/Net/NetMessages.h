@@ -153,6 +153,10 @@ namespace CommonType
 		ReqRepairAll                            = 0x0F10,
 		ReqRepairAllDelete                      = 0x0F12,
 		ReqRepairAllConfirm                     = 0x0F13,
+		// === NUEVO: EXTRA LOOT (CLIENTE -> SERVER) ===
+		ReqExtraLootList                        = 0x0F14,
+		ReqClaimExtraLoot                       = 0x0F15,
+		// =============================================
 	};
 }
 
@@ -335,6 +339,11 @@ namespace Notify
 		RepairAllPrices                         = 0x0F11,
 		MobKills                                = 0x0A68,
 		Contribution                            = 0x0A69, // <-- ¡Fuera del Tester!
+
+		// === NUEVO: EXTRA LOOT (SERVER -> CLIENTE) ===
+		NotifyExtraLootAvailable                = 0x0A6C,
+		NotifyExtraLootList                     = 0x0A6D,
+		// =============================================
 
 #ifdef TESTER_ONLY
 		// TESTER MENU — tester-only notifications

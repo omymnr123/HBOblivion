@@ -266,6 +266,7 @@
     <ClInclude Include="DialogBox_CommandHallMenu.h" />
     <ClInclude Include="DialogBox_SellOrRepair.h" />
     <ClInclude Include="DialogBox_Manufacture.h" />
+    <ClInclude Include="DialogBox_ExtraLoot.h" />
     <ClInclude Include="AnimationState.h" />
     <ClInclude Include="EffectManager.h" />
     <ClInclude Include="EntityMotion.h" />
@@ -472,6 +473,7 @@
     <ClCompile Include="HotkeyManager.cpp" />
     <ClCompile Include="Screen_OnGame.Hotkeys.cpp" />
     <ClCompile Include="Screen_OnGame.DrawObjects.cpp" />
+    <ClCompile Include="DialogBox_ExtraLoot.cpp" />
     <ClCompile Include="EquipmentIndices.cpp" />
     <ClCompile Include="RenderHelpers.cpp" />
     <ClCompile Include="PlayerRenderer.cpp" />
