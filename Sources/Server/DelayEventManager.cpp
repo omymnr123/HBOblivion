@@ -80,8 +80,22 @@ void DelayEventManager::delay_event_processor()
 	uint32_t time = GameClock::GetTimeMS();
 	int temp;
 
-	for(int i = 0; i < MaxDelayEvents; i++)
-		if ((m_delay_event_list[i] != 0) && (m_delay_event_list[i]->m_trigger_time < time)) {
+	for(int i = 0; i < MaxDelayEvents; i++) {
+		if (m_delay_event_list[i] != 0) {
+			
+			// Continually update active ExpPotion time for persistence
+			if (m_delay_event_list[i]->m_target_type == hb::shared::owner_class::Player && 
+				m_delay_event_list[i]->m_delay_type == hb::server::delay_event::Type::ExpPotion) {
+				if (m_game->m_client_list[m_delay_event_list[i]->m_target_handle]) {
+					if (m_delay_event_list[i]->m_trigger_time > time) {
+						m_game->m_client_list[m_delay_event_list[i]->m_target_handle]->m_exp_potion_time = m_delay_event_list[i]->m_trigger_time - time;
+					} else {
+						m_game->m_client_list[m_delay_event_list[i]->m_target_handle]->m_exp_potion_time = 0;
+					}
+				}
+			}
+
+			if (m_delay_event_list[i]->m_trigger_time < time) {
 
 			switch (m_delay_event_list[i]->m_delay_type) {
 
@@ -111,6 +125,7 @@ void DelayEventManager::delay_event_processor()
 					pkt.time_left_ms = 0;
 					pkt.percent = 0;
 					m_game->m_client_list[m_delay_event_list[i]->m_target_handle]->m_socket->send_msg(reinterpret_cast<char*>(&pkt), sizeof(pkt));
+					m_game->m_item_manager->calc_total_item_effect(m_delay_event_list[i]->m_target_handle, -1, true);
 				}
 				break;
 
@@ -264,6 +279,8 @@ void DelayEventManager::delay_event_processor()
 			delete m_delay_event_list[i];
 			m_delay_event_list[i] = 0;
 		}
+	}
+}
 }
 
 void DelayEventManager::delay_event_process()

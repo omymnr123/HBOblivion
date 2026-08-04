@@ -2011,7 +2011,7 @@ void ItemManager::use_item_handler(int client_h, short item_index, short dX, sho
 				int duration_mins = m_game->m_client_list[client_h]->m_item_list[item_index]->m_item_effect_value2;
 				
 				m_game->m_client_list[client_h]->m_exp_potion_percent = percent;
-				
+				calc_total_item_effect(client_h, -1, true);
 				// Register the end of the effect
 				m_game->m_delay_event_manager->register_delay_event(sdelay::Type::ExpPotion, 0,
 							time + (duration_mins * 60 * 1000), client_h, hb::shared::owner_class::Player, 0, 0, 0, 1, 0, 0);
@@ -3642,6 +3642,10 @@ void ItemManager::calc_total_item_effect(int client_h, int equip_item_id, bool n
 				break;
 			}
 		}
+	}
+
+	if (m_game->m_client_list[client_h]->m_exp_potion_percent > 0) {
+		m_game->m_client_list[client_h]->m_add_exp += m_game->m_client_list[client_h]->m_exp_potion_percent;
 	}
 
 	// Snoopy: Bonus for Angels	

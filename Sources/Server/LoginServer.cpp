@@ -1014,8 +1014,7 @@ void LoginServer::local_save_player_data(int h)
 	sqlite3* db = nullptr;
 	std::string dbPath;
 	if (EnsureAccountDatabase(G_pGame->m_client_list[h]->m_account_name, &db, dbPath)) {
-		// Calculate remaining potion time before saving
-		G_pGame->m_client_list[h]->m_exp_potion_time = 0;
+		// Calculate remaining potion time before saving (if delay event still exists)
 		if (G_pGame->m_client_list[h]->m_exp_potion_percent > 0 && G_pGame->m_delay_event_manager) {
 			uint32_t current_time = GameClock::GetTimeMS();
 			for (int i = 0; i < 60000; i++) {

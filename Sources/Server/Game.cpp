@@ -2107,6 +2107,8 @@ void CGame::request_init_data_handler(int client_h, char* data, char key, size_t
 		return;
 	}
 
+	send_exp_potion_status(client_h);
+
 	send_event_to_near_client_type_a(client_h, hb::shared::owner_class::Player, MsgId::EventLog, MsgType::Confirm, 0, 0, 0);
 
 	// v2.13 
@@ -4605,17 +4607,9 @@ bool CGame::load_player_data_from_db(int client_h)
                 hb::server::delay_event::Type::ExpPotion,
                 0,
                 GameClock::GetTimeMS() + m_client_list[client_h]->m_exp_potion_time,
-                client_h,
-                0, 0, 0, 0, 0, 0, 0
+                client_h, hb::shared::owner_class::Player, 0, 0, 0, 0, 0, 0
             );
         }
-        
-        hb::net::PacketNotifyExpPotionStatus pkt{};
-        pkt.header.msg_id = hb::shared::net::MsgId::Notify;
-        pkt.header.msg_type = hb::shared::net::Notify::ExpPotionStatus;
-        pkt.time_left_ms = m_client_list[client_h]->m_exp_potion_time;
-        pkt.percent = static_cast<uint8_t>(m_client_list[client_h]->m_exp_potion_percent);
-        m_client_list[client_h]->m_socket->send_msg(reinterpret_cast<char*>(&pkt), sizeof(pkt));
     } else {
         m_client_list[client_h]->m_exp_potion_percent = 0;
         m_client_list[client_h]->m_exp_potion_time = 0;
@@ -7215,6 +7209,19 @@ void CGame::send_exchange_item_notify(int from_h, int to_h, uint16_t msg_type, i
 	m_client_list[to_h]->m_socket->send_msg(reinterpret_cast<char*>(&pkt), sizeof(pkt));
 }
 
+void CGame::send_exp_potion_status(int client_h)
+{
+	if (m_client_list[client_h] == nullptr) return;
+	if (m_client_list[client_h]->m_exp_potion_percent > 0 && m_client_list[client_h]->m_exp_potion_time > 0) {
+		hb::net::PacketNotifyExpPotionStatus pkt{};
+		pkt.header.msg_id = hb::shared::net::MsgId::Notify;
+		pkt.header.msg_type = hb::shared::net::Notify::ExpPotionStatus;
+		pkt.time_left_ms = m_client_list[client_h]->m_exp_potion_time;
+		pkt.percent = static_cast<uint8_t>(m_client_list[client_h]->m_exp_potion_percent);
+		m_client_list[client_h]->m_socket->send_msg(reinterpret_cast<char*>(&pkt), sizeof(pkt));
+	}
+}
+
 // 05/29/2004 - Hypnotoad - Purchase Dicount updated to take charisma into consideration
 
 void CGame::send_notify_msg(int from_h, int to_h, uint16_t msg_type, uint32_t v1, uint64_t v2, uint32_t v3, const char* string, uint32_t v4, uint32_t v5, uint32_t v6, uint32_t v7, uint32_t v8, uint32_t v9, const char* string2)
@@ -9256,6 +9263,8 @@ void CGame::request_teleport_handler(int client_h, const char* data, const char*
 		delete_client(client_h, true, true);
 		return;
 	}
+
+	send_exp_potion_status(client_h);
 
 	send_event_to_near_client_type_a(client_h, hb::shared::owner_class::Player, MsgId::EventLog, MsgType::Confirm, 0, 0, 0);
 
@@ -12108,6 +12117,8 @@ bool CGame::gm_teleport_to(int client_h, const char* dest_map, short dest_x, sho
 		return false;
 	}
 
+	send_exp_potion_status(client_h);
+
 	send_event_to_near_client_type_a(client_h, hb::shared::owner_class::Player, MsgId::EventLog, MsgType::Confirm, 0, 0, 0);
 
 	return true;
@@ -12213,7 +12224,6 @@ void CGame::get_exp(int client_h, uint32_t exp, bool is_attacker_own)
 				iH = m_party_info[m_client_list[client_h]->m_party_id].index[i];
 				if ((m_client_list[iH] != 0) && (m_client_list[iH]->m_skill_using_status[19] != 1) && (m_client_list[iH]->m_hp > 0)) { // Is player alive ??
 					if (m_client_list[iH]->m_status.slate_exp)  unit_value *= 3;
-					if (m_client_list[iH]->m_exp_potion_percent > 0) unit_value += (unit_value * m_client_list[iH]->m_exp_potion_percent + 99) / 100;
 					m_client_list[iH]->m_exp_stock += unit_value;
 					
 					// Give guild GXP (1 GXP per 1000 player EXP)
@@ -12228,7 +12238,6 @@ void CGame::get_exp(int client_h, uint32_t exp, bool is_attacker_own)
 	else {
 		if ((m_client_list[client_h] != 0) && (m_client_list[client_h]->m_skill_using_status[19] != 1) && (m_client_list[client_h]->m_hp > 0)) { // Is player alive ??
 			if (m_client_list[client_h]->m_status.slate_exp)  exp *= 3;
-			if (m_client_list[client_h]->m_exp_potion_percent > 0) exp += (exp * m_client_list[client_h]->m_exp_potion_percent + 99) / 100;
 			m_client_list[client_h]->m_exp_stock += exp;
 			
 			// Give guild GXP (1 GXP per 1000 player EXP)
