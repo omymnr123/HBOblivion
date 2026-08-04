@@ -485,6 +485,32 @@
         }
 
         .btn-small:hover { background: #c8a850; color: #181620; }
+        
+        /* Dropdown Menu para añadir items */
+        .add-menu {
+            position: fixed;
+            background: #22202c;
+            border: 1px solid #c8a850;
+            border-radius: 4px;
+            padding: 4px 0;
+            z-index: 2000;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            min-width: 180px;
+        }
+        .add-menu.show { display: block; }
+        .add-menu button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 8px 16px;
+            background: transparent;
+            border: none;
+            color: #ddd8d0;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .add-menu button:hover { background: #3a3248; color: #fff; }
     </style>
 </head>
 
@@ -539,6 +565,12 @@
                 <!-- Items loaded here -->
             </div>
         </div>
+    </div>
+    
+    <!-- Menú desplegable para Añadir Items -->
+    <div id="addMenu" class="add-menu">
+        <button onclick="addDropToSelected()">Añadir al NPC actual</button>
+        <button onclick="addDropToAll()" style="color: #c8a850;">Añadir a TODOS los NPCs</button>
     </div>
 
     <div class="status" id="status">Saved!</div>
@@ -611,6 +643,70 @@
         let selectedNpc = null;
         let pickerTier = 1;
         let config = { settings: {}, global_drops: [] };
+        
+        let pendingAddItem = null;
+
+        // Mostrar el menú flotante en la posición del ratón
+        function showAddMenu(event, itemId, itemName) {
+            event.stopPropagation(); // Evitar que se cierre al instante
+            pendingAddItem = { id: itemId, name: itemName };
+            const menu = document.getElementById('addMenu');
+            
+            // Posicionarlo a la izquierda del botón "Add"
+            const rect = event.target.getBoundingClientRect();
+            menu.style.left = (rect.left - 180) + 'px'; 
+            menu.style.top = rect.bottom + 'px';
+            menu.classList.add('show');
+        }
+
+        // Cerrar menú al hacer clic en cualquier otro lado
+        document.addEventListener('click', () => {
+            const menu = document.getElementById('addMenu');
+            if (menu) menu.classList.remove('show');
+        });
+
+        // Opción 1: Añadir solo al NPC seleccionado (reutiliza lógica existente)
+        async function addDropToSelected() {
+            if (!pendingAddItem) return;
+            await addItem(pendingAddItem.id, pendingAddItem.name);
+        }
+
+        // Opción 2: Añadir a TODOS los NPCs
+        async function addDropToAll() {
+            if (!pendingAddItem) return;
+            
+            if (!confirm(`¿Estás seguro de que quieres añadir "${pendingAddItem.name}" a TODOS los NPCs del servidor?`)) return;
+
+            const result = await fetch('/api/drops/add_all', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    tier: pickerTier,
+                    item_id: pendingAddItem.id,
+                    weight: 100, // Peso por defecto
+                    min_count: 1,
+                    max_count: 1
+                })
+            }).then(r => r.json());
+
+            if (result.success) {
+                // Guardar qué NPC teníamos abierto
+                const currentNpcId = selectedNpc ? selectedNpc.id : null;
+                
+                // Recargar toda la base de datos
+                await loadData();
+                
+                // Si teníamos un NPC seleccionado, recargar su vista para ver el nuevo drop
+                if (currentNpcId) {
+                    selectNpc(currentNpcId);
+                }
+                
+                showStatus('¡Añadido a TODOS los NPCs!');
+                loadChangelog();
+            } else {
+                alert('Error: ' + result.error);
+            }
+        }
 
         // Load data
         async function loadData() {
@@ -787,7 +883,7 @@
                         <div>${item.name}</div>
                         <div class="id">ID: ${item.id}</div>
                     </div>
-                    <button class="add-btn" onclick="addItem(${item.id}, '${item.name.replace(/'/g, "\\'")}')">Add</button>
+                    <button class="add-btn" onclick="showAddMenu(event, ${item.id}, '${item.name.replace(/'/g, "\'")}')">Add</button>
                 </div>
             `).join('');
         }

@@ -123,6 +123,8 @@ HTML_PAGE = r"""<!DOCTYPE html>
     .btn-revert:hover { background: #a03030; }
     .btn-snapshot { background: #3a3468; color: #fff; }
     .btn-snapshot:hover { background: #2e2a56; }
+    .btn-halve-gold { background: #a67c00; color: #fff; }
+    .btn-halve-gold:hover { background: #c29200; }
     .changes-badge {
         background: #c8a850;
         color: #181620;
@@ -268,6 +270,8 @@ HTML_PAGE = r"""<!DOCTYPE html>
     <span class="changes-badge" id="changesBadge">0</span>
     <button class="btn btn-revert" onclick="revertAll()">Revert All</button>
     <button class="btn btn-snapshot" onclick="takeSnapshot()">Snapshot</button>
+    <div class="action-sep"></div>
+    <button class="btn btn-halve-gold" onclick="halveAllGold()">Halve All Gold</button>
     <div class="action-sep"></div>
     <input type="text" class="search-input" id="searchBox" placeholder="Search by name...">
     <select class="filter-select" id="filterMode">
@@ -563,7 +567,15 @@ function onFieldChange(input) {
         newVal = input.value === '' ? 0 : parseInt(input.value) || 0;
     }
 
-    // Compare to original snapshot value
+    applyChange(npcId, field, newVal);
+}
+
+// Centralized change applier so it can be called programmatically
+function applyChange(npcId, field, newVal) {
+    const id = String(npcId);
+    const npc = npcs.find(n => n.npc_id === npcId);
+    if (!npc) return;
+
     const origVal = getOrigValue(npcId, field);
     const dbVal = npc[field];
 
@@ -578,12 +590,47 @@ function onFieldChange(input) {
         pendingChanges[id][field] = newVal;
     }
 
-    // Update highlight
-    const isChanged = isFieldChanged(npcId, field);
-    input.classList.toggle('changed', isChanged);
-
+    // Refresh UI elements
     updateBadge();
     renderTable();
+    
+    // Only re-render detail if it's the currently selected NPC
+    // (This avoids re-rendering the detail panel repeatedly in loops)
+    if (selectedNpcId === npcId) {
+        renderDetail(npcId);
+    }
+}
+
+// ---- Custom Action: Halve All Gold ----
+function halveAllGold() {
+    if (!confirm('This will reduce gold_min and gold_max for ALL NPCs by 50% as a pending change. Are you sure?')) return;
+    
+    let changedCount = 0;
+    
+    for (const npc of npcs) {
+        const currentMin = parseInt(getNpcValue(npc, 'gold_min')) || 0;
+        const currentMax = parseInt(getNpcValue(npc, 'gold_max')) || 0;
+        
+        // Skip if they are already 0 to avoid unnecessary changes
+        if (currentMin > 0 || currentMax > 0) {
+            const newMin = Math.floor(currentMin / 2);
+            const newMax = Math.floor(currentMax / 2);
+            
+            applyChange(npc.npc_id, 'gold_min', newMin);
+            applyChange(npc.npc_id, 'gold_max', newMax);
+            changedCount++;
+        }
+    }
+    
+    if (changedCount > 0) {
+        showStatus('Reduced gold for ' + changedCount + ' NPCs. Remember to click Save Changes!', 'success');
+        // Force a re-render of the detail view in case the selected NPC was updated
+        if (selectedNpcId !== null) {
+            renderDetail(selectedNpcId);
+        }
+    } else {
+        showStatus('No NPCs had gold > 0 to halve.', 'error');
+    }
 }
 
 // ---- API actions ----

@@ -66,6 +66,9 @@ class DropManagerHandler(http.server.SimpleHTTPRequestHandler):
         if parsed.path == '/api/drops/add':
             result = self.add_drop(data)
             self.send_json(result)
+        elif parsed.path == '/api/drops/add_all':
+            result = self.add_drop_to_all(data)
+            self.send_json(result)
         elif parsed.path == '/api/drops/remove':
             result = self.remove_drop(data)
             self.send_json(result)
@@ -200,6 +203,33 @@ class DropManagerHandler(http.server.SimpleHTTPRequestHandler):
             return {"success": True}
         except Exception as e:
             return {"success": False, "error": str(e)}
+
+    def add_drop_to_all(self, data):
+        try:
+            conn = self.get_conn()
+            cursor = conn.cursor()
+            
+            # Obtener todos los IDs de las tablas de drop existentes
+            cursor.execute("SELECT drop_table_id FROM drop_tables")
+            tables = cursor.fetchall()
+            
+            # Insertar el objeto en cada una de las tablas
+            for (tid,) in tables:
+                cursor.execute("""
+                    INSERT OR REPLACE INTO drop_entries (drop_table_id, tier, item_id, weight, min_count, max_count)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (tid, data['tier'], data['item_id'], data['weight'], 
+                      data.get('min_count', 1), data.get('max_count', 1)))
+            conn.commit()
+            
+            # Registrar en el historial (Changelog)
+            item_name = self._get_item_name(cursor, data['item_id'])
+            conn.close()
+            self._log_drop_change(f"Added [{item_name}] to ALL NPCs (Tier {data['tier']}, weight {data['weight']})")
+            
+            return {"success": True}
+        except Exception as e:
+            return {"success": False, "error": str(e)}
     
     def remove_drop(self, data):
         try:
@@ -257,7 +287,7 @@ class DropManagerHandler(http.server.SimpleHTTPRequestHandler):
                 changes.append(f"  {key}: {old_value} -> {value}")
 
             with open(config_file, 'w', encoding='utf-8') as f:
-                json.dump(cfg, f, indent='\t', ensure_ascii=False)
+                json.dump(cfg, f, indent='	', ensure_ascii=False)
                 f.write('\n')
 
             # Auto-log to changelog
