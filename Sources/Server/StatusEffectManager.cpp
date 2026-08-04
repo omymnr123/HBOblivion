@@ -2,6 +2,7 @@
 #include "Game.h"
 #include "Item.h"
 #include "ItemManager.h"
+#include "DelayEventManager.h"
 #include "Packet/SharedPackets.h"
 #include "ObjectIDRange.h"
 
