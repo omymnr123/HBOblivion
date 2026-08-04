@@ -39,6 +39,7 @@
 #include "RegenManager.h"
 #include "Log.h"
 #include "ServerLogChannels.h"
+#include "ServerConsole.h"
 #include "Packet/PacketGuildSystem.h"
 
 using namespace hb::shared::net;
@@ -1036,8 +1037,9 @@ bool CGame::init()
 	m_on_exit_process = false;
 	m_shutdown_start_time = 0;
 	m_shutdown_delay_ms = 0;
-	m_shutdown_next_milestone = 0;
-	m_shutdown_message[0] = '\0';
+	m_shutdown_save_done = false;
+	m_shutdown_force_logout_done = false;
+	m_last_shutdown_notice_time = 0;
 
 	for(int i = 0; i <= 100; i++) {
 		m_skill_progress_threshold[i] = m_skill_manager->calc_skill_ssn_point(i);
@@ -12592,39 +12594,72 @@ void CGame::on_timer(char type)
 	if ((m_heldenian_running) && (m_is_heldenian_mode)) {
 		m_war_manager->set_heldenian_mode();
 	}
-	// Scheduled shutdown: send milestone notifications, then begin disconnect
+	// Scheduled shutdown: orchestrate countdown, saving, and forced logout
 	if (m_shutdown_start_time != 0 && !m_on_exit_process)
 	{
 		uint32_t elapsed_ms = time - m_shutdown_start_time;
+		uint32_t remaining_ms = (m_shutdown_delay_ms > elapsed_ms) ? (m_shutdown_delay_ms - elapsed_ms) : 0;
+		int remaining_sec = static_cast<int>(remaining_ms / 1000);
 
-		if (elapsed_ms >= m_shutdown_delay_ms)
+		if (remaining_ms == 0)
 		{
-			// Delay elapsed — save and begin disconnect sequence
-			hb::logger::log("Scheduled shutdown delay elapsed, beginning disconnect sequence...");
-			save_all_players();
+			// Timer finished — begin final disconnect and exit sequence
+			hb::logger::log("Scheduled shutdown delay elapsed, terminating gracefully...");
 			m_on_exit_process = true;
 			m_exit_process_time = time;
 			m_shutdown_start_time = 0;
 		}
 		else
 		{
-			// Check if we've crossed a milestone
-			uint32_t remaining_ms = m_shutdown_delay_ms - elapsed_ms;
-			int remaining_sec = static_cast<int>(remaining_ms / 1000);
-
-			if (m_shutdown_next_milestone < static_cast<int>(m_shutdown_milestones.size()))
+			// Every 30 seconds (or immediately on start), send a chat notice
+			if (m_last_shutdown_notice_time == 0 || (time - m_last_shutdown_notice_time) >= 30000)
 			{
-				int milestone = m_shutdown_milestones[m_shutdown_next_milestone];
-				if (remaining_sec <= milestone)
+				m_last_shutdown_notice_time = time;
+				for (int i = 1; i < MaxClients; i++)
 				{
-					hb::logger::log("Shutdown countdown: {} seconds remaining", milestone);
+					if (m_client_list[i] != nullptr && m_client_list[i]->m_is_init_complete)
+						send_notify_msg(0, i, Notify::ServerShutdown, 1, remaining_sec, 0, nullptr);
+				}
+				hb::logger::log("Shutdown countdown: {} seconds remaining", remaining_sec);
+			}
+
+			// When 30 seconds remain: save all players safely
+			if (remaining_sec <= 30 && !m_shutdown_save_done)
+			{
+				hb::logger::log("Shutdown countdown reached 30s: saving all players...");
+				int count = save_all_players();
+				hb::console::success("Saved {} player(s) during shutdown sequence", count);
+				m_shutdown_save_done = true;
+			}
+
+			// When 25 seconds remain: force all clients into uncancelable logout
+			if (remaining_sec <= 25)
+			{
+				if (!m_shutdown_force_logout_done)
+				{
+					hb::logger::log("Shutdown countdown reached 25s: forcing clients to log out...");
 					for (int i = 1; i < MaxClients; i++)
 					{
 						if (m_client_list[i] != nullptr && m_client_list[i]->m_is_init_complete)
-							send_notify_msg(0, i, Notify::ServerShutdown, 1, milestone, 0,
-								m_shutdown_message[0] != '\0' ? m_shutdown_message : nullptr);
+							send_notify_msg(0, i, Notify::ForceDisconn, 0, 5, 0, nullptr);
 					}
-					m_shutdown_next_milestone++;
+					m_shutdown_force_logout_done = true;
+				}
+				else
+				{
+					// Check if all players have disconnected to skip the rest of the countdown
+					int players_online = 0;
+					for (int i = 1; i < MaxClients; i++)
+					{
+						if (m_client_list[i] != nullptr && m_client_list[i]->m_is_init_complete)
+							players_online++;
+					}
+					
+					if (players_online == 0)
+					{
+						hb::logger::log("All players have disconnected. Skipping remaining {}s of shutdown delay...", remaining_sec);
+						m_shutdown_start_time = time - m_shutdown_delay_ms; // Forces remaining_ms to 0 on the next tick
+					}
 				}
 			}
 		}

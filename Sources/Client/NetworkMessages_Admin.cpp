@@ -41,18 +41,9 @@ void HandleServerShutdown(CGame* game, char* data)
 		data, sizeof(hb::net::PacketNotifyServerShutdown));
 	if (!pkt) return;
 
-	// Enable or update the noticement dialog
-	if (!game->get_dialog_box_manager().is_enabled(DialogBoxId::Noticement))
-		game->get_dialog_box_manager().enable_dialog_box(DialogBoxId::Noticement, pkt->mode, pkt->seconds, 0);
-
-	// Pass shutdown info to the dialog (seconds + custom message)
-	auto* dlg = game->get_dialog_box_manager().get_dialog_as<DialogBox_Noticement>(DialogBoxId::Noticement);
-	if (dlg != nullptr)
-	{
-		dlg->m_mode = pkt->mode;
-		dlg->m_countdown_seconds = pkt->seconds;
-		dlg->set_shutdown_info(pkt->seconds, pkt->message);
-	}
+	// Format and show the top message (same style as config reload)
+	std::string notice = std::format("The server will shut down in {} seconds.", pkt->seconds);
+	game->set_top_msg(notice.c_str(), 5);
 
 	audio_manager::get().play_game_sound(sound_type::effect, 27, 0);
 }

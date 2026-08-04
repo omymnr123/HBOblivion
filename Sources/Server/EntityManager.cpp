@@ -2741,7 +2741,7 @@ void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char a
     // Funciona de 1 a 10000 (Ejemplo: 10000 = 100%, 5000 = 50%, 100 = 1%).
     // Lo dejamos al 10000 (100%) para que te salga todo el rato y puedas probarlo.
     // Cuando vayas a abrir el servidor, cambialo por algo como 50 (0.5%) o 100 (1%).
-    int extra_loot_chance = 10000; 
+    int extra_loot_chance = 75; 
 
     if (table != nullptr && attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[attacker_h] != nullptr) {
         if ((int)m_game->dice(1, 10000) <= extra_loot_chance) {

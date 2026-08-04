@@ -590,9 +590,9 @@ public:
 
 	uint32_t m_shutdown_start_time;          // When scheduled shutdown was requested (0 = not scheduled)
 	uint32_t m_shutdown_delay_ms;            // Total delay in ms from m_shutdown_start_time
-	std::vector<int> m_shutdown_milestones;  // Countdown display points in seconds (descending)
-	int m_shutdown_next_milestone;           // Index into m_shutdown_milestones
-	char m_shutdown_message[128];            // Custom message for noticement dialog
+	bool m_shutdown_save_done;               // Whether save_all_players has been called
+	bool m_shutdown_force_logout_done;       // Whether ForceDisconn has been sent
+	uint32_t m_last_shutdown_notice_time;    // Last time a notice was sent
 
 	uint32_t m_weather_time, m_game_time_1, m_game_time_2, m_game_time_3, m_game_time_4, m_game_time_5, m_game_time_6;
 	uint32_t m_equip_validation_time = 0;
