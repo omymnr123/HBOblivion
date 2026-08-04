@@ -1641,6 +1641,10 @@ bool SaveCharacterSnapshot(sqlite3* db, const CClient* client)
         return false;
     }
 
+    // Backup extra loot before INSERT OR REPLACE CASCADE deletes it
+    std::vector<AccountDbExtraLootRow> tempExtraLoot;
+    LoadCharacterExtraLoot(db, client->m_char_name, tempExtraLoot);
+
     hb::time::local_time sysTime{};
     sysTime = hb::time::local_time::now();
     char timestamp[32] = {};
@@ -2037,6 +2041,10 @@ bool SaveCharacterSnapshot(sqlite3* db, const CClient* client)
         }
     }
     sqlite3_finalize(stmt);
+
+    for (const auto& row : tempExtraLoot) {
+        InsertCharacterExtraLoot(db, client->m_char_name, row);
+    }
 
     if (!ExecSql(db, "COMMIT;")) {
         FailAndRollback("COMMIT");

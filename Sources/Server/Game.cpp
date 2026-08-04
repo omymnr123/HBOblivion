@@ -5020,6 +5020,19 @@ void CGame::init_player_data(int client_h, char* data, uint32_t size)
 		}
 	}
 
+	// Notificar al cliente si tiene Extra Loot pendiente
+	sqlite3* db = nullptr;
+	std::string dbPath;
+	if (EnsureAccountDatabase(m_client_list[client_h]->m_account_name, &db, dbPath)) {
+		std::vector<AccountDbExtraLootRow> loot;
+		if (LoadCharacterExtraLoot(db, m_client_list[client_h]->m_char_name, loot)) {
+			if (!loot.empty()) {
+				send_notify_msg(0, client_h, Notify::NotifyExtraLootAvailable, 0, 0, 0, 0);
+			}
+		}
+		CloseAccountDatabase(db);
+	}
+
 	m_client_list[client_h]->m_is_init_complete = true;
 }
 
