@@ -100,6 +100,20 @@ void DelayEventManager::delay_event_processor()
 				m_game->m_item_manager->set_slate_flag(m_delay_event_list[i]->m_target_handle, temp, false);
 				break;
 
+			case hb::server::delay_event::Type::ExpPotion:
+				if (m_game->m_client_list[m_delay_event_list[i]->m_target_handle]) {
+					m_game->m_client_list[m_delay_event_list[i]->m_target_handle]->m_exp_potion_percent = 0;
+					m_game->send_notify_msg(0, m_delay_event_list[i]->m_target_handle, Notify::NoticeMsg, 0, 0, 0, "Your experience potion effect has worn off.");
+					
+					hb::net::PacketNotifyExpPotionStatus pkt{};
+					pkt.header.msg_id = hb::shared::net::MsgId::Notify;
+					pkt.header.msg_type = hb::shared::net::Notify::ExpPotionStatus;
+					pkt.time_left_ms = 0;
+					pkt.percent = 0;
+					m_game->m_client_list[m_delay_event_list[i]->m_target_handle]->m_socket->send_msg(reinterpret_cast<char*>(&pkt), sizeof(pkt));
+				}
+				break;
+
 			case sdelay::Type::CalcMeteorStrikeEffect:
 				m_game->m_war_manager->calc_meteor_strike_effect_handler(m_delay_event_list[i]->m_map_index);
 				break;

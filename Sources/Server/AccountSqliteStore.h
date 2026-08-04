@@ -121,6 +121,8 @@ struct AccountDbCharacterState
     hb::shared::entity::PlayerAppearance appearance;
     uint8_t talent_points;
     uint8_t talents[8];
+    int exp_potion_percent;
+    int exp_potion_time;
 };
 
 struct AccountDbItemRow

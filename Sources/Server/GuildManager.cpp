@@ -627,19 +627,35 @@ void GuildManager::process_shop_command(int client_h, const std::string& item_na
 		int item_id;
 		int count;
 		int token_cost;
+		int min_level; // Minimum guild level required
 		const char* display_name;
 	};
 
 	static const std::map<std::string, ShopEntry> shop_catalog = {
-		{"xelima",  {hb::shared::item::ItemId::StoneOfXelima,  1,  50, "Stone of Xelima"}},
-		{"merien",  {hb::shared::item::ItemId::StoneOfMerien,  1,  30, "Stone of Merien"}},
+		{"xp",      {1112,                                      1,  10,  1,  "Experience Potion"}},
+		{"superxp", {1113,                                      1,  25,  5,  "Super Experience Potion"}},
+		{"zemstone",{hb::shared::item::ItemId::ZemstoneofSacrifice,1, 100, 10, "Zemstone of Sacrifice"}},
+		{"xelima",  {hb::shared::item::ItemId::StoneOfXelima,  1,  50,  15, "Stone of Xelima"}},
+		{"merien",  {hb::shared::item::ItemId::StoneOfMerien,  1,  30,  15, "Stone of Merien"}},
 	};
+
+	// Fetch guild level
+	int guild_level = 1;
+	const char* sql_guild = "SELECT guild_level FROM guilds WHERE guid = ?;";
+	sqlite3_stmt* stmt_g = nullptr;
+	if (sqlite3_prepare_v2(m_db, sql_guild, -1, &stmt_g, nullptr) == SQLITE_OK) {
+		sqlite3_bind_int(stmt_g, 1, client->m_guild_guid);
+		if (sqlite3_step(stmt_g) == SQLITE_ROW) {
+			guild_level = sqlite3_column_int(stmt_g, 0);
+		}
+		sqlite3_finalize(stmt_g);
+	}
 
 	// If no item specified, show the catalog
 	if (item_name.empty()) {
 		// Get player's current tokens
 		int tokens = 0;
-		const char* sql_tok = "SELECT contribution FROM guild_members WHERE character_name = ?";;
+		const char* sql_tok = "SELECT contribution FROM guild_members WHERE character_name = ?";
 		sqlite3_stmt* stmt = nullptr;
 		if (sqlite3_prepare_v2(m_db, sql_tok, -1, &stmt, nullptr) == SQLITE_OK) {
 			sqlite3_bind_text(stmt, 1, client->m_char_name, -1, SQLITE_STATIC);
@@ -650,12 +666,17 @@ void GuildManager::process_shop_command(int client_h, const std::string& item_na
 		}
 
 		m_game->send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "=== Guild Quartermaster ===");
-		std::string tok_msg = std::format("Your Guild Tokens: {}", tokens);
+		std::string tok_msg = std::format("Your Guild Tokens: {} | Guild Level: {}", tokens, guild_level);
 		m_game->send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, tok_msg.c_str());
 
 		for (const auto& [key, entry] : shop_catalog) {
-			std::string line = std::format("  /guild shop {} - {} (x{}) = {} tokens", key, entry.display_name, entry.count, entry.token_cost);
-			m_game->send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, line.c_str());
+			if (guild_level >= entry.min_level) {
+				std::string line = std::format("  /guild shop {} - {} (x{}) = {} tokens", key, entry.display_name, entry.count, entry.token_cost);
+				m_game->send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, line.c_str());
+			} else {
+				std::string line = std::format("  [Locked Lvl {}] - {}", entry.min_level, entry.display_name);
+				m_game->send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, line.c_str());
+			}
 		}
 		return;
 	}
@@ -668,6 +689,12 @@ void GuildManager::process_shop_command(int client_h, const std::string& item_na
 	}
 
 	const ShopEntry& entry = it->second;
+
+	if (guild_level < entry.min_level) {
+		std::string msg = std::format("Your guild must be level {} to buy this item.", entry.min_level);
+		m_game->send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, msg.c_str());
+		return;
+	}
 
 	// Check tokens
 	int tokens = 0;

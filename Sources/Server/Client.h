@@ -199,6 +199,8 @@ public:
 
 	uint32_t   m_exp_stock;
 	uint32_t m_exp_stock_time;		 // ExpStock ? .
+	int        m_exp_potion_percent; // Exp potion bonus %
+	int        m_exp_potion_time;    // Exp potion time left in ms on logout
 
 	uint32_t   m_auto_exp_amount;		 // Auto-Exp
 	uint32_t m_auto_exp_time;		 // Auto-Exp ? .

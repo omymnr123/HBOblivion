@@ -262,6 +262,7 @@ namespace Notify
 		GlobalAttackMode                        = 0x0B73,
 		DamageMove                              = 0x0B74,
 		ForceDisconn                            = 0x0B75,
+		ExpPotionStatus                         = 0x0B76,
 		ResponseCreateNewParty                  = 0x0B80,
 		QueryJoinParty                          = 0x0B81,
 		EnergySphereCreated                     = 0x0B90,

@@ -2005,6 +2005,31 @@ void ItemManager::use_item_handler(int client_h, short item_index, short dX, sho
 				}
 			}
 			break;
+		case ItemEffectType::ExpPotion:
+			{
+				int percent = m_game->m_client_list[client_h]->m_item_list[item_index]->m_item_effect_value1;
+				int duration_mins = m_game->m_client_list[client_h]->m_item_list[item_index]->m_item_effect_value2;
+				
+				m_game->m_client_list[client_h]->m_exp_potion_percent = percent;
+				
+				// Register the end of the effect
+				m_game->m_delay_event_manager->register_delay_event(sdelay::Type::ExpPotion, 0,
+							time + (duration_mins * 60 * 1000), client_h, hb::shared::owner_class::Player, 0, 0, 0, 1, 0, 0);
+
+				std::string msg = std::format("You feel more experienced. (+{}% XP for {} minutes)", percent, duration_mins);
+				m_game->send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, msg.c_str());
+
+				hb::net::PacketNotifyExpPotionStatus pkt{};
+				pkt.header.msg_id = hb::shared::net::MsgId::Notify;
+				pkt.header.msg_type = hb::shared::net::Notify::ExpPotionStatus;
+				pkt.time_left_ms = duration_mins * 60 * 1000;
+				pkt.percent = static_cast<uint8_t>(percent);
+				m_game->m_client_list[client_h]->m_socket->send_msg(reinterpret_cast<char*>(&pkt), sizeof(pkt));
+				
+				effect_result = 0; // Just deplete
+			}
+			break;
+
 		case ItemEffectType::HP:
 			max = m_game->get_max_hp(client_h);
 			if (m_game->m_client_list[client_h]->m_hp < max) {

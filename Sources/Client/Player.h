@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <cstdint>
 #include <cstring>
 #include <memory>
@@ -132,6 +132,10 @@ public:
 
     // INVENTORY
     std::array<std::unique_ptr<CItem>, hb::shared::limits::MaxItems> m_item_list;
+
+	uint8_t m_exp_potion_percent;
+	int32_t m_exp_potion_time_left_ms;
+	uint32_t m_exp_potion_last_tick;
 
     // BANK
     std::array<std::unique_ptr<CItem>, hb::shared::limits::MaxBankItems> m_bank_list;

@@ -1,4 +1,4 @@
-﻿#include "Player.h"
+#include "Player.h"
 #include "Item/Item.h"
 
 CPlayer::CPlayer()
@@ -29,6 +29,10 @@ void CPlayer::reset()
     m_sp = 0;
     m_hunger_status = 0;
     m_stats_initialized = false;
+    
+    m_exp_potion_percent = 0;
+    m_exp_potion_time_left_ms = 0;
+    m_exp_potion_last_tick = 0;
 
     // BASE STATS
     m_str = 0;

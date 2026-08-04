@@ -4597,6 +4597,30 @@ bool CGame::load_player_data_from_db(int client_h)
     std::memcpy(m_client_list[client_h]->m_status.talents, state.talents, sizeof(state.talents));
     // ==================================
 
+    m_client_list[client_h]->m_exp_potion_percent = state.exp_potion_percent;
+    m_client_list[client_h]->m_exp_potion_time = state.exp_potion_time;
+    if (m_client_list[client_h]->m_exp_potion_percent > 0 && m_client_list[client_h]->m_exp_potion_time > 0) {
+        if (m_delay_event_manager) {
+            m_delay_event_manager->register_delay_event(
+                hb::server::delay_event::Type::ExpPotion,
+                0,
+                GameClock::GetTimeMS() + m_client_list[client_h]->m_exp_potion_time,
+                client_h,
+                0, 0, 0, 0, 0, 0, 0
+            );
+        }
+        
+        hb::net::PacketNotifyExpPotionStatus pkt{};
+        pkt.header.msg_id = hb::shared::net::MsgId::Notify;
+        pkt.header.msg_type = hb::shared::net::Notify::ExpPotionStatus;
+        pkt.time_left_ms = m_client_list[client_h]->m_exp_potion_time;
+        pkt.percent = static_cast<uint8_t>(m_client_list[client_h]->m_exp_potion_percent);
+        m_client_list[client_h]->m_socket->send_msg(reinterpret_cast<char*>(&pkt), sizeof(pkt));
+    } else {
+        m_client_list[client_h]->m_exp_potion_percent = 0;
+        m_client_list[client_h]->m_exp_potion_time = 0;
+    }
+
     for(int i = 0; i < hb::shared::limits::MaxItems; i++) {
         if (m_client_list[client_h]->m_item_list[i] != 0) {
             delete m_client_list[client_h]->m_item_list[i];
@@ -12189,6 +12213,7 @@ void CGame::get_exp(int client_h, uint32_t exp, bool is_attacker_own)
 				iH = m_party_info[m_client_list[client_h]->m_party_id].index[i];
 				if ((m_client_list[iH] != 0) && (m_client_list[iH]->m_skill_using_status[19] != 1) && (m_client_list[iH]->m_hp > 0)) { // Is player alive ??
 					if (m_client_list[iH]->m_status.slate_exp)  unit_value *= 3;
+					if (m_client_list[iH]->m_exp_potion_percent > 0) unit_value += (unit_value * m_client_list[iH]->m_exp_potion_percent + 99) / 100;
 					m_client_list[iH]->m_exp_stock += unit_value;
 					
 					// Give guild GXP (1 GXP per 1000 player EXP)
@@ -12203,6 +12228,7 @@ void CGame::get_exp(int client_h, uint32_t exp, bool is_attacker_own)
 	else {
 		if ((m_client_list[client_h] != 0) && (m_client_list[client_h]->m_skill_using_status[19] != 1) && (m_client_list[client_h]->m_hp > 0)) { // Is player alive ??
 			if (m_client_list[client_h]->m_status.slate_exp)  exp *= 3;
+			if (m_client_list[client_h]->m_exp_potion_percent > 0) exp += (exp * m_client_list[client_h]->m_exp_potion_percent + 99) / 100;
 			m_client_list[client_h]->m_exp_stock += exp;
 			
 			// Give guild GXP (1 GXP per 1000 player EXP)

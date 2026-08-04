@@ -819,6 +819,60 @@ void Screen_OnGame::on_render()
 
     draw_top_msg();
 
+    // Exp Potion UI
+    if (m_game->m_player->m_exp_potion_percent > 0 && m_game->m_player->m_exp_potion_time_left_ms > 0) {
+        // Update time left
+        uint32_t dt = m_game->m_cur_time - m_game->m_player->m_exp_potion_last_tick;
+        if (dt > 0) {
+            m_game->m_player->m_exp_potion_time_left_ms -= dt;
+            if (m_game->m_player->m_exp_potion_time_left_ms < 0) {
+                m_game->m_player->m_exp_potion_time_left_ms = 0;
+            }
+            m_game->m_player->m_exp_potion_last_tick = m_game->m_cur_time;
+        }
+
+        if (m_game->m_player->m_exp_potion_time_left_ms > 0) {
+            bool draw_ui = true;
+            if (m_game->m_player->m_exp_potion_time_left_ms <= 60000) {
+                // Blink when < 60 seconds (500ms on, 500ms off)
+                if ((m_game->m_cur_time % 1000) < 500) {
+                    draw_ui = false;
+                }
+            }
+
+            if (draw_ui) {
+                int icon_x = 10;
+                int icon_y = 40;
+
+                // Draw Gold Dye icon (Item ID 301). Using get_item_draw.
+                auto item_draw = m_game->get_item_draw(301, item_atlas::pack, false);
+                if (item_draw.sprite) {
+                    item_draw.sprite->draw(icon_x, icon_y, item_draw.frame);
+                }
+
+                // Draw time text
+                int mins = m_game->m_player->m_exp_potion_time_left_ms / 60000;
+                int secs = (m_game->m_player->m_exp_potion_time_left_ms % 60000) / 1000;
+                std::string time_str;
+                if (mins > 0) {
+                    time_str = std::format("{}m", mins + 1); // e.g. "60m"
+                } else {
+                    time_str = std::format("{}s", secs);     // e.g. "59s"
+                }
+
+                // Position text to the right of the icon
+                int text_x = icon_x + 15; 
+                int text_y = icon_y - 6; // Raise text significantly to align with the visual center of the icon
+                hb::shared::text::draw_text(
+                    GameFont::Default,
+                    text_x, text_y,
+                    time_str.c_str(),
+                    hb::shared::text::TextStyle::from_color(GameColors::UIYellow)
+                );
+            }
+        }
+    }
+
     FrameTiming::end_profile(ProfileStage::DrawMisc);
 
     // FPS, latency, and profiling display moved to RenderFrame (global, all screens)
@@ -1070,7 +1124,7 @@ void Screen_OnGame::render_item_tooltip()
         if (inv_item != nullptr && inv_item->m_id_num == item->m_id_num)
         {
             // Sumamos la cantidad interna (por si es oro/flechas) o contamos 1 (para pociones separadas)
-            total_quantity += (inv_item->m_instance.count > 0) ? inv_item->m_instance.count : 1;
+            total_quantity += (inv_item->m_instance.count > 0) ? (int)inv_item->m_instance.count : 1;
         }
     }
 

@@ -20,6 +20,7 @@ namespace Type
 		DoMeteorStrikeDamage    = 5,
 		CalcMeteorStrikeEffect  = 6,
 		AncientTablet           = 7,
+		ExpPotion               = 8,
 	};
 }
 } // namespace hb::server::delay_event

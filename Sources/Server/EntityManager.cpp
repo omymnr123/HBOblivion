@@ -2744,7 +2744,7 @@ void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char a
     int extra_loot_chance = 10000; 
 
     if (table != nullptr && attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[attacker_h] != nullptr) {
-        if (m_game->dice(1, 10000) <= extra_loot_chance) {
+        if ((int)m_game->dice(1, 10000) <= extra_loot_chance) {
             std::vector<int> eligible_members;
             int party_id = m_game->m_client_list[attacker_h]->m_party_id;
             

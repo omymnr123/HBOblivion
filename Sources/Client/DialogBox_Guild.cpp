@@ -169,14 +169,18 @@ void DialogBox_Guild::on_draw()
 		hb::shared::text::draw_text(GameFont::Default, sX + 27, sY + 150, "Guild Shop:", hb::shared::text::TextStyle::with_shadow(hb::shared::render::Color(200, 200, 200)));
 		
 		// Hardcoded items for UI
-		hb::shared::text::draw_text(GameFont::Default, sX + 27, sY + 175, "Xelima (50 T)", hb::shared::text::TextStyle::with_shadow(hb::shared::render::Color(150, 150, 150)));
-		hb::shared::text::draw_text(GameFont::Default, sX + 182, sY + 175, "[Buy]", hb::shared::text::TextStyle::with_shadow((mx >= sX + 182 && mx <= sX + 252 && my >= sY + 175 && my <= sY + 190) ? hb::shared::render::Color(255,255,255) : hb::shared::render::Color(200,200,200)));
+		int y_offset = 175;
+		auto draw_item = [&](const char* name, int cost, int y) {
+			std::string display = std::format("{} ({} T)", name, cost);
+			hb::shared::text::draw_text(GameFont::Default, sX + 27, sY + y, display.c_str(), hb::shared::text::TextStyle::with_shadow(hb::shared::render::Color(150, 150, 150)));
+			hb::shared::text::draw_text(GameFont::Default, sX + 182, sY + y, "[Buy]", hb::shared::text::TextStyle::with_shadow((mx >= sX + 182 && mx <= sX + 252 && my >= sY + y && my <= sY + y + 15) ? hb::shared::render::Color(255,255,255) : hb::shared::render::Color(200,200,200)));
+		};
 
-		hb::shared::text::draw_text(GameFont::Default, sX + 27, sY + 195, "Merien (30 T)", hb::shared::text::TextStyle::with_shadow(hb::shared::render::Color(150, 150, 150)));
-		hb::shared::text::draw_text(GameFont::Default, sX + 182, sY + 195, "[Buy]", hb::shared::text::TextStyle::with_shadow((mx >= sX + 182 && mx <= sX + 252 && my >= sY + 195 && my <= sY + 210) ? hb::shared::render::Color(255,255,255) : hb::shared::render::Color(200,200,200)));
-		
-		hb::shared::text::draw_text(GameFont::Default, sX + 27, sY + 215, "Zemstone (100 T)", hb::shared::text::TextStyle::with_shadow(hb::shared::render::Color(150, 150, 150)));
-		hb::shared::text::draw_text(GameFont::Default, sX + 182, sY + 215, "[Buy]", hb::shared::text::TextStyle::with_shadow((mx >= sX + 182 && mx <= sX + 252 && my >= sY + 215 && my <= sY + 230) ? hb::shared::render::Color(255,255,255) : hb::shared::render::Color(200,200,200)));
+		draw_item("Exp Potion", 10, y_offset); y_offset += 20;
+		draw_item("Super Exp", 25, y_offset); y_offset += 20;
+		draw_item("Xelima", 50, y_offset); y_offset += 20;
+		draw_item("Merien", 30, y_offset); y_offset += 20;
+		draw_item("Zemstone", 100, y_offset);
 	}
 	else if (m_active_tab == 2)
 	{
@@ -411,9 +415,13 @@ bool DialogBox_Guild::on_click()
 			audio_manager::get().play_game_sound(sound_type::effect, 14, 5);
 		};
 
-		if (mx >= sX + 182 && mx <= sX + 252 && my >= sY + 175 && my <= sY + 190) { send_buy("xelima"); return true; }
-		if (mx >= sX + 182 && mx <= sX + 252 && my >= sY + 195 && my <= sY + 210) { send_buy("merien"); return true; }
-		if (mx >= sX + 182 && mx <= sX + 252 && my >= sY + 215 && my <= sY + 230) { send_buy("zemstone"); return true; }
+		if (mx >= sX + 182 && mx <= sX + 252) {
+			if (my >= sY + 175 && my <= sY + 190) { send_buy("xp"); return true; }
+			if (my >= sY + 195 && my <= sY + 210) { send_buy("superxp"); return true; }
+			if (my >= sY + 215 && my <= sY + 230) { send_buy("xelima"); return true; }
+			if (my >= sY + 235 && my <= sY + 250) { send_buy("merien"); return true; }
+			if (my >= sY + 255 && my <= sY + 270) { send_buy("zemstone"); return true; }
+		}
 	}
 	else if (m_active_tab == 2)
 	{

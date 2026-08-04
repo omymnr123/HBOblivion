@@ -158,6 +158,8 @@ CClient::CClient(asio::io_context& ctx)
 	m_inhibition = false;
 
 	m_exp_stock = 0;
+	m_exp_potion_percent = 0;
+	m_exp_potion_time = 0;
 
 	m_allocated_fish = 0;
 	m_fish_chance    = 0;

@@ -606,7 +606,9 @@ bool EnsureAccountDatabase(const char* account_name, sqlite3** outDb, std::strin
         !AddColumnIfMissing(db, "characters", "party_id", "INTEGER NOT NULL DEFAULT 0") ||
         !AddColumnIfMissing(db, "characters", "gizon_item_upgrade_left", "INTEGER NOT NULL DEFAULT 0") ||
         !AddColumnIfMissing(db, "characters", "TalentPoints", "INTEGER NOT NULL DEFAULT 0") ||
-        !AddColumnIfMissing(db, "characters", "Talents", "TEXT NOT NULL DEFAULT '0,0,0,0,0,0,0,0'")) {
+        !AddColumnIfMissing(db, "characters", "Talents", "TEXT NOT NULL DEFAULT '0,0,0,0,0,0,0,0'") ||
+        !AddColumnIfMissing(db, "characters", "exp_potion_percent", "INTEGER NOT NULL DEFAULT 0") ||
+        !AddColumnIfMissing(db, "characters", "exp_potion_time", "INTEGER NOT NULL DEFAULT 0")) {
         sqlite3_close(db);
         return false;
     }
@@ -747,7 +749,7 @@ bool LoadCharacterState(sqlite3* db, const char* character_name, AccountDbCharac
         "special_event_id, super_attack_left, "
         "special_ability_time, locked_map_name, locked_map_time, crusade_job, crusade_guid, "
         "construct_point, dead_penalty_time, party_id, gizon_item_upgrade_left, "
-        "underwear_type, hair_color, hair_style, skin_color, TalentPoints, Talents "
+        "underwear_type, hair_color, hair_style, skin_color, TalentPoints, Talents, exp_potion_percent, exp_potion_time "
         "FROM characters WHERE character_name = ? COLLATE NOCASE;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -828,11 +830,16 @@ bool LoadCharacterState(sqlite3* db, const char* character_name, AccountDbCharac
         outState.talent_points = sqlite3_column_int(stmt, col++);
         const char* talentStr = reinterpret_cast<const char*>(sqlite3_column_text(stmt, col++));
         if (talentStr) {
-            memset(outState.talents, 0, sizeof(outState.talents));
-            sscanf(talentStr, "%hhu,%hhu,%hhu,%hhu,%hhu,%hhu,%hhu,%hhu",
-                &outState.talents[0], &outState.talents[1], &outState.talents[2], &outState.talents[3],
-                &outState.talents[4], &outState.talents[5], &outState.talents[6], &outState.talents[7]);
+            std::stringstream ss(talentStr);
+            std::string token;
+            int i = 0;
+            while (std::getline(ss, token, ',') && i < 8) {
+                outState.talents[i++] = std::stoi(token);
+            }
         }
+        
+        outState.exp_potion_percent = sqlite3_column_int(stmt, col++);
+        outState.exp_potion_time = sqlite3_column_int(stmt, col++);
 
         ok = true;
     }
@@ -1128,8 +1135,8 @@ bool InsertCharacterState(sqlite3* db, const AccountDbCharacterState& state)
         " special_event_id, super_attack_left, "
         " special_ability_time, locked_map_name, locked_map_time, crusade_job, crusade_guid, "
         " construct_point, dead_penalty_time, party_id, gizon_item_upgrade_left,"
-        " underwear_type, hair_color, hair_style, skin_color"
-        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+        " underwear_type, hair_color, hair_style, skin_color, TalentPoints, Talents, exp_potion_percent, exp_potion_time"
+        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
     sqlite3_stmt* stmt = nullptr;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
@@ -1202,6 +1209,17 @@ bool InsertCharacterState(sqlite3* db, const AccountDbCharacterState& state)
     ok &= (sqlite3_bind_int(stmt, col++, state.appearance.hair_color) == SQLITE_OK);
     ok &= (sqlite3_bind_int(stmt, col++, state.appearance.hair_style) == SQLITE_OK);
     ok &= (sqlite3_bind_int(stmt, col++, state.appearance.skin_color) == SQLITE_OK);
+
+    ok &= (sqlite3_bind_int(stmt, col++, state.talent_points) == SQLITE_OK);
+    std::string talents_str;
+    for (int i = 0; i < 8; ++i) {
+        talents_str += std::to_string(state.talents[i]);
+        if (i < 7) talents_str += ",";
+    }
+    ok &= (sqlite3_bind_text(stmt, col++, talents_str.c_str(), -1, SQLITE_TRANSIENT) == SQLITE_OK);
+
+    ok &= (sqlite3_bind_int(stmt, col++, state.exp_potion_percent) == SQLITE_OK);
+    ok &= (sqlite3_bind_int(stmt, col++, state.exp_potion_time) == SQLITE_OK);
 
     if (ok) {
         ok = sqlite3_step(stmt) == SQLITE_DONE;
@@ -1640,8 +1658,8 @@ bool SaveCharacterSnapshot(sqlite3* db, const CClient* client)
         " special_event_id, super_attack_left,"
         " special_ability_time, locked_map_name, locked_map_time, crusade_job, crusade_guid,"
         " construct_point, dead_penalty_time, party_id, gizon_item_upgrade_left,"
-        " underwear_type, hair_color, hair_style, skin_color, TalentPoints, Talents"
-        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+        " underwear_type, hair_color, hair_style, skin_color, TalentPoints, Talents, exp_potion_percent, exp_potion_time"
+        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
     sqlite3_stmt* stmt = nullptr;
     if (sqlite3_prepare_v2(db, upsertSql, -1, &stmt, nullptr) != SQLITE_OK) {
@@ -1719,13 +1737,15 @@ bool SaveCharacterSnapshot(sqlite3* db, const CClient* client)
     ok &= (sqlite3_bind_int(stmt, idx++, client->m_appearance.skin_color) == SQLITE_OK);
 
     ok &= (sqlite3_bind_int(stmt, idx++, client->m_status.talent_points) == SQLITE_OK);
-    char talentBuffer[64];
-    snprintf(talentBuffer, sizeof(talentBuffer), "%u,%u,%u,%u,%u,%u,%u,%u",
-        client->m_status.talents[0], client->m_status.talents[1],
-        client->m_status.talents[2], client->m_status.talents[3],
-        client->m_status.talents[4], client->m_status.talents[5],
-        client->m_status.talents[6], client->m_status.talents[7]);
-    ok &= PrepareAndBindText(stmt, idx++, talentBuffer);
+    std::string talents_str;
+    for (int i = 0; i < 8; ++i) {
+        talents_str += std::to_string(client->m_status.talents[i]);
+        if (i < 7) talents_str += ",";
+    }
+    ok &= PrepareAndBindText(stmt, idx++, talents_str.c_str());
+
+    ok &= (sqlite3_bind_int(stmt, idx++, client->m_exp_potion_percent) == SQLITE_OK);
+    ok &= (sqlite3_bind_int(stmt, idx++, client->m_exp_potion_time) == SQLITE_OK);
 
     if (!ok) {
         char logMsg[512] = {};

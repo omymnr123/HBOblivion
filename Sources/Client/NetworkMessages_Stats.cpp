@@ -221,4 +221,14 @@ namespace NetworkMessageHandlers {
 		game->m_player->m_playerStatus.attack_delay = pkt->attack_delay;
 		game->m_player->m_lu_str = game->m_player->m_lu_vit = game->m_player->m_lu_dex = game->m_player->m_lu_int = game->m_player->m_lu_mag = game->m_player->m_lu_char = 0;
 	}
+
+	void HandleExpPotionStatus(CGame* game, char* data)
+	{
+		auto* packet = hb::net::PacketCast<hb::net::PacketNotifyExpPotionStatus>(data, sizeof(hb::net::PacketNotifyExpPotionStatus));
+		if (!packet) return;
+
+		game->m_player->m_exp_potion_percent = packet->percent;
+		game->m_player->m_exp_potion_time_left_ms = packet->time_left_ms;
+		game->m_player->m_exp_potion_last_tick = game->m_cur_time;
+	}
 } // namespace NetworkMessageHandlers

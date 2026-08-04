@@ -22,6 +22,8 @@ using namespace std;
 #include "CharacterClass.h"
 #include "version_info.h"
 #include "Game.h"
+#include "AccountSqliteStore.h"
+#include "DelayEventManager.h"
 #include <filesystem>
 
 using namespace hb::shared::net;
@@ -1012,6 +1014,22 @@ void LoginServer::local_save_player_data(int h)
 	sqlite3* db = nullptr;
 	std::string dbPath;
 	if (EnsureAccountDatabase(G_pGame->m_client_list[h]->m_account_name, &db, dbPath)) {
+		// Calculate remaining potion time before saving
+		G_pGame->m_client_list[h]->m_exp_potion_time = 0;
+		if (G_pGame->m_client_list[h]->m_exp_potion_percent > 0 && G_pGame->m_delay_event_manager) {
+			uint32_t current_time = GameClock::GetTimeMS();
+			for (int i = 0; i < 60000; i++) {
+				if (G_pGame->m_delay_event_manager->m_delay_event_list[i] && 
+					G_pGame->m_delay_event_manager->m_delay_event_list[i]->m_delay_type == hb::server::delay_event::Type::ExpPotion &&
+					G_pGame->m_delay_event_manager->m_delay_event_list[i]->m_target_handle == h) {
+					if (G_pGame->m_delay_event_manager->m_delay_event_list[i]->m_trigger_time > current_time) {
+						G_pGame->m_client_list[h]->m_exp_potion_time = G_pGame->m_delay_event_manager->m_delay_event_list[i]->m_trigger_time - current_time;
+					}
+					break;
+				}
+			}
+		}
+
 		if (!SaveCharacterSnapshot(db, G_pGame->m_client_list[h])) {
 			char logMsg[256] = {};
 			hb::logger::error("SaveCharacterSnapshot failed: Account({}) Char({}) Error({})", G_pGame->m_client_list[h]->m_account_name, G_pGame->m_client_list[h]->m_char_name, sqlite3_errmsg(db));
@@ -1024,7 +1042,7 @@ void LoginServer::local_save_player_data(int h)
 		CloseAccountDatabase(db);
 		
 		if (G_pGame->m_client_list[h]->m_guild_guid != 0 && G_pGame->m_guild_manager) {
-			G_pGame->m_guild_manager->update_member_login(G_pGame->m_client_list[h]->m_char_name, time(nullptr));
+			G_pGame->m_guild_manager->update_member_login(G_pGame->m_client_list[h]->m_char_name, static_cast<uint32_t>(std::time(nullptr)));
 		}
 	} else {
 		char logMsg[256] = {};

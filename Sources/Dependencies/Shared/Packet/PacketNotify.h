@@ -18,6 +18,13 @@ namespace net {
 		uint8_t padding[2];
 	};
 
+	struct HB_PACKED PacketNotifyExpPotionStatus {
+		PacketHeader header; // msg_type = Notify::ExpPotionStatus
+		uint32_t time_left_ms;
+		uint8_t percent;
+		uint8_t padding[3];
+	};
+
 	struct HB_PACKED PacketNotifyAngelicStats {
 		PacketHeader header;
 		int32_t str;

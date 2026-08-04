@@ -148,7 +148,8 @@ enum class ItemEffectType : int16_t
     Slates             = 31,  // Ancient Tablets
     ArmorDye           = 32,  // Armor dye
     CritKomm           = 33,  // Crit Candy
-    WeaponDye          = 34   // Weapon dye
+    WeaponDye          = 34,  // Weapon dye
+    ExpPotion          = 35   // Experience Potion
 };
 
 //------------------------------------------------------------------------

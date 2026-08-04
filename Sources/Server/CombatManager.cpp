@@ -2972,7 +2972,7 @@ if (attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[at
 	int triturador_nivel = m_game->m_client_list[attacker_h]->m_status.talents[2];
 	if (triturador_nivel > 0) {
 		int prob = triturador_nivel * 5; // Nivel 1: 5%, Nivel 2: 10%, Nivel 3: 15%
-		if (m_game->dice(1, 100) <= prob) {
+		if ((int)m_game->dice(1, 100) <= prob) {
 			iAP_Abs_Armor = 0;
 			iAP_Abs_Shield = 0;
 		}
@@ -3266,7 +3266,7 @@ if (attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[at
 	int triturador_nivel = m_game->m_client_list[attacker_h]->m_status.talents[2];
 	if (triturador_nivel > 0) {
 		int prob = triturador_nivel * 5;
-		if (m_game->dice(1, 100) <= prob) {
+		if ((int)m_game->dice(1, 100) <= prob) {
 			tmp2 = 0.0f; // Ignora toda la resistencia de absorción del monstruo
 		}
 	}
