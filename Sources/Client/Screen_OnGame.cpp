@@ -873,6 +873,86 @@ void Screen_OnGame::on_render()
         }
     }
 
+    // Magic Effect Timers
+    int next_icon_y = (m_game->m_player->m_exp_potion_percent > 0 && m_game->m_player->m_exp_potion_time_left_ms > 0) ? 35 : 15;
+
+    for (auto it = m_game->m_player->m_magic_timers.begin(); it != m_game->m_player->m_magic_timers.end(); ) {
+        // Update time left
+        uint32_t dt = m_game->m_cur_time - it->last_tick;
+        if (dt > 0) {
+            it->time_left_ms -= dt;
+            if (it->time_left_ms < 0) {
+                it->time_left_ms = 0;
+            }
+            it->last_tick = m_game->m_cur_time;
+        }
+
+        if (it->time_left_ms > 0) {
+            int d_id = -1;
+            // Map (magic_type, magic_effect) to Display IDs 400-410
+            if (it->magic_type == 11) { // Protect
+                if (it->magic_effect == 3) d_id = 400; // Defense Shield
+                else if (it->magic_effect == 4) d_id = 401; // Greater Defense Shield
+                else if (it->magic_effect == 1) d_id = 402; // Protection from Arrow
+                else if (it->magic_effect == 2) d_id = 403; // Protection from magic
+                else if (it->magic_effect == 5) d_id = 404; // Absolute Magic Protect
+            }
+            else if (it->magic_type == 13) d_id = 405; // Invisibility
+            else if (it->magic_type == 45) d_id = 406; // Haste
+            else if (it->magic_type == 17) d_id = 407; // Poison
+            else if (it->magic_type == 12) { // HoldObject
+                if (it->magic_effect == 1) d_id = 408; // Hold Person
+                else if (it->magic_effect == 2) d_id = 409; // Paralyze
+            }
+            else if (it->magic_type == 18) d_id = 410; // Berserk
+
+            if (d_id != -1) {
+                bool draw_ui = true;
+                if (it->time_left_ms <= 10000) {
+                    // Blink when < 10 seconds (500ms on, 500ms off)
+                    if ((m_game->m_cur_time % 1000) < 500) {
+                        draw_ui = false;
+                    }
+                }
+
+                if (draw_ui) {
+                    int icon_x = 10;
+                    int icon_y = next_icon_y;
+
+                    // Draw icon
+                    auto item_draw = m_game->get_item_draw(d_id, item_atlas::pack, false);
+                    if (item_draw.sprite) {
+                        item_draw.sprite->draw(icon_x, icon_y, item_draw.frame);
+                    }
+
+                    // Draw time text
+                    int mins = it->time_left_ms / 60000;
+                    int secs = (it->time_left_ms % 60000) / 1000;
+                    std::string time_str;
+                    if (mins > 0) {
+                        time_str = std::format("{}m", mins + 1); // e.g. "60m"
+                    } else {
+                        time_str = std::format("{}s", secs);     // e.g. "59s"
+                    }
+
+                    int text_x = icon_x + 17; 
+                    int text_y = icon_y - -8;
+                    hb::shared::text::draw_text(
+                        GameFont::Default,
+                        text_x, text_y,
+                        time_str.c_str(),
+                        hb::shared::text::TextStyle::from_color(GameColors::UIYellow)
+                    );
+                }
+
+                next_icon_y += 20; // Move down for the next icon
+            }
+            ++it;
+        } else {
+            it = m_game->m_player->m_magic_timers.erase(it);
+        }
+    }
+
     FrameTiming::end_profile(ProfileStage::DrawMisc);
 
     // FPS, latency, and profiling display moved to RenderFrame (global, all screens)

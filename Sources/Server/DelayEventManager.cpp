@@ -67,11 +67,30 @@ bool DelayEventManager::remove_from_delay_event_list(int iH, char type, int effe
 					(m_delay_event_list[i]->m_effect_type == effect_type)) {
 					delete m_delay_event_list[i];
 					m_delay_event_list[i] = 0;
+					return true;
 				}
 			}
 		}
 
-	return true;
+	return false;
+}
+
+uint32_t DelayEventManager::get_delay_event_time_left(int target_h, char target_type, int delay_type, int effect_type)
+{
+	for (int i = 0; i < MaxDelayEvents; i++) {
+		if (m_delay_event_list[i] != 0 && 
+			m_delay_event_list[i]->m_delay_type == delay_type && 
+			m_delay_event_list[i]->m_effect_type == effect_type && 
+			m_delay_event_list[i]->m_target_handle == target_h && 
+			m_delay_event_list[i]->m_target_type == target_type) 
+		{
+			if (m_delay_event_list[i]->m_trigger_time > GameClock::GetTimeMS()) {
+				return m_delay_event_list[i]->m_trigger_time - GameClock::GetTimeMS();
+			}
+			return 0;
+		}
+	}
+	return 0;
 }
 
 void DelayEventManager::delay_event_processor()

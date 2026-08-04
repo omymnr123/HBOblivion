@@ -22,6 +22,7 @@ public:
 	// Core delay event management
 	bool register_delay_event(int delay_type, int effect_type, uint32_t last_time, int target_h, char target_type, char map_index, int dX, int dY, int v1, int v2, int v3);
 	bool remove_from_delay_event_list(int iH, char type, int effect_type);
+	uint32_t get_delay_event_time_left(int target_h, char target_type, int delay_type, int effect_type);
 	void delay_event_processor();
 	void delay_event_process();
 

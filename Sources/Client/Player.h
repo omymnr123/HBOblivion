@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <array>
+#include <vector>
 #include "PlayerController.h"
 #include "NetConstants.h"
 #include "Appearance.h"
@@ -136,6 +137,14 @@ public:
 	uint8_t m_exp_potion_percent;
 	int32_t m_exp_potion_time_left_ms;
 	uint32_t m_exp_potion_last_tick;
+
+	struct MagicTimer {
+		short magic_type;
+		short magic_effect;
+		int32_t time_left_ms;
+		uint32_t last_tick;
+	};
+	std::vector<MagicTimer> m_magic_timers;
 
     // BANK
     std::array<std::unique_ptr<CItem>, hb::shared::limits::MaxBankItems> m_bank_list;

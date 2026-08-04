@@ -481,6 +481,7 @@ namespace net {
 		uint16_t magic_type;
 		uint32_t effect;
 		uint32_t owner;
+		uint32_t duration_ms;
 	};
 
 	struct HB_PACKED PacketNotifyMagicStudySuccess {

@@ -3234,5 +3234,16 @@
     "pak_file": null,
     "inventory_frame_index": 362,
     "ground_frame_index": 362
-  }
+  },
+  { "id": 400, "name": "Buff_DefenseShield", "equip_type": "none", "pak_file": null, "inventory_frame_index": 374, "ground_frame_index": 374 },
+  { "id": 401, "name": "Buff_GreaterDefenseShield", "equip_type": "none", "pak_file": null, "inventory_frame_index": 375, "ground_frame_index": 375 },
+  { "id": 402, "name": "Buff_ProtectionFromArrow", "equip_type": "none", "pak_file": null, "inventory_frame_index": 376, "ground_frame_index": 376 },
+  { "id": 403, "name": "Buff_ProtectionFromMagic", "equip_type": "none", "pak_file": null, "inventory_frame_index": 377, "ground_frame_index": 377 },
+  { "id": 404, "name": "Buff_AbsoluteMagicProtect", "equip_type": "none", "pak_file": null, "inventory_frame_index": 378, "ground_frame_index": 378 },
+  { "id": 405, "name": "Buff_Invisibility", "equip_type": "none", "pak_file": null, "inventory_frame_index": 379, "ground_frame_index": 379 },
+  { "id": 406, "name": "Buff_Haste", "equip_type": "none", "pak_file": null, "inventory_frame_index": 380, "ground_frame_index": 380 },
+  { "id": 407, "name": "Debuff_Poison", "equip_type": "none", "pak_file": null, "inventory_frame_index": 381, "ground_frame_index": 381 },
+  { "id": 408, "name": "Debuff_HoldPerson", "equip_type": "none", "pak_file": null, "inventory_frame_index": 382, "ground_frame_index": 382 },
+  { "id": 409, "name": "Debuff_Paralyze", "equip_type": "none", "pak_file": null, "inventory_frame_index": 383, "ground_frame_index": 383 },
+  { "id": 410, "name": "Buff_Berserk", "equip_type": "none", "pak_file": null, "inventory_frame_index": 384, "ground_frame_index": 384 }
 ]

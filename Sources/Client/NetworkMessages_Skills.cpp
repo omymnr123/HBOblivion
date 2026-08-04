@@ -1,4 +1,4 @@
-﻿#include "Game.h"
+#include "Game.h"
 #include "FloatingTextManager.h"
 #include "NetworkMessageManager.h"
 #include "Packet/SharedPackets.h"
@@ -149,6 +149,26 @@ namespace NetworkMessageHandlers {
 		magic_type = static_cast<short>(pkt->magic_type);
 		magic_effect = static_cast<short>(pkt->effect);
 		owner_h = static_cast<short>(pkt->owner);
+
+		if (magic_type >= 0 && magic_type < 100 && pkt->duration_ms > 0) {
+			bool found = false;
+			for (auto& timer : game->m_player->m_magic_timers) {
+				if (timer.magic_type == magic_type && timer.magic_effect == magic_effect) {
+					timer.time_left_ms = pkt->duration_ms;
+					timer.last_tick = timeGetTime();
+					found = true;
+					break;
+				}
+			}
+			if (!found) {
+				CPlayer::MagicTimer new_timer;
+				new_timer.magic_type = magic_type;
+				new_timer.magic_effect = magic_effect;
+				new_timer.time_left_ms = pkt->duration_ms;
+				new_timer.last_tick = timeGetTime();
+				game->m_player->m_magic_timers.push_back(new_timer);
+			}
+		}
 		switch (magic_type) {
 		case hb::shared::magic::Protect:
 			switch (magic_effect) {
@@ -247,6 +267,17 @@ namespace NetworkMessageHandlers {
 		if (!pkt) return;
 		magic_type = static_cast<short>(pkt->magic_type);
 		magic_effect = static_cast<short>(pkt->effect);
+
+		if (magic_type >= 0 && magic_type < 100) {
+			for (auto it = game->m_player->m_magic_timers.begin(); it != game->m_player->m_magic_timers.end(); ) {
+				if (it->magic_type == magic_type && it->magic_effect == magic_effect) {
+					it = game->m_player->m_magic_timers.erase(it);
+				} else {
+					++it;
+				}
+			}
+		}
+
 		switch (magic_type) {
 		case hb::shared::magic::Protect:
 			switch (magic_effect) {

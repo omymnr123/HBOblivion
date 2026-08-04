@@ -8332,6 +8332,11 @@ void CGame::send_notify_msg(int from_h, int to_h, uint16_t msg_type, uint32_t v1
 		pkt.magic_type = static_cast<uint16_t>(v1);
 		pkt.effect = static_cast<uint32_t>(v2);
 		pkt.owner = static_cast<uint32_t>(v3);
+		uint32_t duration_ms = static_cast<uint32_t>(v4);
+		if (msg_type == Notify::MagicEffectOn && duration_ms == 0) {
+			duration_ms = m_delay_event_manager->get_delay_event_time_left(to_h, hb::shared::owner_class::Player, sdelay::Type::MagicRelease, v1);
+		}
+		pkt.duration_ms = duration_ms;
 		ret = m_client_list[to_h]->m_socket->send_msg(reinterpret_cast<char*>(&pkt), sizeof(pkt));
 	}
 	break;
