@@ -215,17 +215,30 @@ void StatusEffectManager::set_invisibility_flag(short owner_h, char owner_type, 
 	switch (owner_type) {
 	case hb::shared::owner_class::Player:
 		if (m_game->m_client_list[owner_h] == 0) return;
-		if (status)
+		if (status) {
 			m_game->m_client_list[owner_h]->m_status.invisibility = true;
-		else m_game->m_client_list[owner_h]->m_status.invisibility = false;
+		} else {
+			m_game->m_client_list[owner_h]->m_status.invisibility = false;
+			if (m_game->m_client_list[owner_h]->m_magic_effect_status[hb::shared::magic::Invisibility] != 0) {
+				m_game->send_notify_msg(0, owner_h, Notify::MagicEffectOff, hb::shared::magic::Invisibility, m_game->m_client_list[owner_h]->m_magic_effect_status[hb::shared::magic::Invisibility], 0, 0);
+				m_game->m_client_list[owner_h]->m_magic_effect_status[hb::shared::magic::Invisibility] = 0;
+				m_game->m_delay_event_manager->remove_from_delay_event_list(owner_h, owner_type, hb::shared::magic::Invisibility);
+			}
+		}
 		m_game->send_event_to_near_client_type_a(owner_h, hb::shared::owner_class::Player, MsgId::EventMotion, Type::NullAction, 0, 0, 0);
 		break;
 
 	case hb::shared::owner_class::Npc:
 		if (m_game->m_npc_list[owner_h] == 0) return;
-		if (status)
+		if (status) {
 			m_game->m_npc_list[owner_h]->m_status.invisibility = true;
-		else m_game->m_npc_list[owner_h]->m_status.invisibility = false;
+		} else {
+			m_game->m_npc_list[owner_h]->m_status.invisibility = false;
+			if (m_game->m_npc_list[owner_h]->m_magic_effect_status[hb::shared::magic::Invisibility] != 0) {
+				m_game->m_npc_list[owner_h]->m_magic_effect_status[hb::shared::magic::Invisibility] = 0;
+				m_game->m_delay_event_manager->remove_from_delay_event_list(owner_h, owner_type, hb::shared::magic::Invisibility);
+			}
+		}
 		m_game->send_event_to_near_client_type_a(owner_h, hb::shared::owner_class::Npc, MsgId::EventMotion, Type::NullAction, 0, 0, 0);
 		break;
 	}

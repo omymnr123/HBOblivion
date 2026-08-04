@@ -155,7 +155,7 @@ namespace NetworkMessageHandlers {
 			for (auto& timer : game->m_player->m_magic_timers) {
 				if (timer.magic_type == magic_type && timer.magic_effect == magic_effect) {
 					timer.time_left_ms = pkt->duration_ms;
-					timer.last_tick = timeGetTime();
+					timer.last_tick = game->m_cur_time;
 					found = true;
 					break;
 				}
@@ -165,7 +165,7 @@ namespace NetworkMessageHandlers {
 				new_timer.magic_type = magic_type;
 				new_timer.magic_effect = magic_effect;
 				new_timer.time_left_ms = pkt->duration_ms;
-				new_timer.last_tick = timeGetTime();
+				new_timer.last_tick = game->m_cur_time;
 				game->m_player->m_magic_timers.push_back(new_timer);
 			}
 		}
