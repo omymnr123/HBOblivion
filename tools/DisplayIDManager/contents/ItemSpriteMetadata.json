@@ -3226,5 +3226,13 @@
     "pak_file": null,
     "inventory_frame_index": 249,
     "ground_frame_index": 249
+  },
+  {
+    "id": 313,
+    "name": "Experience Potion",
+    "equip_type": "none",
+    "pak_file": null,
+    "inventory_frame_index": 362,
+    "ground_frame_index": 362
   }
 ]

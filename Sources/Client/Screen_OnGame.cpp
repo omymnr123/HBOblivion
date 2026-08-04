@@ -842,10 +842,10 @@ void Screen_OnGame::on_render()
 
             if (draw_ui) {
                 int icon_x = 10;
-                int icon_y = 40;
+                int icon_y = 15;
 
-                // Draw Gold Dye icon (Item ID 301). Using get_item_draw.
-                auto item_draw = m_game->get_item_draw(301, item_atlas::pack, false);
+                // Draw Exp Potion icon (Display ID 313). Using get_item_draw.
+                auto item_draw = m_game->get_item_draw(313, item_atlas::pack, false);
                 if (item_draw.sprite) {
                     item_draw.sprite->draw(icon_x, icon_y, item_draw.frame);
                 }
@@ -861,8 +861,8 @@ void Screen_OnGame::on_render()
                 }
 
                 // Position text to the right of the icon
-                int text_x = icon_x + 15; 
-                int text_y = icon_y - 6; // Raise text significantly to align with the visual center of the icon
+                int text_x = icon_x + 17; 
+                int text_y = icon_y - -8; // Raise text significantly to align with the visual center of the icon
                 hb::shared::text::draw_text(
                     GameFont::Default,
                     text_x, text_y,
