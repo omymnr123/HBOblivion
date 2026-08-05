@@ -21,6 +21,7 @@ namespace Type
 		CalcMeteorStrikeEffect  = 6,
 		AncientTablet           = 7,
 		ExpPotion               = 8,
+		MailNotification        = 9,
 	};
 }
 } // namespace hb::server::delay_event

@@ -2374,7 +2374,11 @@ void CGame::chat_msg_handler(char* packet_data)
 	int chat_slot = get_floating_text().add_chat_text(cp, current_time, object_id, m_map_data.get(), map_x, map_y, msg_type);
 	if (chat_slot != 0 || msg_type == 20 || msg_type == 10) {
 		if ((msg_type != 0) && (get_dialog_box_manager().is_enabled(DialogBoxId::ChatHistory) != true)) {
-			head_msg = std::format("{}:{}", name, cp);
+			if (name.empty() || name == "HGServer" || name == " ") {
+				head_msg = cp;
+			} else {
+				head_msg = std::format("{}:{}", name, cp);
+			}
 			if (msg_type == 10) {
 				event_list_manager::get().add_event_top(head_msg.c_str(), msg_type);
 			}
@@ -2776,6 +2780,7 @@ void CGame::response_read_mail_handler(const char* data)
     for (int i = 0; i < 10; ++i) {
         dlg->m_read_attachments[i].item_id = pkt->attached_items[i].item_id;
         dlg->m_read_attachments[i].item_count = pkt->attached_items[i].item_count;
+        dlg->m_read_attachments[i].instance_data = pkt->attached_items[i].instance_data;
     }
 
     dlg->m_mode = DialogBox_MailBox::mode::read;

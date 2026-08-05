@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include "PacketHeaders.h"
+#include "Item/ItemInstanceData.h"
 
 namespace hb {
 namespace net {
@@ -61,6 +62,7 @@ struct PacketResponseMailList : packet_base {
 struct MailAttachmentItem {
     int item_id;
     uint64_t item_count;
+    hb::shared::item::item_instance_data instance_data;
 };
 
 // El sobre que contiene el texto y datos de un correo específico al abrirlo

@@ -148,6 +148,14 @@ void DelayEventManager::delay_event_processor()
 				}
 				break;
 
+			case hb::server::delay_event::Type::MailNotification:
+				if (m_game->m_client_list[m_delay_event_list[i]->m_target_handle]) {
+					char buf[256];
+					snprintf(buf, sizeof(buf), "You have %d unread mail(s) in your Mail Box.", m_delay_event_list[i]->m_v1);
+					m_game->show_client_msg(m_delay_event_list[i]->m_target_handle, buf);
+				}
+				break;
+
 			case sdelay::Type::CalcMeteorStrikeEffect:
 				m_game->m_war_manager->calc_meteor_strike_effect_handler(m_delay_event_list[i]->m_map_index);
 				break;

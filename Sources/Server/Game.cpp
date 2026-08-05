@@ -2124,9 +2124,7 @@ void CGame::request_init_data_handler(int client_h, char* data, char key, size_t
 			if (sqlite3_step(stmt) == SQLITE_ROW) {
 				int count = sqlite3_column_int(stmt, 0);
 				if (count > 0) {
-					char buf[256];
-					snprintf(buf, sizeof(buf), "You have %d unread mail(s) in your Mail Box.", count);
-					send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, buf);
+					m_delay_event_manager->register_delay_event(hb::server::delay_event::Type::MailNotification, 0, GameClock::GetTimeMS() + 3000, client_h, hb::shared::owner_class::Player, 0, 0, 0, count, 0, 0);
 				}
 			}
 			sqlite3_finalize(stmt);
@@ -15031,8 +15029,23 @@ void CGame::request_send_mail_handler(int client_h, char* data)
         }
     }
 
-    // (El código del oro lo hemos pausado temporalmente para asegurar la compilación.
-    // En Helbreath el oro es un ítem del inventario, lo programaremos más adelante).
+    // -------------------------------------------------------------
+    // 3.5 COMPROBACIÓN Y COBRO DE ORO
+    // -------------------------------------------------------------
+    int gold_cost = req->attached_gold + 175;
+    for (int i = 0; i < 10; ++i) {
+        if (req->inventory_slots[i] >= 0 && req->inventory_slots[i] < 50) {
+            gold_cost += 175;
+        }
+    }
+    uint64_t current_gold = m_item_manager->get_item_count_by_id(client_h, hb::shared::item::ItemId::Gold);
+    if (current_gold < gold_cost) {
+        send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "No tienes suficiente oro para enviar este correo.");
+        return;
+    }
+    // Deduct gold
+    m_item_manager->set_item_count_by_id(client_h, hb::shared::item::ItemId::Gold, current_gold - gold_cost);
+    calc_total_weight(client_h);
 
     // -------------------------------------------------------------
     // 4. GUARDAR EN LA BASE DE DATOS (gamedata.db)
@@ -15055,8 +15068,17 @@ void CGame::request_send_mail_handler(int client_h, char* data)
 
             // Ejecutar y guardar
             if (sqlite3_step(stmt) == SQLITE_DONE) {
-                // Enviar un aviso verde al chat del jugador confirmando el envío
                 send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "Mail sent successfully.");
+                
+                // Real-time notification if receiver is online
+                for (int i = 1; i < hb::server::config::MaxClients; ++i) {
+                    if (m_client_list[i] != nullptr && m_client_list[i]->m_char_name != nullptr) {
+                        if (strcmp(m_client_list[i]->m_char_name, req->receiver_name) == 0) {
+                            show_client_msg(i, (char*)"You have 1 unread mail(s) in your Mail Box.");
+                            break;
+                        }
+                    }
+                }
             } else {
                 hb::logger::error("Error inserting mail: {}", sqlite3_errmsg(mail_db));
                 send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "Error sending mail. Please try again.");
@@ -15193,7 +15215,21 @@ void CGame::request_read_mail_handler(int client_h, char* data)
                         if (colon != std::string::npos) {
                             try {
                                 response.attached_items[idx].item_id = std::stoi(token.substr(0, colon));
-                                response.attached_items[idx].item_count = std::stoull(token.substr(colon + 1));
+                                
+                                std::string hex_data = token.substr(colon + 1);
+                                if (!hex_data.empty()) {
+                                    auto* p = reinterpret_cast<uint8_t*>(&response.attached_items[idx].instance_data);
+                                    for (size_t k = 0; k < sizeof(hb::shared::item::item_instance_data) && k * 2 < hex_data.size(); ++k) {
+                                        unsigned int byte_val;
+                                        if (std::sscanf(&hex_data[k * 2], "%02X", &byte_val) == 1) {
+                                            p[k] = static_cast<uint8_t>(byte_val);
+                                        }
+                                    }
+                                    response.attached_items[idx].item_count = response.attached_items[idx].instance_data.count;
+                                } else {
+                                    response.attached_items[idx].item_count = std::stoull(token.substr(colon + 1));
+                                    std::memset(&response.attached_items[idx].instance_data, 0, sizeof(hb::shared::item::item_instance_data));
+                                }
                                 idx++;
                             } catch (...) {}
                         }

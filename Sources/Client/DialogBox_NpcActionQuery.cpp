@@ -224,10 +224,13 @@ bool DialogBox_NpcActionQuery::on_click()
 
     switch (m_mode) {
     case mode::npc_menu:
-        if ((mouse_x > sX + 25) && (mouse_x < sX + 100) && (mouse_y > sY + 55) && (mouse_y < sY + 70)) {
-            enable_dialog_box((DialogBoxId::Type)m_item_index, m_owner_type, 0, 0);
-            disable_this_dialog();
-            return true;
+        {
+            int max_x = (m_action_type == 25) ? (sX + 65) : (sX + 100);
+            if ((mouse_x > sX + 25) && (mouse_x < max_x) && (mouse_y > sY + 55) && (mouse_y < sY + 70)) {
+                enable_dialog_box((DialogBoxId::Type)m_item_index, m_owner_type, 0, 0);
+                disable_this_dialog();
+                return true;
+            }
         }
         
         // CONDICIÓN: Clic en el botón MailBox para el Cityhall Officer (m_action_type == 25)

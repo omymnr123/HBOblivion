@@ -2,6 +2,7 @@
 #include "IDialogBox.h"
 #include <vector>
 #include <string>
+#include "Item/ItemInstanceData.h"
 
 class DialogBox_MailBox : public IDialogBox
 {
@@ -42,6 +43,7 @@ public:
     struct ReadAttachment {
         int item_id;
         uint64_t item_count;
+        hb::shared::item::item_instance_data instance_data;
     };
     ReadAttachment m_read_attachments[10]{};
 

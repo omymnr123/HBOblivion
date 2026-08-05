@@ -10,6 +10,7 @@
 #include "AudioManager.h"
 #include "ItemTooltip.h"
 #include "ItemNameFormatter.h"
+#include "Item/Item.h"
 using namespace hb::client::sprite_id;
 using namespace hb::shared::net;
 
@@ -98,7 +99,12 @@ void DialogBox_MailBox::DrawMode_Read(short sX, short sY, short size_x)
         if (m_read_attachments[i].item_id > 0) {
             has_attach = true;
             if (attach_count >= m_scroll_offset && attach_count < m_scroll_offset + 5) {
-                auto itemInfo = item_name_formatter::get().format(static_cast<short>(m_read_attachments[i].item_id));
+                CItem tempItem;
+                tempItem.m_id_num = m_read_attachments[i].item_id;
+                tempItem.m_instance = m_read_attachments[i].instance_data;
+                tempItem.m_instance.count = m_read_attachments[i].item_count;
+
+                auto itemInfo = item_name_formatter::get().format(&tempItem);
                 
                 std::string itemName = itemInfo.name;
                 if (m_read_attachments[i].item_count > 1) {
@@ -109,10 +115,23 @@ void DialogBox_MailBox::DrawMode_Read(short sX, short sY, short size_x)
                 int x = 20;
                 int y_item = 145 + row * 15;
 
+                bool has_prefix = tempItem.m_instance.prefix_type != 0;
+                hb::shared::render::Color dye_color = {255, 255, 255, 255};
+                bool has_dye = false;
+                if (has_prefix && tempItem.m_instance.item_color != 0) {
+                    const auto& dye = m_game->m_color_palette[static_cast<uint8_t>(tempItem.m_instance.item_color)];
+                    dye_color = {dye.r, dye.g, dye.b, 255};
+                    has_dye = true;
+                }
+
                 if (mouse_in({static_cast<short>(x), static_cast<short>(y_item), 150, 15})) {
                     put_string(sX + x, sY + y_item, itemName.c_str(), GameColors::UIWhite);
                     item_tooltip tooltip;
-                    tooltip.add_line(itemName, itemInfo.is_special ? GameColors::UIItemName_Special : GameColors::UIWhite);
+                    if (has_dye) {
+                        tooltip.add_line(itemName, dye_color);
+                    } else {
+                        tooltip.add_line(itemName, itemInfo.is_special ? GameColors::UIItemName_Special : GameColors::UIWhite);
+                    }
                     for (const auto& effect : itemInfo.effects) {
                         tooltip.add_line(effect.label + effect.value, GameColors::InfoGrayLight);
                     }
@@ -122,14 +141,6 @@ void DialogBox_MailBox::DrawMode_Read(short sX, short sY, short size_x)
                 }
             }
             attach_count++;
-        }
-    }
-
-    if (m_read_gold > 0 || has_attach) {
-        if (mouse_in({20, 220, 105, 15})) {
-            put_string(sX + 20, sY + 220, "Take Attachment", GameColors::UIWhite);
-        } else {
-            put_string(sX + 20, sY + 220, "Take Attachment", GameColors::UITopMsgYellow);
         }
     }
 
@@ -204,6 +215,16 @@ void DialogBox_MailBox::DrawMode_Compose(short sX, short sY, short size_x)
         put_string(sX + 20, sY + 145, "Drag items to attach (max 10)", GameColors::UIDisabledMed);
     }
 
+    char cost_str[64];
+    int gold_cost = 175; // base cost
+    for (int i = 0; i < 10; ++i) {
+        if (m_compose_inventory_slots[i] != -1 && m_game->m_player->m_item_list[m_compose_inventory_slots[i]]) {
+            gold_cost += 175;
+        }
+    }
+    snprintf(cost_str, sizeof(cost_str), "Cost: %d Gold", gold_cost);
+    put_aligned_string(sX, sX + size_x, sY + 215, cost_str, GameColors::UIYellow);
+
     if (mouse_in({20, 220, 50, 15})) {
         put_string(sX + 20, sY + 220, "Send", GameColors::UIWhite);
     } else {
@@ -275,24 +296,30 @@ bool DialogBox_MailBox::OnClick_List(short sX, short sY)
 
 bool DialogBox_MailBox::OnClick_Read(short sX, short sY)
 {
-    bool has_attach = m_read_gold > 0;
+    int attach_count = 0;
     for (int i = 0; i < 10; ++i) {
-        if (m_read_attachments[i].item_id > 0) has_attach = true;
-    }
+        if (m_read_attachments[i].item_id > 0) {
+            if (attach_count >= m_scroll_offset && attach_count < m_scroll_offset + 5) {
+                int row = attach_count - m_scroll_offset;
+                int x = 20;
+                int y_item = 145 + row * 15;
 
-    if (has_attach) {
-        if (mouse_in({20, 220, 105, 15})) {
-            hb::net::PacketRequestTakeAttachment pkt{};
-            pkt.header.msg_id = hb::shared::net::MsgId::RequestTakeAttachment;
-            pkt.mail_id = m_read_mail_id;
-            send_game_packet(pkt);
-            
-            m_read_gold = 0;
-            for (int i = 0; i < 10; ++i) {
-                m_read_attachments[i].item_id = 0;
-                m_read_attachments[i].item_count = 0;
+                if (mouse_in({static_cast<short>(x), static_cast<short>(y_item), 150, 15})) {
+                    hb::net::PacketRequestTakeAttachment pkt{};
+                    pkt.header.msg_id = hb::shared::net::MsgId::RequestTakeAttachment;
+                    pkt.mail_id = m_read_mail_id;
+                    send_game_packet(pkt);
+                    
+                    // We optimistically clear everything since the packet takes all attachments
+                    m_read_gold = 0;
+                    for (int j = 0; j < 10; ++j) {
+                        m_read_attachments[j].item_id = 0;
+                        m_read_attachments[j].item_count = 0;
+                    }
+                    return true;
+                }
             }
-            return true;
+            attach_count++;
         }
     }
 
