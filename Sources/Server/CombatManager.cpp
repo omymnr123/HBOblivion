@@ -3303,7 +3303,7 @@ if (attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[at
 			}
 
 
-			// === NUEVO: GM SWORD INSTAKILL OVERRIDE ===
+			// === NUEVO: GMSWORD INSTAKILL OVERRIDE ===
 			if (attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[attacker_h] != 0) {
 				if (m_game->m_client_list[attacker_h]->m_is_gm_mode) {
 					// Comprobamos si lleva equipada la GMSword (ID 899) a una o dos manos
@@ -3324,7 +3324,7 @@ if (attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[at
 			}
 			// ==========================================
 
-			// === NUEVO: GM SWORD INSTAKILL OVERRIDE ===
+			// === NUEVO: GMSWORD2 INSTAKILL OVERRIDE ===
 			if (attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[attacker_h] != 0) {
 				if (m_game->m_client_list[attacker_h]->m_is_gm_mode) {
 					// Comprobamos si lleva equipada la GMSword (ID 899) a una o dos manos
@@ -3345,7 +3345,7 @@ if (attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[at
 			}
 			// ==========================================
 
-			// === NUEVO: GM SWORD INSTAKILL OVERRIDE ===
+			// === NUEVO: GMSWORD3 INSTAKILL OVERRIDE ===
 			if (attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[attacker_h] != 0) {
 				if (m_game->m_client_list[attacker_h]->m_is_gm_mode) {
 					// Comprobamos si lleva equipada la GMSword (ID 899) a una o dos manos
