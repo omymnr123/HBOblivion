@@ -98,6 +98,13 @@ bool Screen_OnGame::on_game_msg(uint32_t msg_id, uint16_t msg_type, char* data, 
 	case ClientMsgId::ResponseHeldenianTpList:
 		teleport_manager::get().handle_heldenian_teleport_list(data);
 		return true;
+	case MsgId::ResponseMailList:
+		m_game->response_mail_list_handler(data);
+		return true;
+
+	case MsgId::ResponseReadMail:
+		m_game->response_read_mail_handler(data);
+		return true;
 	}
 
 	return false;

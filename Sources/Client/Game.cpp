@@ -106,6 +106,8 @@
 #include "DialogBox_Slates.h"
 #include "DialogBox_NpcActionQuery.h"
 #include "DialogBox_Manufacture.h"
+#include "DialogBox_MailBox.h"
+#include "Packet/PacketMailBox.h"
 
 
 using namespace hb::shared::net;
@@ -2730,6 +2732,52 @@ int CGame::load_text_dlg_contents2(int type)
 		}
 	}
 	return index;
+}
+
+void CGame::response_mail_list_handler(const char* data)
+{
+    auto* pkt = reinterpret_cast<const hb::net::PacketResponseMailList*>(data);
+    auto* dlg = get_dialog_box_manager().get_dialog_as<DialogBox_MailBox>(DialogBoxId::MailBox);
+    if (!dlg) return;
+
+    dlg->m_mails.clear();
+    for (int i = 0; i < pkt->mail_count; ++i) {
+        DialogBox_MailBox::MailEntry entry;
+        entry.mail_id = pkt->mails[i].mail_id;
+        entry.sender = pkt->mails[i].sender_name;
+        entry.subject = pkt->mails[i].subject;
+        entry.has_attachment = pkt->mails[i].has_attachment == 1;
+        entry.is_read = pkt->mails[i].is_read == 1;
+        dlg->m_mails.push_back(entry);
+    }
+    
+    dlg->m_mode = DialogBox_MailBox::mode::list;
+    get_dialog_box_manager().enable(DialogBoxId::MailBox);
+}
+
+void CGame::response_read_mail_handler(const char* data)
+{
+    auto* pkt = reinterpret_cast<const hb::net::PacketResponseReadMail*>(data);
+    auto* dlg = get_dialog_box_manager().get_dialog_as<DialogBox_MailBox>(DialogBoxId::MailBox);
+    if (!dlg) return;
+
+    dlg->m_read_mail_id = pkt->mail_id;
+    
+    for (const auto& mail : dlg->m_mails) {
+        if (mail.mail_id == pkt->mail_id) {
+            dlg->m_read_sender = mail.sender;
+            dlg->m_read_subject = mail.subject;
+            break;
+        }
+    }
+    
+    dlg->m_read_body = pkt->body;
+    dlg->m_read_gold = pkt->attached_gold;
+    dlg->m_read_item_id = pkt->attached_item_id;
+    dlg->m_read_item_count = pkt->attached_item_count;
+
+    dlg->m_mode = DialogBox_MailBox::mode::read;
+    get_dialog_box_manager().enable(DialogBoxId::MailBox);
 }
 
 void CGame::load_game_msg_text_contents()

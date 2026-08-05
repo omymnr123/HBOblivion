@@ -55,6 +55,7 @@ void text_input_manager::start_input(int x, int y, unsigned char max_len, std::s
 	m_buffer = &buffer;
 	m_is_active = true;
 	m_show_chat_bg = false;
+	m_text_color = GameColors::InputNormal;
 }
 
 void text_input_manager::end_input()
@@ -99,8 +100,8 @@ void text_input_manager::render()
 		return;
 
 	hb::client::draw_text_field(*m_active_textbox, 0,
-		hb::shared::text::TextStyle::with_shadow(GameColors::InputNormal),
-		hb::shared::text::TextStyle::with_shadow(GameColors::InputNormal));
+		hb::shared::text::TextStyle::with_shadow(m_text_color),
+		hb::shared::text::TextStyle::with_shadow(m_text_color));
 }
 
 void text_input_manager::show_input()

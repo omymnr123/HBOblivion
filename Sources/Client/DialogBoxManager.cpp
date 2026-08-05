@@ -59,6 +59,7 @@
 #include "CursorTarget.h"
 #include "IInput.h"
 #include "Screen_OnGame.h"
+#include "DialogBox_MailBox.h"
 
 using namespace hb::shared::net;
 
@@ -116,6 +117,7 @@ void DialogBoxManager::initialize_dialog_boxes()
 	register_dialog_box(std::make_unique<DialogBox_SellOrRepair>(&m_game));
 	register_dialog_box(std::make_unique<DialogBox_Manufacture>(&m_game));
 	register_dialog_box(std::make_unique<DialogBox_ExtraLoot>(&m_game));
+	register_dialog_box(std::make_unique<DialogBox_MailBox>(&m_game));
 #ifdef TESTER_ONLY
 	// TESTER MENU — dialog registration (tester builds only)
 	register_dialog_box(std::make_unique<DialogBox_TesterMenu>(&m_game));

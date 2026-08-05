@@ -60,8 +60,9 @@ namespace DialogBoxId
 		GuildInvite = 56,
 		GuildDisbandConfirm = 57,
 		// === NUEVO: ID de la ventana de Extra Loot ===
-		ExtraLoot = 58
+		ExtraLoot = 58,
 		// =============================================
+		MailBox = 59
 
 	};
 }

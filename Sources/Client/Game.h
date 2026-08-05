@@ -1,4 +1,4 @@
-﻿// Game.h: interface for the CGame class.
+// Game.h: interface for the CGame class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -148,6 +148,9 @@ public:
 
 	void response_panning_handler(char * data);
 	void set_ilusion_effect(int owner_h);
+	void response_mail_list_handler(const char* data);
+	void response_read_mail_handler(const char* data);
+
 	void noticement_handler(char * data);
 	CItem* get_item_config(int item_id) const;
 	item_draw_ref get_item_draw(int16_t display_id, int atlas_type, bool is_female);

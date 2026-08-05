@@ -347,6 +347,12 @@ public:
 	void activate_special_ability_handler(int client_h);
 	void join_party_handler(int client_h, int v1, const char * member_name);
 	void request_shop_contents_handler(int client_h, char * data);
+	// --- SISTEMA DE MAILBOX ---
+    void request_mail_list_handler(int client_h, char* data);
+    void request_send_mail_handler(int client_h, char* data);
+    void request_read_mail_handler(int client_h, char* data);
+    void request_delete_mail_handler(int client_h, char* data);
+    void request_take_attachment_handler(int client_h, char* data);
 	void request_restart_handler(int client_h);
 	int request_panning_map_data_request(int client_h, char * data);
 	void request_check_account_password_handler(char * data, size_t msg_size);

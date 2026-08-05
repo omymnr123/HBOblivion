@@ -41,6 +41,7 @@
 #include "ServerLogChannels.h"
 #include "ServerConsole.h"
 #include "Packet/PacketGuildSystem.h"
+#include "Packet/PacketMailBox.h"
 
 using namespace hb::shared::net;
 
@@ -5944,6 +5945,26 @@ void CGame::msg_process()
 
 			case MsgId::RequestNoticement:
 				//request_noticement_handler(client_h, data);
+				break;
+				// --- SISTEMA DE MAILBOX ---
+			case MsgId::RequestMailList:
+				request_mail_list_handler(client_h, data);
+				break;
+
+			case MsgId::RequestSendMail:
+				request_send_mail_handler(client_h, data);
+				break;
+
+			case MsgId::RequestReadMail:
+				request_read_mail_handler(client_h, data);
+				break;
+
+			case MsgId::RequestDeleteMail:
+				request_delete_mail_handler(client_h, data);
+				break;
+
+			case MsgId::RequestTakeAttachment:
+				request_take_attachment_handler(client_h, data);
 				break;
 
 			case MsgId::GuildSystem:
@@ -14947,5 +14968,307 @@ void CGame::add_extra_loot(int client_h, CItem* item)
             hb::logger::log("Extra loot added for {} (Item ID: {})", m_client_list[client_h]->m_char_name, item->m_id_num);
         }
         CloseAccountDatabase(db);
+    }
+}
+
+// =========================================================================
+//                      SISTEMA DE MAILBOX (BUZON)
+// =========================================================================
+
+void CGame::request_send_mail_handler(int client_h, char* data)
+{
+    // 1. Si el jugador no existe o está desconectado, cancelamos
+    if (m_client_list[client_h] == nullptr) return;
+
+    auto* req = reinterpret_cast<hb::net::PacketRequestSendMail*>(data);
+
+    // 2. Seguridad: Asegurarnos de que los textos no se pasen de límite
+    req->receiver_name[sizeof(req->receiver_name) - 1] = '\0';
+    req->subject[sizeof(req->subject) - 1] = '\0';
+    req->body[sizeof(req->body) - 1] = '\0';
+
+    // -------------------------------------------------------------
+    // 3. COMPROBACIÓN Y EXTRACCIÓN DEL ÍTEM (C4244 CORREGIDO)
+    // -------------------------------------------------------------
+    int item_id = 0;
+    uint64_t item_count = 0; // CORRECCIÓN: Ahora usamos uint64_t para evitar pérdida de datos
+    int slot = req->inventory_slot;
+
+    // Comprobamos si el cliente ha enviado un slot válido (ej. 0 a 50)
+    if (slot >= 0 && slot < 50) { 
+        // Comprobamos si hay realmente un ítem en ese hueco del inventario
+        if (m_client_list[client_h]->m_item_list[slot] != nullptr) {
+            
+            // Guardamos los datos del ítem ANTES de borrarlo
+            item_id = m_client_list[client_h]->m_item_list[slot]->m_id_num;
+            item_count = m_client_list[client_h]->m_item_list[slot]->m_instance.count; 
+            
+            // Borramos el ítem del inventario del jugador (el cliente también se actualizará)
+            m_item_manager->release_item_handler(client_h, slot, true);
+        }
+    }
+
+    // (El código del oro lo hemos pausado temporalmente para asegurar la compilación.
+    // En Helbreath el oro es un ítem del inventario, lo programaremos más adelante).
+
+    // -------------------------------------------------------------
+    // 4. GUARDAR EN LA BASE DE DATOS (gamedata.db)
+    // -------------------------------------------------------------
+    sqlite3* mail_db;
+    if (sqlite3_open("gamedata.db", &mail_db) == SQLITE_OK) {
+        
+        const char* sql = "INSERT INTO mailbox (sender_name, receiver_name, subject, body, attached_gold, attached_item_id, attached_item_count) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        sqlite3_stmt* stmt;
+
+        if (sqlite3_prepare_v2(mail_db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+            
+            // Llenar los datos reales
+            sqlite3_bind_text(stmt, 1, m_client_list[client_h]->m_char_name, -1, SQLITE_STATIC);
+            sqlite3_bind_text(stmt, 2, req->receiver_name, -1, SQLITE_STATIC);
+            sqlite3_bind_text(stmt, 3, req->subject, -1, SQLITE_STATIC);
+            sqlite3_bind_text(stmt, 4, req->body, -1, SQLITE_STATIC);
+            sqlite3_bind_int(stmt, 5, req->attached_gold);
+            sqlite3_bind_int(stmt, 6, item_id);
+            sqlite3_bind_int64(stmt, 7, item_count); // CORRECCIÓN: Guardamos usando int64 para coincidir con uint64_t
+
+            // Ejecutar y guardar
+            if (sqlite3_step(stmt) == SQLITE_DONE) {
+                // Enviar un aviso verde al chat del jugador confirmando el envío
+                send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "¡Correo enviado con exito!");
+            } else {
+                hb::logger::error("Error inserting mail: {}", sqlite3_errmsg(mail_db));
+                send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "Error al enviar el correo. Intentalo de nuevo.");
+            }
+            
+            sqlite3_finalize(stmt);
+        }
+        sqlite3_close(mail_db);
+    }
+}
+
+// ---------------------------------------------------------
+// FUNCIONES PENDIENTES DEL SISTEMA DE MAILBOX
+// ---------------------------------------------------------
+
+void CGame::request_mail_list_handler(int client_h, char* data)
+{
+    if (m_client_list[client_h] == nullptr) return;
+
+    // 1. Preparamos el sobre de respuesta (vacío por ahora)
+    hb::net::PacketResponseMailList response{};
+    response.header.msg_id = MsgId::ResponseMailList; 
+    response.header.msg_type = 0;
+    response.mail_count = 0;
+
+    // 2. Abrimos la base de datos para buscar los correos
+    sqlite3* mail_db;
+    if (sqlite3_open("gamedata.db", &mail_db) == SQLITE_OK) {
+        
+        // Buscamos hasta 20 correos para este jugador, ordenados del más nuevo al más viejo
+        const char* sql = "SELECT mail_id, sender_name, subject, attached_gold, attached_item_id, is_read FROM mailbox WHERE receiver_name = ? ORDER BY mail_id DESC LIMIT 20";
+        sqlite3_stmt* stmt;
+
+        if (sqlite3_prepare_v2(mail_db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+            
+            // Rellenamos el interrogante (?) con el nombre del personaje que lo solicita
+            sqlite3_bind_text(stmt, 1, m_client_list[client_h]->m_char_name, -1, SQLITE_STATIC);
+
+            // 3. Vamos leyendo fila por fila (correo por correo de la base de datos)
+            while (sqlite3_step(stmt) == SQLITE_ROW && response.mail_count < 20) {
+                auto& mail = response.mails[response.mail_count];
+                
+                mail.mail_id = sqlite3_column_int(stmt, 0);
+                
+                // Copiamos el nombre del remitente de forma segura
+                const char* sender = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 1));
+                if (sender) snprintf(mail.sender_name, sizeof(mail.sender_name), "%s", sender);
+                
+                // Copiamos el asunto de forma segura
+                const char* subject = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 2));
+                if (subject) snprintf(mail.subject, sizeof(mail.subject), "%s", subject);
+                
+                int gold = sqlite3_column_int(stmt, 3);
+                int item = sqlite3_column_int(stmt, 4);
+                
+                // Si tiene oro o ítem, marcamos que tiene adjunto (1), si no (0)
+                mail.has_attachment = (gold > 0 || item > 0) ? 1 : 0;
+                mail.is_read = sqlite3_column_int(stmt, 5);
+                
+                response.mail_count++; // Sumamos un correo a la cuenta total de este paquete
+            }
+            sqlite3_finalize(stmt);
+        }
+        sqlite3_close(mail_db);
+    }
+
+    // 4. Disparamos el sobre lleno al cliente
+    m_client_list[client_h]->m_socket->send_msg(
+        reinterpret_cast<char*>(&response), sizeof(response)
+    );
+}
+
+void CGame::request_read_mail_handler(int client_h, char* data)
+{
+    if (m_client_list[client_h] == nullptr) return;
+
+    // 1. Leer qué correo nos está pidiendo abrir el jugador
+    auto* req = reinterpret_cast<hb::net::PacketRequestReadMail*>(data);
+
+    // 2. Preparar el sobre de respuesta
+    hb::net::PacketResponseReadMail response{};
+    response.header.msg_id = MsgId::ResponseReadMail;
+    response.header.msg_type = 0;
+    response.mail_id = req->mail_id;
+    // Nos aseguramos de que el texto empiece vacío por si acaso
+    response.body[0] = '\0'; 
+    response.attached_gold = 0;
+    response.attached_item_id = 0;
+    response.attached_item_count = 0;
+
+    // 3. Conectar a la base de datos para extraer los datos
+    sqlite3* mail_db;
+    if (sqlite3_open("gamedata.db", &mail_db) == SQLITE_OK) {
+        
+        // Seleccionamos el mensaje asegurándonos de que realmente pertenece a este jugador (Seguridad)
+        const char* sql = "SELECT body, attached_gold, attached_item_id, attached_item_count FROM mailbox WHERE mail_id = ? AND receiver_name = ?";
+        sqlite3_stmt* stmt;
+
+        if (sqlite3_prepare_v2(mail_db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+            
+            sqlite3_bind_int(stmt, 1, req->mail_id);
+            sqlite3_bind_text(stmt, 2, m_client_list[client_h]->m_char_name, -1, SQLITE_STATIC);
+
+            if (sqlite3_step(stmt) == SQLITE_ROW) {
+                // Copiamos el mensaje
+                const char* body = reinterpret_cast<const char*>(sqlite3_column_text(stmt, 0));
+                if (body) snprintf(response.body, sizeof(response.body), "%s", body);
+                
+                // Copiamos los adjuntos
+                response.attached_gold = sqlite3_column_int(stmt, 1);
+                response.attached_item_id = sqlite3_column_int(stmt, 2);
+                response.attached_item_count = sqlite3_column_int64(stmt, 3);
+            }
+            sqlite3_finalize(stmt);
+        }
+
+        // 4. Marcamos el correo como "Leído" (is_read = 1) en la base de datos
+        const char* sql_update = "UPDATE mailbox SET is_read = 1 WHERE mail_id = ?";
+        sqlite3_stmt* stmt_update;
+        if (sqlite3_prepare_v2(mail_db, sql_update, -1, &stmt_update, nullptr) == SQLITE_OK) {
+            sqlite3_bind_int(stmt_update, 1, req->mail_id);
+            sqlite3_step(stmt_update);
+            sqlite3_finalize(stmt_update);
+        }
+
+        sqlite3_close(mail_db);
+    }
+
+    // 5. Enviamos el sobre con los datos del correo de vuelta al cliente
+    m_client_list[client_h]->m_socket->send_msg(
+        reinterpret_cast<char*>(&response), sizeof(response)
+    );
+}
+
+void CGame::request_delete_mail_handler(int client_h, char* data)
+{
+    if (m_client_list[client_h] == nullptr) return;
+
+    // 1. Leer el ID del correo que se quiere borrar
+    auto* req = reinterpret_cast<hb::net::PacketRequestDeleteMail*>(data);
+
+    // 2. Conectar a la base de datos global
+    sqlite3* mail_db;
+    if (sqlite3_open("gamedata.db", &mail_db) == SQLITE_OK) {
+        
+        // Borramos el correo solo si el destinatario coincide (evita que borren correos ajenos)
+        const char* sql = "DELETE FROM mailbox WHERE mail_id = ? AND receiver_name = ?";
+        sqlite3_stmt* stmt;
+
+        if (sqlite3_prepare_v2(mail_db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+            sqlite3_bind_int(stmt, 1, req->mail_id);
+            sqlite3_bind_text(stmt, 2, m_client_list[client_h]->m_char_name, -1, SQLITE_STATIC);
+            
+            sqlite3_step(stmt);
+            sqlite3_finalize(stmt);
+        }
+        sqlite3_close(mail_db);
+    }
+}
+
+void CGame::request_take_attachment_handler(int client_h, char* data)
+{
+    if (m_client_list[client_h] == nullptr) return;
+
+    auto* req = reinterpret_cast<hb::net::PacketRequestTakeAttachment*>(data);
+
+    sqlite3* mail_db;
+    if (sqlite3_open("gamedata.db", &mail_db) == SQLITE_OK) {
+        
+        // 1. Consultar los adjuntos de este correo
+        const char* sql = "SELECT attached_gold, attached_item_id, attached_item_count FROM mailbox WHERE mail_id = ? AND receiver_name = ?";
+        sqlite3_stmt* stmt;
+
+        int gold = 0;
+        int item_id = 0;
+        uint64_t item_count = 0;
+
+        if (sqlite3_prepare_v2(mail_db, sql, -1, &stmt, nullptr) == SQLITE_OK) {
+            sqlite3_bind_int(stmt, 1, req->mail_id);
+            sqlite3_bind_text(stmt, 2, m_client_list[client_h]->m_char_name, -1, SQLITE_STATIC);
+
+            if (sqlite3_step(stmt) == SQLITE_ROW) {
+                gold = sqlite3_column_int(stmt, 0);
+                item_id = sqlite3_column_int(stmt, 1);
+                item_count = sqlite3_column_int64(stmt, 2);
+            }
+            sqlite3_finalize(stmt);
+        }
+
+        // 2. Si hay algo que reclamar, procedemos a entregárselo al jugador
+        if (gold > 0 || item_id > 0) {
+            
+            // Entregar Oro
+            if (gold > 0) {
+                CItem* item_gold = new CItem;
+                m_item_manager->init_item_attr(item_gold, hb::shared::item::ItemId::Gold);
+                item_gold->m_instance.count = gold;
+                
+                int erase_req = 0;
+                if (m_item_manager->add_client_item_list(client_h, item_gold, &erase_req)) {
+                    m_item_manager->send_item_notify_msg(client_h, Notify::ItemObtained, item_gold, 0);
+                    calc_total_weight(client_h);
+                } else {
+                    delete item_gold; // if it fails to add (e.g. inventory full)
+                }
+            }
+
+            // Entregar Ítem
+            if (item_id > 0) {
+                CItem* item = new CItem;
+                m_item_manager->init_item_attr(item, item_id);
+                item->m_instance.count = item_count;
+                
+                int erase_req = 0;
+                if (m_item_manager->add_client_item_list(client_h, item, &erase_req)) {
+                    m_item_manager->send_item_notify_msg(client_h, Notify::ItemObtained, item, 0);
+                    calc_total_weight(client_h);
+                } else {
+                    delete item; // if it fails to add
+                }
+            }
+
+            // 3. Limpiar los adjuntos en la base de datos para que queden en 0 (ya reclamados)
+            const char* sql_clear = "UPDATE mailbox SET attached_gold = 0, attached_item_id = 0, attached_item_count = 0 WHERE mail_id = ?";
+            sqlite3_stmt* stmt_clear;
+            if (sqlite3_prepare_v2(mail_db, sql_clear, -1, &stmt_clear, nullptr) == SQLITE_OK) {
+                sqlite3_bind_int(stmt_clear, 1, req->mail_id);
+                sqlite3_step(stmt_clear);
+                sqlite3_finalize(stmt_clear);
+                
+                send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "¡Adjuntos reclamados con éxito!");
+            }
+        }
+
+        sqlite3_close(mail_db);
     }
 }

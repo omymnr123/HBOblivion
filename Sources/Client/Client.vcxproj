@@ -241,6 +241,7 @@
     <ClInclude Include="DialogBox_SysMenu.h" />
     <ClInclude Include="DialogBox_Text.h" />
     <ClInclude Include="DialogBox_MagicShop.h" />
+    <ClInclude Include="DialogBox_MailBox.h" />
     <ClInclude Include="DialogBox_NpcTalk.h" />
     <ClInclude Include="DialogBox_ChatHistory.h" />
     <ClInclude Include="DialogBox_CityHallMenu.h" />
@@ -444,6 +445,7 @@
     <ClCompile Include="DialogBox_SysMenu.cpp" />
     <ClCompile Include="DialogBox_Text.cpp" />
     <ClCompile Include="DialogBox_MagicShop.cpp" />
+    <ClCompile Include="DialogBox_MailBox.cpp" />
     <ClCompile Include="DialogBox_NpcTalk.cpp" />
     <ClCompile Include="DialogBox_ChatHistory.cpp" />
     <ClCompile Include="DialogBox_CityHallMenu.cpp" />

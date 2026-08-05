@@ -4,6 +4,7 @@
 #include <string>
 #include <string_view>
 #include <cstdint>
+#include "CommonTypes.h"
 
 namespace cc { class textbox; }
 
@@ -25,6 +26,8 @@ public:
 
 	void set_chat_background(bool show) { m_show_chat_bg = show; }
 	bool shows_chat_background() const { return m_show_chat_bg; }
+	void set_text_color(const hb::shared::render::Color& color) { m_text_color = color; }
+	hb::shared::render::Color get_text_color() const { return m_text_color; }
 
 private:
 	text_input_manager();
@@ -34,4 +37,5 @@ private:
 	std::string* m_buffer = nullptr;
 	bool m_is_active = false;
 	bool m_show_chat_bg = false;
+	hb::shared::render::Color m_text_color = hb::shared::render::Color::White(); // Default white
 };

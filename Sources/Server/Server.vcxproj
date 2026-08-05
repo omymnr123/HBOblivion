@@ -240,6 +240,7 @@
     <ClInclude Include="GameCmdKill.h" />
     <ClInclude Include="GameCmdRevive.h" />
     <ClInclude Include="GameCmdWho.h" />
+    <ClInclude Include="Packet\PacketMailBox.h" />
     <ClInclude Include="..\Dependencies\Shared\Net\ASIOSocket.h" />
     <ClInclude Include="..\Dependencies\Shared\Entity\ActionID.h" />
     <ClInclude Include="..\Dependencies\Shared\Game\AdminLevel.h" />

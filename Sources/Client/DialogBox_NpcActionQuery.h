@@ -38,6 +38,7 @@ public:
 		talk_to_npc = 4,
 		shop_with_sell = 5,
 		gail = 6,
+		mailbox = 7, // Identificador para el botón MailBox
 	};
 	mode m_mode{mode::npc_menu};
 	int m_item_index{-1};

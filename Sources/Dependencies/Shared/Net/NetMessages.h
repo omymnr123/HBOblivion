@@ -84,6 +84,17 @@ namespace MsgId
 		RequestSellItemList                     = 0x2900AD30,
 		StateChangePoint                        = 0x11A01001,
 		GuildSystem                             = 0x0FA31505,
+		RequestMailList                         = 0x0FA40001,
+		ResponseMailList                        = 0x0FA40002,
+		RequestSendMail                         = 0x0FA40003,
+		ResponseSendMail                        = 0x0FA40004,
+		RequestReadMail                         = 0x0FA40005,
+		ResponseReadMail                        = 0x0FA40006,
+		RequestDeleteMail                       = 0x0FA40007,
+		ResponseDeleteMail                      = 0x0FA40008,
+		RequestTakeAttachment                   = 0x0FA40009,
+		ResponseTakeAttachment                  = 0x0FA4000A,
+		NotifyNewMail                           = 0x0FA4000B,
 	};
 }
 
