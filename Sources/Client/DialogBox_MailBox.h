@@ -39,15 +39,20 @@ public:
     std::string m_read_subject;
     std::string m_read_body;
     int m_read_gold{0};
-    int m_read_item_id{0};
-    uint64_t m_read_item_count{0};
+    struct ReadAttachment {
+        int item_id;
+        uint64_t item_count;
+    };
+    ReadAttachment m_read_attachments[10]{};
 
     // For Compose mode
     std::string m_compose_receiver;
     std::string m_compose_subject;
     std::string m_compose_body;
-    int m_compose_active_field{0}; // 0 = none, 1 = receiver, 2 = subject, 3 = body
-    int m_compose_inventory_slot{-1};
+    int m_compose_active_field = 0; // 0=none, 1=receiver, 2=subject, 3=body
+    int m_compose_inventory_slots[10];
+    
+    int m_scroll_offset = 0;
 
 private:
 	void DrawMode_List(short sX, short sY, short size_x);

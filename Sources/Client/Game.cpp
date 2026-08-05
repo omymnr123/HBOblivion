@@ -2773,8 +2773,10 @@ void CGame::response_read_mail_handler(const char* data)
     
     dlg->m_read_body = pkt->body;
     dlg->m_read_gold = pkt->attached_gold;
-    dlg->m_read_item_id = pkt->attached_item_id;
-    dlg->m_read_item_count = pkt->attached_item_count;
+    for (int i = 0; i < 10; ++i) {
+        dlg->m_read_attachments[i].item_id = pkt->attached_items[i].item_id;
+        dlg->m_read_attachments[i].item_count = pkt->attached_items[i].item_count;
+    }
 
     dlg->m_mode = DialogBox_MailBox::mode::read;
     get_dialog_box_manager().enable(DialogBoxId::MailBox);

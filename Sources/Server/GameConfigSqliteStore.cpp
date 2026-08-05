@@ -217,6 +217,8 @@ bool EnsureGameConfigDatabase(sqlite3** outDb, std::string& outPath, bool* outCr
         " attached_gold INTEGER NOT NULL DEFAULT 0,"
         " attached_item_id INTEGER NOT NULL DEFAULT 0,"
         " attached_item_count INTEGER NOT NULL DEFAULT 0,"
+        " attached_items_data TEXT,"
+        " timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,"
         " is_read INTEGER NOT NULL DEFAULT 0"
         ");"
         "CREATE TABLE IF NOT EXISTS active_maps ("
@@ -485,6 +487,13 @@ bool EnsureGameConfigDatabase(sqlite3** outDb, std::string& outPath, bool* outCr
     if (!ExecSql(db, schemaSql)) {
         sqlite3_close(db);
         return false;
+    }
+
+    if (!HasColumn(db, "mailbox", "attached_items_data")) {
+        sqlite3_exec(db, "ALTER TABLE mailbox ADD COLUMN attached_items_data TEXT;", nullptr, nullptr, nullptr);
+    }
+    if (!HasColumn(db, "mailbox", "timestamp")) {
+        sqlite3_exec(db, "ALTER TABLE mailbox ADD COLUMN timestamp DATETIME DEFAULT CURRENT_TIMESTAMP;", nullptr, nullptr, nullptr);
     }
 
     // Migrate old items schema (has appr_value) → new schema (has weapon_class etc.)

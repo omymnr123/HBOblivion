@@ -19,7 +19,7 @@ struct PacketRequestSendMail : packet_base {
     char subject[40];       // Asunto del correo
     char body[200];         // Texto del mensaje
     uint32_t attached_gold; // Cantidad de oro adjunto
-    int16_t inventory_slot; // Slot del inventario del ítem (-1 si no envía nada)
+    int16_t inventory_slots[10]; // Slots del inventario del ítem (-1 si no envía nada)
 };
 
 // 3. El Cliente pide leer un correo específico
@@ -57,17 +57,22 @@ struct PacketResponseMailList : packet_base {
     MailListEntry mails[20]; 
 };
 
+// Estructura auxiliar para los objetos adjuntos en un correo
+struct MailAttachmentItem {
+    int item_id;
+    uint64_t item_count;
+};
+
 // El sobre que contiene el texto y datos de un correo específico al abrirlo
 struct PacketResponseReadMail : packet_base {
     PacketHeader header; // msg_id = MsgId::ResponseReadMail
     uint32_t mail_id;
     char body[200];
     uint32_t attached_gold;
-    int attached_item_id;
-    uint64_t attached_item_count;
+    MailAttachmentItem attached_items[10];
 };
 
 #pragma pack(pop)
 
 }
-}
+}
