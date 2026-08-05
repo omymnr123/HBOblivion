@@ -878,18 +878,22 @@ void Screen_OnGame::on_render()
 
     for (auto it = m_game->m_player->m_magic_timers.begin(); it != m_game->m_player->m_magic_timers.end(); ) {
         // Update time left
-        uint32_t dt = m_game->m_cur_time - it->last_tick;
-        if (dt > 0) {
-            it->time_left_ms -= dt;
-            if (it->time_left_ms < 0) {
-                it->time_left_ms = 0;
+        if (it->time_left_ms != -1) {
+            uint32_t dt = m_game->m_cur_time - it->last_tick;
+            if (dt > 0) {
+                it->time_left_ms -= dt;
+                if (it->time_left_ms < 0) {
+                    it->time_left_ms = 0;
+                }
+                it->last_tick = m_game->m_cur_time;
             }
+        } else {
             it->last_tick = m_game->m_cur_time;
         }
 
-        if (it->time_left_ms > 0) {
+        if (it->time_left_ms > 0 || it->time_left_ms == -1) {
             int d_id = -1;
-            // Map (magic_type, magic_effect) to Display IDs 400-410
+            // Map (magic_type, magic_effect) to Display IDs 400-411
             if (it->magic_type == 11) { // Protect
                 if (it->magic_effect == 3) d_id = 400; // Defense Shield
                 else if (it->magic_effect == 4) d_id = 401; // Greater Defense Shield
@@ -905,10 +909,11 @@ void Screen_OnGame::on_render()
                 else if (it->magic_effect == 2) d_id = 409; // Paralyze
             }
             else if (it->magic_type == 18) d_id = 410; // Berserk
+            else if (it->magic_type == 23) d_id = 411; // Ice
 
             if (d_id != -1) {
                 bool draw_ui = true;
-                if (it->time_left_ms <= 10000) {
+                if (it->time_left_ms != -1 && it->time_left_ms <= 10000) {
                     // Blink when < 10 seconds (500ms on, 500ms off)
                     if ((m_game->m_cur_time % 1000) < 500) {
                         draw_ui = false;
@@ -925,24 +930,26 @@ void Screen_OnGame::on_render()
                         item_draw.sprite->draw(icon_x, icon_y, item_draw.frame);
                     }
 
-                    // Draw time text
-                    int mins = it->time_left_ms / 60000;
-                    int secs = (it->time_left_ms % 60000) / 1000;
-                    std::string time_str;
-                    if (mins > 0) {
-                        time_str = std::format("{}m", mins + 1); // e.g. "60m"
-                    } else {
-                        time_str = std::format("{}s", secs);     // e.g. "59s"
-                    }
+                    if (it->time_left_ms != -1) {
+                        // Draw time text
+                        int mins = it->time_left_ms / 60000;
+                        int secs = (it->time_left_ms % 60000) / 1000;
+                        std::string time_str;
+                        if (mins > 0) {
+                            time_str = std::format("{}m", mins + 1); // e.g. "60m"
+                        } else {
+                            time_str = std::format("{}s", secs);     // e.g. "59s"
+                        }
 
-                    int text_x = icon_x + 17; 
-                    int text_y = icon_y - -8;
-                    hb::shared::text::draw_text(
-                        GameFont::Default,
-                        text_x, text_y,
-                        time_str.c_str(),
-                        hb::shared::text::TextStyle::from_color(GameColors::UIYellow)
-                    );
+                        int text_x = icon_x + 17; 
+                        int text_y = icon_y - -8;
+                        hb::shared::text::draw_text(
+                            GameFont::Default,
+                            text_x, text_y,
+                            time_str.c_str(),
+                            hb::shared::text::TextStyle::from_color(GameColors::UIYellow)
+                        );
+                    }
                 }
 
                 next_icon_y += 20; // Move down for the next icon

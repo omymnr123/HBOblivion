@@ -3245,5 +3245,6 @@
   { "id": 407, "name": "Debuff_Poison", "equip_type": "none", "pak_file": null, "inventory_frame_index": 381, "ground_frame_index": 381 },
   { "id": 408, "name": "Debuff_HoldPerson", "equip_type": "none", "pak_file": null, "inventory_frame_index": 382, "ground_frame_index": 382 },
   { "id": 409, "name": "Debuff_Paralyze", "equip_type": "none", "pak_file": null, "inventory_frame_index": 383, "ground_frame_index": 383 },
-  { "id": 410, "name": "Buff_Berserk", "equip_type": "none", "pak_file": null, "inventory_frame_index": 384, "ground_frame_index": 384 }
+  { "id": 410, "name": "Buff_Berserk", "equip_type": "none", "pak_file": null, "inventory_frame_index": 384, "ground_frame_index": 384 },
+  { "id": 411, "name": "Debuff_Ice", "equip_type": "none", "pak_file": null, "inventory_frame_index": 383, "ground_frame_index": 383 }
 ]

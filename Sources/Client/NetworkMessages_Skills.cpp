@@ -150,11 +150,12 @@ namespace NetworkMessageHandlers {
 		magic_effect = static_cast<short>(pkt->effect);
 		owner_h = static_cast<short>(pkt->owner);
 
-		if (magic_type >= 0 && magic_type < 100 && pkt->duration_ms > 0) {
+		if (magic_type >= 0 && magic_type < 100) {
+			int32_t time_left = pkt->duration_ms > 0 ? pkt->duration_ms : -1;
 			bool found = false;
 			for (auto& timer : game->m_player->m_magic_timers) {
 				if (timer.magic_type == magic_type && timer.magic_effect == magic_effect) {
-					timer.time_left_ms = pkt->duration_ms;
+					timer.time_left_ms = time_left;
 					timer.last_tick = game->m_cur_time;
 					found = true;
 					break;
@@ -164,7 +165,7 @@ namespace NetworkMessageHandlers {
 				CPlayer::MagicTimer new_timer;
 				new_timer.magic_type = magic_type;
 				new_timer.magic_effect = magic_effect;
-				new_timer.time_left_ms = pkt->duration_ms;
+				new_timer.time_left_ms = time_left;
 				new_timer.last_tick = game->m_cur_time;
 				game->m_player->m_magic_timers.push_back(new_timer);
 			}
@@ -270,7 +271,7 @@ namespace NetworkMessageHandlers {
 
 		if (magic_type >= 0 && magic_type < 100) {
 			for (auto it = game->m_player->m_magic_timers.begin(); it != game->m_player->m_magic_timers.end(); ) {
-				if (it->magic_type == magic_type && it->magic_effect == magic_effect) {
+				if (it->magic_type == magic_type && (it->magic_effect == magic_effect || magic_effect == 0)) {
 					it = game->m_player->m_magic_timers.erase(it);
 				} else {
 					++it;
