@@ -6,6 +6,7 @@
 #include "DialogBox_ItemCreator.h"
 #include "DialogBox_TesterMenu.h"
 #include "DialogBox_GameMaster.h"
+#include "DialogBox_NpcCreator.h"
 #include "lan_eng.h"
 #include <cstdio>
 #include <cstring>
@@ -133,6 +134,17 @@ namespace NetworkMessageHandlers {
 		auto* dlg = dynamic_cast<DialogBox_GameMaster*>(
 			game->get_dialog_box_manager().get_dialog_box(DialogBoxId::GameMasterMenu));
 		if (dlg) dlg->receive_map_list(pkt);
+	}
+
+	void HandleGameMasterNpcSearchResult(CGame* game, char* data)
+	{
+		const auto* pkt = hb::net::PacketCast<hb::net::PacketNotifyGameMasterNpcSearchResult>(
+			data, sizeof(hb::net::PacketNotifyGameMasterNpcSearchResult));
+		if (!pkt) return;
+
+		auto* dlg = dynamic_cast<DialogBox_NpcCreator*>(
+			game->get_dialog_box_manager().get_dialog_box(DialogBoxId::NpcCreator));
+		if (dlg) dlg->receive_search_results(pkt);
 	}
 
 	void HandleEnemyKillReward(CGame* game, char* data)
@@ -269,6 +281,7 @@ namespace NetworkMessageHandlers {
 		game->on_game()->m_point_command_type = -1;
 	}
 }
+
 
 
 

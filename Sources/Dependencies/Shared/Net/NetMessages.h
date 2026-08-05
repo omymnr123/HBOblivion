@@ -159,6 +159,7 @@ namespace CommonType
 		TesterItemSearch                        = 0x0A77,
 		TesterCreateItem                        = 0x0A78,
 		TesterMapList                           = 0x0A79,
+		GameMasterNpcSearch                     = 0x0A7B,
 		ReqRepairAll                            = 0x0F10,
 		ReqRepairAllDelete                      = 0x0F12,
 		ReqRepairAllConfirm                     = 0x0F13,
@@ -359,6 +360,7 @@ namespace Notify
 		// TESTER MENU — tester-only notifications
 		TesterItemSearchResult                  = 0x0A6A,
 		TesterMapListResult                     = 0x0A6B,
+		GameMasterNpcSearchResult               = 0x0B6A,
 	};
 }
 

@@ -399,7 +399,7 @@ std::array<bool, hb::shared::limits::MaxItems> m_is_item_equipped{};
 	bool m_color_palette_loaded = false;
 
 	uint8_t m_prefix_multiplier[16]{};
-	uint8_t m_secondary_multiplier[16]{};
+	uint8_t m_secondary_multiplier[64]{};
 	bool m_attribute_types_loaded = false;
 
 	struct NpcConfig { short npcType = 0; std::string name; bool valid = false; };

@@ -37,6 +37,14 @@ def ensure_table():
         " PRIMARY KEY (class_type, item_id, gender_limit)"
         ")"
     )
+    
+    # Intenta añadir la columna 'lifespan' si la tabla es de una versión antigua
+    try:
+        conn.execute("ALTER TABLE character_creation_items ADD COLUMN lifespan INTEGER NOT NULL DEFAULT 0")
+    except sqlite3.OperationalError:
+        # Si la columna ya existe, SQLite lanzará un error que podemos ignorar en silencio.
+        pass
+        
     conn.commit()
     conn.close()
 

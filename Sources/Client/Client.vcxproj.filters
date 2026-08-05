@@ -165,6 +165,12 @@
     <ClInclude Include="DialogBox_TesterMenu.h">
       <Filter>DialogBox</Filter>
     </ClInclude>
+    <ClInclude Include="DialogBox_GameMaster.h">
+      <Filter>DialogBox</Filter>
+    </ClInclude>
+    <ClInclude Include="DialogBox_NpcCreator.h">
+      <Filter>DialogBox</Filter>
+    </ClInclude>
     <ClInclude Include="DialogBox_ItemCreator.h">
       <Filter>DialogBox</Filter>
     </ClInclude>
@@ -764,6 +770,12 @@
       <Filter>DialogBox</Filter>
     </ClCompile>
     <ClCompile Include="DialogBox_TesterMenu.cpp">
+      <Filter>DialogBox</Filter>
+    </ClCompile>
+    <ClCompile Include="DialogBox_GameMaster.cpp">
+      <Filter>DialogBox</Filter>
+    </ClCompile>
+    <ClCompile Include="DialogBox_NpcCreator.cpp">
       <Filter>DialogBox</Filter>
     </ClCompile>
     <ClCompile Include="DialogBox_ItemCreator.cpp">

@@ -161,6 +161,7 @@ void DialogBox_ItemCreator::build_valid_options(int16_t effect_type)
 		m_valid_secondaries.push_back({7, "MagicRes", m_game->m_secondary_multiplier[7]});
 		m_valid_secondaries.push_back({8, "PhysAbsorb", m_game->m_secondary_multiplier[8]});
 		m_valid_secondaries.push_back({9, "MagicAbsorb", m_game->m_secondary_multiplier[9]});
+		m_valid_secondaries.push_back({40, "HitProb%", m_game->m_secondary_multiplier[40]});
 		break;
 
 	case item_category::magic_weapon:

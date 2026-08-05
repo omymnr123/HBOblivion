@@ -28,7 +28,8 @@ const DialogBox_GameMaster::action_entry DialogBox_GameMaster::actions[action_co
 	{ "Max all skills" },
 	{ "Set level" },
 	{ "Create item" },
-	{ "Teleport" },
+	{ "Teleport to Map" },
+	{ "NPC Spawner" },
 };
 
 DialogBox_GameMaster::DialogBox_GameMaster(CGame* game)
@@ -262,6 +263,12 @@ bool DialogBox_GameMaster::on_click_main_menu(short sX, short sY)
 			m_map_scroll = 0;
 			m_map_count = 0;
 			send_game_packet(hb::net::make_common_command(CommonType::TesterMapList, player().m_player_x, player().m_player_y));
+			audio_manager::get().play_game_sound(sound_type::effect, 14, 5);
+			return true;
+		}
+		if (row == 10) // NPC Spawner
+		{
+			m_game->get_dialog_box_manager().enable_dialog_box(DialogBoxId::NpcCreator, 0, 0, 0);
 			audio_manager::get().play_game_sound(sound_type::effect, 14, 5);
 			return true;
 		}

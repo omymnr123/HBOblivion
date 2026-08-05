@@ -3302,6 +3302,70 @@ if (attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[at
 				return 0;
 			}
 
+
+			// === NUEVO: GM SWORD INSTAKILL OVERRIDE ===
+			if (attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[attacker_h] != 0) {
+				if (m_game->m_client_list[attacker_h]->m_is_gm_mode) {
+					// Comprobamos si lleva equipada la GMSword (ID 899) a una o dos manos
+					int r_hand = m_game->m_client_list[attacker_h]->m_item_equipment_status[to_int(EquipPos::RightHand)];
+					int t_hand = m_game->m_client_list[attacker_h]->m_item_equipment_status[to_int(EquipPos::TwoHand)];
+					
+					if ((r_hand != -1 && m_game->m_client_list[attacker_h]->m_item_list[r_hand]->m_id_num == 1114) ||
+						(t_hand != -1 && m_game->m_client_list[attacker_h]->m_item_list[t_hand]->m_id_num == 1114)) {
+						
+						// El truco sucio: Le dejamos a 1 de vida antes de calcular el impacto
+						m_game->m_npc_list[target_h]->m_hp = 1;
+						
+						// Pegamos un golpe de 5000 (totalmente seguro para el límite de 32767)
+						iAP_SM = 5000;
+						iAP_L = 5000;
+					}
+				}
+			}
+			// ==========================================
+
+			// === NUEVO: GM SWORD INSTAKILL OVERRIDE ===
+			if (attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[attacker_h] != 0) {
+				if (m_game->m_client_list[attacker_h]->m_is_gm_mode) {
+					// Comprobamos si lleva equipada la GMSword (ID 899) a una o dos manos
+					int r_hand = m_game->m_client_list[attacker_h]->m_item_equipment_status[to_int(EquipPos::RightHand)];
+					int t_hand = m_game->m_client_list[attacker_h]->m_item_equipment_status[to_int(EquipPos::TwoHand)];
+					
+					if ((r_hand != -1 && m_game->m_client_list[attacker_h]->m_item_list[r_hand]->m_id_num == 1115) ||
+						(t_hand != -1 && m_game->m_client_list[attacker_h]->m_item_list[t_hand]->m_id_num == 1115)) {
+						
+						// El truco sucio: Le dejamos a 1 de vida antes de calcular el impacto
+						m_game->m_npc_list[target_h]->m_hp = 1;
+						
+						// Pegamos un golpe de 5000 (totalmente seguro para el límite de 32767)
+						iAP_SM = 5000;
+						iAP_L = 5000;
+					}
+				}
+			}
+			// ==========================================
+
+			// === NUEVO: GM SWORD INSTAKILL OVERRIDE ===
+			if (attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[attacker_h] != 0) {
+				if (m_game->m_client_list[attacker_h]->m_is_gm_mode) {
+					// Comprobamos si lleva equipada la GMSword (ID 899) a una o dos manos
+					int r_hand = m_game->m_client_list[attacker_h]->m_item_equipment_status[to_int(EquipPos::RightHand)];
+					int t_hand = m_game->m_client_list[attacker_h]->m_item_equipment_status[to_int(EquipPos::TwoHand)];
+					
+					if ((r_hand != -1 && m_game->m_client_list[attacker_h]->m_item_list[r_hand]->m_id_num == 1116) ||
+						(t_hand != -1 && m_game->m_client_list[attacker_h]->m_item_list[t_hand]->m_id_num == 1116)) {
+						
+						// El truco sucio: Le dejamos a 1 de vida antes de calcular el impacto
+						m_game->m_npc_list[target_h]->m_hp = 1;
+						
+						// Pegamos un golpe de 5000 (totalmente seguro para el límite de 32767)
+						iAP_SM = 5000;
+						iAP_L = 5000;
+					}
+				}
+			}
+			// ==========================================
+
 			if (m_game->m_npc_list[target_h]->m_size == 0)
 				damage = iAP_SM;
 			else damage = iAP_L;

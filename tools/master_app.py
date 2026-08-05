@@ -63,7 +63,7 @@ TOOL_REGISTRY = [
     },
 ]
 
-MASTER_PORT = 8000
+MASTER_PORT = 8090
 
 # ---------------------------------------------------------------------------
 # Launch each tool's main() in a daemon thread

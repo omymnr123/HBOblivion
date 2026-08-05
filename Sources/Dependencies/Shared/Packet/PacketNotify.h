@@ -937,6 +937,18 @@ namespace net {
 		int16_t count;
 		TesterMapEntry entries[100];
 	};
+	
+	struct HB_PACKED GameMasterNpcSearchEntry {
+		int16_t npc_id;
+		char name[22];
+	};
+
+	struct HB_PACKED PacketNotifyGameMasterNpcSearchResult {
+		PacketHeader header;
+		int16_t count;
+		GameMasterNpcSearchEntry entries[200];
+	};
+
 	struct HB_PACKED PacketNotifyFloatingText {
 		PacketHeader header;
 		uint32_t object_id;

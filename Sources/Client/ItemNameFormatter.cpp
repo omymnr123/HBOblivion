@@ -1,4 +1,4 @@
-﻿#include "ItemNameFormatter.h"
+#include "ItemNameFormatter.h"
 #include "Item/Item.h"
 #include "lan_eng.h"
 #include "GameConstants.h"
@@ -161,7 +161,7 @@ ItemNameInfo item_name_formatter::format(short item_id, const hb::shared::item::
 
 		if (type2 != 0)
 		{
-			int s = (m_secondary_multiplier && type2 < 16) ? m_secondary_multiplier[type2] : 1;
+			int s = (m_secondary_multiplier && type2 < 64) ? m_secondary_multiplier[type2] : 1;
 			switch (type2) {
 			case 1:  result.effects.push_back({"Poison Resistance", std::format("+{}%", value2 * s)}); break;
 			case 2:  result.effects.push_back({"Hitting Probability", std::format("+{}", value2 * s)}); break;

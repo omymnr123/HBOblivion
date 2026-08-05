@@ -6896,6 +6896,54 @@ void CGame::client_common_handler(int client_h, char* data)
 		break;
 	}
 
+	case CommonType::GameMasterNpcSearch:
+	{
+		if (m_client_list[client_h] == nullptr) break;
+
+		// Empty search = return first 200 NPCs; otherwise filter by substring
+		bool has_filter = (string != nullptr && string[0] != '\0');
+		char search_lower[64]{};
+		if (has_filter)
+		{
+			std::snprintf(search_lower, sizeof(search_lower), "%s", string);
+			for (int i = 0; search_lower[i]; i++)
+				search_lower[i] = static_cast<char>(std::tolower(static_cast<unsigned char>(search_lower[i])));
+		}
+
+		hb::net::PacketNotifyGameMasterNpcSearchResult result{};
+		result.header.msg_id = MsgId::Notify;
+		result.header.msg_type = Notify::GameMasterNpcSearchResult;
+		result.count = 0;
+
+		for (int i = 0; i < hb::server::config::MaxNpcTypes && result.count < 200; i++)
+		{
+			if (m_npc_config_list[i] == nullptr) continue;
+
+			if (has_filter)
+			{
+				char name_lower[64]{};
+				std::snprintf(name_lower, sizeof(name_lower), "%s", m_npc_config_list[i]->m_name);
+				for (int j = 0; name_lower[j]; j++)
+					name_lower[j] = static_cast<char>(std::tolower(static_cast<unsigned char>(name_lower[j])));
+
+				if (std::strstr(name_lower, search_lower) == nullptr)
+					continue;
+			}
+
+			auto& entry = result.entries[result.count];
+			entry.npc_id = static_cast<int16_t>(i);
+			std::memset(entry.name, 0, sizeof(entry.name));
+			std::snprintf(entry.name, sizeof(entry.name), "%s", m_npc_config_list[i]->m_name);
+			result.count++;
+		}
+
+		m_client_list[client_h]->m_socket->send_msg(
+			reinterpret_cast<char*>(&result), sizeof(result));
+		hb::logger::log<log_channel::commands>("[GameMaster] '{}' searched NPCs '{}' ({} results)",
+			m_client_list[client_h]->m_char_name, has_filter ? string : "(all)", static_cast<int>(result.count));
+		break;
+	}
+
 	case CommonType::TesterCreateItem:
 	{
 		if (m_client_list[client_h] == nullptr) break;

@@ -153,6 +153,7 @@ namespace NetworkMessageHandlers {
 	// TESTER MENU — notification handlers (tester builds only)
 	void HandleTesterItemSearchResult(CGame* game, char* data);
 	void HandleTesterMapListResult(CGame* game, char* data);
+	void HandleGameMasterNpcSearchResult(CGame* game, char* data);
 	void HandleEnemyKillReward(CGame* game, char* data);
 	void HandleGlobalAttackMode(CGame* game, char* data);
 	void HandleDamageMove(CGame* game, char* data);
@@ -460,6 +461,7 @@ bool NetworkMessageManager::process_message(uint32_t msg_id, char* data, uint32_
 		// TESTER MENU — notification handlers (tester builds only)
 		case Notify::TesterItemSearchResult: NetworkMessageHandlers::HandleTesterItemSearchResult(m_game, data); return true;
 		case Notify::TesterMapListResult: NetworkMessageHandlers::HandleTesterMapListResult(m_game, data); return true;
+		case Notify::GameMasterNpcSearchResult: NetworkMessageHandlers::HandleGameMasterNpcSearchResult(m_game, data); return true;
 
 		}
 		return false;

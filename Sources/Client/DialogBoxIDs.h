@@ -62,8 +62,8 @@ namespace DialogBoxId
 		// =============================================
 		MailBox = 59,
 		// === NUEVO: Menú oficial de Game Master (Release) ===
-		GameMasterMenu = 60
+		GameMasterMenu = 60,
+		NpcCreator = 61
 
 	};
 }
-
