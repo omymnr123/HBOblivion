@@ -385,6 +385,15 @@ void Screen_OnGame::on_update()
                                 }
                                 break;
                             }
+                            case 1010:
+                            {
+                                auto* mailDlg = m_game->get_dialog_box_manager().get_dialog_as<DialogBox_MailBox>(DialogBoxId::MailBox);
+                                if (mailDlg) {
+                                    mailDlg->m_compose_gold = amount;
+                                    audio_manager::get().play_game_sound(sound_type::effect, 14, 5);
+                                }
+                                break;
+                            }
                             case 1001:
                             {
                                 auto* sellDlg = m_game->get_dialog_box_manager().get_dialog_as<DialogBox_SellList>(DialogBoxId::SellList);

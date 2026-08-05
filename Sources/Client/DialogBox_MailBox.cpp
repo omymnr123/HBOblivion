@@ -1,4 +1,6 @@
 #include "DialogBox_MailBox.h"
+#include "DialogBox_ItemDropAmount.h"
+#include <cstring>
 #include "Game.h"
 #include "Packet/PacketMailBox.h"
 #include "IInput.h"
@@ -149,6 +151,12 @@ void DialogBox_MailBox::DrawMode_Read(short sX, short sY, short size_x)
     } else {
         put_string(sX + 180, sY + 220, "Back", GameColors::UITopMsgYellow);
     }
+    
+    if (mouse_in({120, 220, 50, 15})) {
+        put_string(sX + 120, sY + 220, "Delete", GameColors::UIDmgRed);
+    } else {
+        put_string(sX + 120, sY + 220, "Delete", GameColors::UINoticeRed);
+    }
 }
 
 void DialogBox_MailBox::DrawMode_Compose(short sX, short sY, short size_x)
@@ -222,6 +230,12 @@ void DialogBox_MailBox::DrawMode_Compose(short sX, short sY, short size_x)
             gold_cost += 175;
         }
     }
+    
+    if (m_compose_gold > 0) {
+        put_string(sX + 20, sY + 125, std::format("Gold Attached: {}", m_compose_gold).c_str(), GameColors::UITopMsgYellow);
+        gold_cost += m_compose_gold;
+    }
+    
     snprintf(cost_str, sizeof(cost_str), "Cost: %d Gold", gold_cost);
     put_aligned_string(sX, sX + size_x, sY + 215, cost_str, GameColors::UIYellow);
 
@@ -325,6 +339,20 @@ bool DialogBox_MailBox::OnClick_Read(short sX, short sY)
 
     if (mouse_in({180, 220, 50, 15})) {
         m_mode = mode::list;
+        m_read_attachments[0].item_id = 0; // Clear attachment cache
+        m_scroll_offset = 0;
+        return true;
+    }
+    
+    // Delete button
+    if (mouse_in({120, 220, 50, 15})) {
+        hb::net::PacketRequestDeleteMail pkt{};
+        pkt.header.msg_id = hb::shared::net::MsgId::RequestDeleteMail;
+        pkt.mail_id = m_read_mail_id;
+        send_game_packet(pkt);
+        
+        m_mode = mode::list;
+        m_read_attachments[0].item_id = 0;
         m_scroll_offset = 0;
         return true;
     }
@@ -369,7 +397,7 @@ bool DialogBox_MailBox::OnClick_Compose(short sX, short sY)
         std::snprintf(pkt.receiver_name, sizeof(pkt.receiver_name), "%s", m_compose_receiver.c_str());
         std::snprintf(pkt.subject, sizeof(pkt.subject), "%s", m_compose_subject.c_str());
         std::snprintf(pkt.body, sizeof(pkt.body), "%s", m_compose_body.c_str());
-        pkt.attached_gold = 0; // Gold attachment not implemented yet
+        pkt.attached_gold = m_compose_gold;
         
         for (int i = 0; i < 10; ++i) {
             pkt.inventory_slots[i] = m_compose_inventory_slots[i];
@@ -378,6 +406,9 @@ bool DialogBox_MailBox::OnClick_Compose(short sX, short sY)
         send_game_packet(pkt);
         
         m_compose_receiver.clear();
+        m_compose_subject.clear();
+        m_compose_body.clear();
+        m_compose_gold = 0;
         m_compose_subject.clear();
         m_compose_body.clear();
         m_compose_active_field = 0;
@@ -420,6 +451,25 @@ bool DialogBox_MailBox::on_item_drop()
     int item_id = CursorTarget::get_selected_id();
     if (item_id < 0 || item_id >= hb::shared::limits::MaxItems) return false;
     if (inventory_manager::get().warn_if_locked(item_id)) return false;
+
+    if (m_game->m_player->m_item_list[item_id]->m_id_num == hb::shared::item::ItemId::Gold) {
+        // Drop target type 1010 for MailBox Gold attachment
+        m_game->get_dialog_box_manager().get_dialog_box(DialogBoxId::ItemDropExternal)->m_x = mouse_x - 140;
+        m_game->get_dialog_box_manager().get_dialog_box(DialogBoxId::ItemDropExternal)->m_y = mouse_y - 70;
+        if (m_game->get_dialog_box_manager().get_dialog_box(DialogBoxId::ItemDropExternal)->m_y < 0) {
+            m_game->get_dialog_box_manager().get_dialog_box(DialogBoxId::ItemDropExternal)->m_y = 0;
+        }
+        auto* dropDlg = m_game->get_dialog_box_manager().get_dialog_as<DialogBox_ItemDropAmount>(DialogBoxId::ItemDropExternal);
+        if (dropDlg) {
+            dropDlg->m_drop_target_type = 1010;
+            dropDlg->m_drop_target_id = item_id;
+            dropDlg->m_drop_x = m_game->m_player->m_player_x + 1;
+            dropDlg->m_drop_y = m_game->m_player->m_player_y + 1;
+            std::memset(dropDlg->m_target_name, 0, sizeof(dropDlg->m_target_name));
+        }
+        m_game->get_dialog_box_manager().enable_dialog_box(DialogBoxId::ItemDropExternal, item_id, static_cast<int64_t>(m_game->m_player->m_item_list[item_id]->m_instance.count), 0);
+        return true;
+    }
 
     for (int i = 0; i < 10; ++i) {
         if (m_compose_inventory_slots[i] == -1) {

@@ -14992,6 +14992,7 @@ void CGame::add_extra_loot(int client_h, CItem* item)
 // =========================================================================
 //                      SISTEMA DE MAILBOX (BUZON)
 // =========================================================================
+#include "AccountSqliteStore.h"
 
 void CGame::request_send_mail_handler(int client_h, char* data)
 {
@@ -15004,6 +15005,11 @@ void CGame::request_send_mail_handler(int client_h, char* data)
     req->receiver_name[sizeof(req->receiver_name) - 1] = '\0';
     req->subject[sizeof(req->subject) - 1] = '\0';
     req->body[sizeof(req->body) - 1] = '\0';
+
+    if (!CharacterNameExistsGlobally(req->receiver_name)) {
+        send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "Character does not exist.");
+        return;
+    }
 
     // -------------------------------------------------------------
     // 3. COMPROBACIÓN Y EXTRACCIÓN DEL ÍTEM (C4244 CORREGIDO)
@@ -15040,7 +15046,7 @@ void CGame::request_send_mail_handler(int client_h, char* data)
     }
     uint64_t current_gold = m_item_manager->get_item_count_by_id(client_h, hb::shared::item::ItemId::Gold);
     if (current_gold < gold_cost) {
-        send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "You do not have enough gold to send this mail.
+        send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "You do not have enough gold to send this mail.");
         return;
     }
     // Deduct gold
@@ -15278,7 +15284,10 @@ void CGame::request_delete_mail_handler(int client_h, char* data)
             sqlite3_bind_int(stmt, 1, req->mail_id);
             sqlite3_bind_text(stmt, 2, m_client_list[client_h]->m_char_name, -1, SQLITE_STATIC);
             
-            sqlite3_step(stmt);
+            if (sqlite3_step(stmt) == SQLITE_DONE) {
+                // Return updated mail list
+                request_mail_list_handler(client_h, nullptr);
+            }
             sqlite3_finalize(stmt);
         }
         sqlite3_close(mail_db);

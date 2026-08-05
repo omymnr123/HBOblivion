@@ -53,8 +53,9 @@ public:
     std::string m_compose_receiver;
     std::string m_compose_subject;
     std::string m_compose_body;
-    int m_compose_active_field = 0; // 0=none, 1=receiver, 2=subject, 3=body
     int m_compose_inventory_slots[10];
+    int m_compose_active_field = 0; // 0=None, 1=Receiver, 2=Subject, 3=Body
+    uint32_t m_compose_gold = 0;
     
     int m_scroll_offset = 0;
 
