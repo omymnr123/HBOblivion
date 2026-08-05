@@ -124,6 +124,7 @@ CClient::CClient(asio::io_context& ctx)
 	m_side = 0;
 
 	m_hit_ratio = 0;
+	m_hitting_probability = 0; // Reseteamos nuestra nueva estadística al iniciar
 	m_defense_ratio = 0;
 	
 	for(int i = 0; i < DEF_MAXITEMEQUIPPOS; i++) m_damage_absorption_armor[i]  = 0;

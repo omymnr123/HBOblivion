@@ -172,6 +172,7 @@ ItemNameInfo item_name_formatter::format(short item_id, const hb::shared::item::
 			case 7:  result.effects.push_back({"Magic Resistance", std::format("+{}%", value2 * s)}); break;
 			case 8:  result.effects.push_back({"Physical Absorption", std::format("+{}%", value2 * s)}); break;
 			case 9:  result.effects.push_back({"Magic Absorption", std::format("+{}%", value2 * s)}); break;
+			case 40:  result.effects.push_back({"Hitting Probability ", std::format("+{}%", value1 * s)}); break;
 			case hb::shared::owner::Slime: result.effects.push_back({"Consecutive Attack Damage", std::format("+{}", value2 * s)}); break;
 			case hb::shared::owner::Skeleton: result.effects.push_back({"Experience", std::format("+{}%", value2 * s)}); break;
 			case hb::shared::owner::StoneGolem: result.effects.push_back({"Gold", std::format("+{}%", value2 * s)}); break;

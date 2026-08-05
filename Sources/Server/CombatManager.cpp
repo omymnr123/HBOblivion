@@ -2800,6 +2800,15 @@ iAP_L += (iAP_L * bonus) / 100;
 	tmp3 = (tmp1 / tmp2) * 50.0f;
 	dest_hit_ratio = (int)(tmp3);
 
+	// =======================================================
+	// NUEVO: SISTEMA DE HITTING PROBABILITY (Daño Físico)
+	// Opción B Híbrida: Probabilidad Plana Absoluta (+%)
+	// =======================================================
+	if (attacker_type == hb::shared::owner_class::Player) {
+		dest_hit_ratio += m_game->m_client_list[attacker_h]->m_hitting_probability;
+	}
+	// =======================================================
+
 	if (dest_hit_ratio < m_game->m_minimum_hit_ratio) dest_hit_ratio = m_game->m_minimum_hit_ratio;
 	if (dest_hit_ratio > m_game->m_maximum_hit_ratio) dest_hit_ratio = m_game->m_maximum_hit_ratio;
 

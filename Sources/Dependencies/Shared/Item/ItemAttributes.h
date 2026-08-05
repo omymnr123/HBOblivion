@@ -50,7 +50,8 @@ enum class SecondaryEffectType : uint8_t
 	MagicAbsorb       = 9,   // Magic Absorption +X%
 	ConsecutiveAttack = 10,  // Consecutive Attack Damage +X
 	ExperienceBonus   = 11,  // Experience +X%
-	GoldBonus         = 12   // Gold +X%
+	GoldBonus         = 12,   // Gold +X%
+	HittingProbability = 40 // Hitting Probability +X%
 };
 
 } // namespace hb::shared::item

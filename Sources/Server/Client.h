@@ -111,6 +111,7 @@ public:
 
 	int  m_defense_ratio;		// Defense Ratio
 	int  m_hit_ratio;			// Hit Ratio
+	int  m_hitting_probability;  // Hitting Probability Flat Bonus (Max +5%)
 
 	// int  m_iHitRatio_ItemEffect_SM; //    HitRatio
 	//int  m_iHitRatio_ItemEffect_L;

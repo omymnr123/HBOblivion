@@ -3191,6 +3191,7 @@ void ItemManager::calc_total_item_effect(int client_h, int equip_item_id, bool n
 	m_game->m_client_list[client_h]->m_attack_bonus_l = 0;
 
 	m_game->m_client_list[client_h]->m_hit_ratio = 0;
+	m_game->m_client_list[client_h]->m_hitting_probability = 0; // Limpiamos antes de recalcular
 	m_game->m_client_list[client_h]->m_defense_ratio = m_game->m_client_list[client_h]->m_dex * 2;
 	m_game->m_client_list[client_h]->m_damage_absorption_shield = 0;
 
@@ -3476,6 +3477,10 @@ void ItemManager::calc_total_item_effect(int client_h, int equip_item_id, bool n
 				case 12:
 					m_game->m_client_list[client_h]->m_hit_ratio += m_game->m_client_list[client_h]->m_item_list[item_index]->m_item_effect_value2;
 					break;
+				
+				case 40: // Efecto especial 40: Hitting Probability (Plano)
+					m_game->m_client_list[client_h]->m_hitting_probability += m_game->m_client_list[client_h]->m_item_list[item_index]->m_item_effect_value1;
+					break;	
 
 				case 13: // Magin Ruby		Characters Hp recovery rate(% applied) added by the purity formula.
 					m_game->m_client_list[client_h]->m_add_hp += (m_game->m_client_list[client_h]->m_item_list[item_index]->m_instance.special_effect_value2 / 5);
