@@ -10,6 +10,7 @@
 using namespace hb::shared::net;
 namespace NetworkMessageHandlers {
 	// Stats
+	void HandleFloatingText(CGame* game, char* data);
 	void HandleHP(CGame* game, char* data);
 	void HandleMP(CGame* game, char* data);
 	void HandleSP(CGame* game, char* data);
@@ -235,6 +236,7 @@ bool NetworkMessageManager::process_message(uint32_t msg_id, char* data, uint32_
 		switch (header->msg_type)
 		{
 		// Stats
+		case Notify::FloatingText: NetworkMessageHandlers::HandleFloatingText(m_game, data); return true;
 		case Notify::Hp: NetworkMessageHandlers::HandleHP(m_game, data); return true;
 		case Notify::Mp: NetworkMessageHandlers::HandleMP(m_game, data); return true;
 		case Notify::Sp: NetworkMessageHandlers::HandleSP(m_game, data); return true;

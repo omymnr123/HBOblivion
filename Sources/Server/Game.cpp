@@ -6960,6 +6960,33 @@ void CGame::client_common_handler(int client_h, char* data)
 //  last updated		:: October 29, 2004; 7:12 PM; Hypnotoad
 //	return value		:: int
 
+void CGame::send_floating_text_to_near_clients(char map_index, short sX, short sY, uint32_t object_id, uint8_t type, int32_t amount)
+{
+	if (m_client_shortcut[0] == 0) return;
+
+	hb::net::PacketNotifyFloatingText pkt{};
+	pkt.header.msg_id = MsgId::Notify;
+	pkt.header.msg_type = Notify::FloatingText;
+	pkt.object_id = object_id;
+	pkt.type = type;
+	pkt.amount = amount;
+
+	int short_cut_index = 0;
+	while (m_client_shortcut[short_cut_index] != 0) {
+		int i = m_client_shortcut[short_cut_index];
+		if ((m_client_list[i] != 0) &&
+			(m_client_list[i]->m_map_index == map_index) &&
+			(m_client_list[i]->m_x >= sX - hb::shared::view::CenterX) &&
+			(m_client_list[i]->m_x <= sX + hb::shared::view::CenterX) &&
+			(m_client_list[i]->m_y >= sY - (hb::shared::view::CenterY + 1)) &&
+			(m_client_list[i]->m_y <= sY + hb::shared::view::CenterY))
+		{
+			m_client_list[i]->m_socket->send_msg(reinterpret_cast<char*>(&pkt), sizeof(pkt));
+		}
+		short_cut_index++;
+	}
+}
+
 void CGame::send_event_to_near_client_type_b(uint32_t msg_id, uint16_t msg_type, char map_index, short sX, short sY, short v1, short v2, short v3, short v4)
 {
 	int ret, short_cut_index;

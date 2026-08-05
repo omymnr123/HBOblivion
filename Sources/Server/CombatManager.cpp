@@ -11,6 +11,7 @@
 #include "LootManager.h"
 #include "DelayEventManager.h"
 #include "DynamicObjectManager.h"
+#include "ObjectIDRange.h"
 #include "Packet/SharedPackets.h"
 #include "SharedCalculations.h"
 #include "BalanceConstants.h"
@@ -1362,9 +1363,21 @@ void CombatManager::effect_hp_up_spot(short attacker_h, char attacker_type, shor
 		if (m_game->m_client_list[target_h]->m_side_effect_max_hp_down != 0)
 			max_hp = max_hp - (max_hp / m_game->m_client_list[target_h]->m_side_effect_max_hp_down);
 		if (m_game->m_client_list[target_h]->m_hp < max_hp) {
+			int actual_amount = hp;
+			if (m_game->m_client_list[target_h]->m_hp + hp > max_hp) {
+				actual_amount = max_hp - m_game->m_client_list[target_h]->m_hp;
+			}
+
 			m_game->m_client_list[target_h]->m_hp += hp;
 			if (m_game->m_client_list[target_h]->m_hp > max_hp) m_game->m_client_list[target_h]->m_hp = max_hp;
 			if (m_game->m_client_list[target_h]->m_hp <= 0)     m_game->m_client_list[target_h]->m_hp = 1;
+			
+			if (actual_amount > 0) {
+				m_game->send_floating_text_to_near_clients(m_game->m_client_list[target_h]->m_map_index,
+					m_game->m_client_list[target_h]->m_x, m_game->m_client_list[target_h]->m_y,
+					target_h, 2, actual_amount);
+			}
+
 			m_game->send_notify_msg(0, target_h, Notify::Hp, 0, 0, 0, 0);
 		}
 		break;
@@ -1375,9 +1388,20 @@ void CombatManager::effect_hp_up_spot(short attacker_h, char attacker_type, shor
 		if (m_game->m_npc_list[target_h]->m_is_killed) return;
 		max_hp = m_game->m_npc_list[target_h]->m_max_hp;
 		if (m_game->m_npc_list[target_h]->m_hp < max_hp) {
+			int actual_amount = hp;
+			if (m_game->m_npc_list[target_h]->m_hp + hp > max_hp) {
+				actual_amount = max_hp - m_game->m_npc_list[target_h]->m_hp;
+			}
+
 			m_game->m_npc_list[target_h]->m_hp += hp;
 			if (m_game->m_npc_list[target_h]->m_hp > max_hp) m_game->m_npc_list[target_h]->m_hp = max_hp;
 			if (m_game->m_npc_list[target_h]->m_hp <= 0)     m_game->m_npc_list[target_h]->m_hp = 1;
+			
+			if (actual_amount > 0) {
+				m_game->send_floating_text_to_near_clients(m_game->m_npc_list[target_h]->m_map_index,
+					m_game->m_npc_list[target_h]->m_x, m_game->m_npc_list[target_h]->m_y,
+					target_h + hb::shared::object_id::NpcMin, 2, actual_amount);
+			}
 		}
 		break;
 	}
@@ -2224,6 +2248,10 @@ switch (attacker_type) {
 
 		if (!m_game->m_client_list[attacker_h]->m_appearance.is_walking) return 0;
 
+		if (m_game->m_client_list[attacker_h]->m_status.invisibility) {
+			m_game->m_status_effect_manager->set_invisibility_flag(attacker_h, hb::shared::owner_class::Player, false);
+		}
+
 		iAP_SM = 0;
 		iAP_L = 0;
 
@@ -3012,8 +3040,20 @@ if (attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[at
 						iAP_SM = (m_game->m_client_list[target_h]->m_hp);
 						break;
 					case 5:
+						int actual_amount = iAP_SM;
+						if (m_game->m_client_list[attacker_h]->m_hp + iAP_SM > m_game->get_max_hp(attacker_h)) {
+							actual_amount = m_game->get_max_hp(attacker_h) - m_game->m_client_list[attacker_h]->m_hp;
+						}
+
 						m_game->m_client_list[attacker_h]->m_hp += iAP_SM;
 						if (m_game->get_max_hp(attacker_h) < m_game->m_client_list[attacker_h]->m_hp) m_game->m_client_list[attacker_h]->m_hp = m_game->get_max_hp(attacker_h);
+						
+						if (actual_amount > 0) {
+							m_game->send_floating_text_to_near_clients(m_game->m_client_list[attacker_h]->m_map_index,
+								m_game->m_client_list[attacker_h]->m_x, m_game->m_client_list[attacker_h]->m_y,
+								attacker_h, 0, actual_amount);
+						}
+
 						m_game->send_notify_msg(0, attacker_h, Notify::Hp, 0, 0, 0, 0);
 						break;
 					}

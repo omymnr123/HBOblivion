@@ -344,6 +344,7 @@ namespace Notify
 		// === NUEVO: EXTRA LOOT (SERVER -> CLIENTE) ===
 		NotifyExtraLootAvailable                = 0x0A6C,
 		NotifyExtraLootList                     = 0x0A6D,
+		FloatingText                            = 0x0A6E,
 		// =============================================
 
 #ifdef TESTER_ONLY

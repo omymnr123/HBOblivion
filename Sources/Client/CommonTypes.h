@@ -127,6 +127,8 @@ namespace GameColors
 	inline constexpr hb::shared::render::Color UITopMsgYellow{ 255, 255, 0 };   // Top message text (Game.cpp)
 	inline constexpr hb::shared::render::Color UIDmgYellow{ 255, 255, 20 };     // Damage text yellow (Game.cpp)
 	inline constexpr hb::shared::render::Color UIDmgRed{ 255, 80, 80 };         // Damage text red (Game.cpp)
+	inline constexpr hb::shared::render::Color UIDmgBlue{ 80, 80, 255 };        // MP text blue
+	inline constexpr hb::shared::render::Color UIDmgGreen{ 80, 255, 80 };       // Heal text green
 	inline constexpr hb::shared::render::Color UIBuildRed{ 180, 30, 30 };       // Build/craft warning (Game.cpp)
 	inline constexpr hb::shared::render::Color ChatEventGreen{ 130, 255, 130 }; // Event history green (Game.cpp)
 	inline constexpr hb::shared::render::Color UISlatesPink{ 220, 140, 160 };   // Slates effect text (DialogBox_Slates)

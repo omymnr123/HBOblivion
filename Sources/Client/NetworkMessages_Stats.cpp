@@ -15,6 +15,35 @@
 
 
 namespace NetworkMessageHandlers {
+	void HandleFloatingText(CGame* game, char* data)
+	{
+		const auto* pkt = hb::net::PacketCast<hb::net::PacketNotifyFloatingText>(
+			data, sizeof(hb::net::PacketNotifyFloatingText));
+		if (!pkt) return;
+
+		notify_text_type text_type;
+		std::string txt;
+
+		if (pkt->type == 0) {
+			text_type = notify_text_type::recover_hp;
+			txt = std::format("+{}HP", pkt->amount);
+		}
+		else if (pkt->type == 1) {
+			text_type = notify_text_type::recover_mp;
+			txt = std::format("+{}MP", pkt->amount);
+		}
+		else if (pkt->type == 2) {
+			text_type = notify_text_type::magic_heal;
+			txt = std::format("+{}HP", pkt->amount);
+		}
+		else {
+			return;
+		}
+
+		game->get_floating_text().add_notify_text(
+			text_type, txt, game->m_cur_time, pkt->object_id, game->m_map_data.get());
+	}
+
 	void HandleHP(CGame* game, char* data)
 	{
 		int prev_hp;

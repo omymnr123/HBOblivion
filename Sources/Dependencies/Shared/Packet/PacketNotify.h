@@ -939,6 +939,14 @@ namespace net {
 		TesterMapEntry entries[100];
 	};
 #endif // TESTER_ONLY
+	struct HB_PACKED PacketNotifyFloatingText {
+		PacketHeader header;
+		uint32_t object_id;
+		uint8_t type; // 0 = HP, 1 = MP, 2 = Heal
+		int32_t amount;
+	};
+
 	HB_PACK_END
 }
 }
+

@@ -2045,9 +2045,21 @@ void ItemManager::use_item_handler(int client_h, short item_index, short dX, sho
 					v3 = m_game->m_client_list[client_h]->m_item_list[item_index]->m_instance.special_effect_value3;
 				}
 
-				m_game->m_client_list[client_h]->m_hp += (m_game->dice(v1, v2) + v3);
+				int amount = m_game->dice(v1, v2) + v3;
+				int actual_amount = amount;
+				if (m_game->m_client_list[client_h]->m_hp + amount > max) {
+					actual_amount = max - m_game->m_client_list[client_h]->m_hp;
+				}
+
+				m_game->m_client_list[client_h]->m_hp += amount;
 				if (m_game->m_client_list[client_h]->m_hp > max) m_game->m_client_list[client_h]->m_hp = max;
 				if (m_game->m_client_list[client_h]->m_hp <= 0)   m_game->m_client_list[client_h]->m_hp = 1;
+
+				if (actual_amount > 0) {
+					m_game->send_floating_text_to_near_clients(m_game->m_client_list[client_h]->m_map_index,
+						m_game->m_client_list[client_h]->m_x, m_game->m_client_list[client_h]->m_y,
+						client_h, 0, actual_amount);
+				}
 
 				effect_result = 1;
 			}
@@ -2070,9 +2082,21 @@ void ItemManager::use_item_handler(int client_h, short item_index, short dX, sho
 					v3 = m_game->m_client_list[client_h]->m_item_list[item_index]->m_instance.special_effect_value3;
 				}
 
-				m_game->m_client_list[client_h]->m_mp += (m_game->dice(v1, v2) + v3);
-				if (m_game->m_client_list[client_h]->m_mp > max)
-					m_game->m_client_list[client_h]->m_mp = max;
+				int amount = m_game->dice(v1, v2) + v3;
+				int actual_amount = amount;
+				if (m_game->m_client_list[client_h]->m_mp + amount > max) {
+					actual_amount = max - m_game->m_client_list[client_h]->m_mp;
+				}
+
+				m_game->m_client_list[client_h]->m_mp += amount;
+				if (m_game->m_client_list[client_h]->m_mp > max) m_game->m_client_list[client_h]->m_mp = max;
+				if (m_game->m_client_list[client_h]->m_mp <= 0)   m_game->m_client_list[client_h]->m_mp = 1;
+
+				if (actual_amount > 0) {
+					m_game->send_floating_text_to_near_clients(m_game->m_client_list[client_h]->m_map_index,
+						m_game->m_client_list[client_h]->m_x, m_game->m_client_list[client_h]->m_y,
+						client_h, 1, actual_amount);
+				}
 
 				effect_result = 2;
 			}

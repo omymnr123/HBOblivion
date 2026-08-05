@@ -23,6 +23,9 @@ enum class notify_text_type : uint8_t {
 	LevelUp,        // "Level up!" - large sprite font
 	GuildLevelUp,   // "Guild Level UP" - large sprite font
 	enemy_kill,      // "Enemy Kill!" - large sprite font
+	recover_hp,
+	recover_mp,
+	magic_heal,
 };
 
 // ---------------------------------------------------------------
@@ -71,6 +74,12 @@ inline constexpr AnimParams Notify[] = {
 	{ 2000, 0, 75, 10, 80, 0, GameColors::UIDmgYellow, true },
 	// enemy_kill: yellow sprite font (large), 2s, fast rise
 	{ 2000, 0, 55, 10, 80, 0, GameColors::UIDmgYellow, true },
+	// recover_hp: red sprite font (small), 1s, fast rise
+	{ 1000, 0, 55, 20, 200, 2, GameColors::UIDmgRed, true },
+	// recover_mp: blue sprite font (small), 1s, fast rise
+	{ 1000, 0, 55, 20, 200, 2, GameColors::UIDmgBlue, true },
+	// magic_heal: green sprite font (small), 1s, fast rise
+	{ 1000, 0, 55, 20, 200, 2, GameColors::UIDmgGreen, true },
 };
 
 } // namespace FloatingTextParams

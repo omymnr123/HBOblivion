@@ -306,10 +306,10 @@ void floating_text_manager::draw_message(const floating_text& msg, short sX, sho
 		}
 		else
 		{
-			// Damage/LevelUp/enemy_kill: yellow sprite font with multi-line support
+			// Damage/LevelUp/enemy_kill/notify: use sprite font with multi-line support
 			auto style = is_trans
-				? hb::shared::text::TextStyle::from_color(GameColors::Yellow2x).with_alpha(0.7f).with_additive()
-				: hb::shared::text::TextStyle::with_two_point_shadow(GameColors::Yellow2x).with_additive();
+				? hb::shared::text::TextStyle::from_color(params.m_color).with_alpha(0.7f).with_additive()
+				: hb::shared::text::TextStyle::with_two_point_shadow(params.m_color).with_additive();
 
 			switch (lines) {
 			case 1:

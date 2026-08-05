@@ -58,11 +58,22 @@ void RegenManager::tick_hp(int client_h, uint32_t time, int hunger_delay_ms)
 			if (m_game->m_client_list[client_h]->m_hp < max_hp)
 			{
 				int amount = calc_hp_regen(client_h);
+				int actual_amount = amount;
+				if (m_game->m_client_list[client_h]->m_hp + amount > max_hp)
+					actual_amount = max_hp - m_game->m_client_list[client_h]->m_hp;
+
 				m_game->m_client_list[client_h]->m_hp += amount;
 				if (m_game->m_client_list[client_h]->m_hp > max_hp)
 					m_game->m_client_list[client_h]->m_hp = max_hp;
 				if (m_game->m_client_list[client_h]->m_hp <= 0)
 					m_game->m_client_list[client_h]->m_hp = 0;
+
+				if (actual_amount > 0)
+				{
+					m_game->send_floating_text_to_near_clients(m_game->m_client_list[client_h]->m_map_index,
+						m_game->m_client_list[client_h]->m_x, m_game->m_client_list[client_h]->m_y,
+						client_h, 0, actual_amount);
+				}
 				m_game->send_notify_msg(0, client_h, Notify::Hp, 0, 0, 0, 0);
 			}
 		}
@@ -81,9 +92,20 @@ void RegenManager::tick_mp(int client_h, uint32_t time, int hunger_delay_ms)
 			if (m_game->m_client_list[client_h]->m_mp < max_mp)
 			{
 				int amount = calc_mp_regen(client_h);
+				int actual_amount = amount;
+				if (m_game->m_client_list[client_h]->m_mp + amount > max_mp)
+					actual_amount = max_mp - m_game->m_client_list[client_h]->m_mp;
+
 				m_game->m_client_list[client_h]->m_mp += amount;
 				if (m_game->m_client_list[client_h]->m_mp > max_mp)
 					m_game->m_client_list[client_h]->m_mp = max_mp;
+
+				if (actual_amount > 0)
+				{
+					m_game->send_floating_text_to_near_clients(m_game->m_client_list[client_h]->m_map_index,
+						m_game->m_client_list[client_h]->m_x, m_game->m_client_list[client_h]->m_y,
+						client_h, 1, actual_amount);
+				}
 				m_game->send_notify_msg(0, client_h, Notify::Mp, 0, 0, 0, 0);
 			}
 		}
