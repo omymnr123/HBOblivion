@@ -176,8 +176,29 @@ void floating_text_manager::update_position(int index, short sX, short sY)
 {
 	if (index >= 0 && index < max_messages && m_messages[index])
 	{
+		int object_id = m_messages[index]->m_object_id;
+		
+		// Update the specific message
 		m_messages[index]->m_x = sX;
 		m_messages[index]->m_y = sY;
+
+		// Also update any detached hp/mp messages for the same object so they keep following
+		if (object_id != -1 && object_id != 0)
+		{
+			for (int i = 0; i < max_messages; i++)
+			{
+				if (i != index && m_messages[i] && m_messages[i]->m_object_id == object_id && m_messages[i]->m_category == floating_text::Category::Notify)
+				{
+					if (m_messages[i]->m_notify_type == notify_text_type::recover_hp || 
+					    m_messages[i]->m_notify_type == notify_text_type::recover_mp || 
+					    m_messages[i]->m_notify_type == notify_text_type::magic_heal)
+					{
+						m_messages[i]->m_x = sX;
+						m_messages[i]->m_y = sY;
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -308,21 +329,63 @@ void floating_text_manager::draw_message(const floating_text& msg, short sX, sho
 		{
 			// Damage/LevelUp/enemy_kill/notify: use sprite font with multi-line support
 			auto style = is_trans
-				? hb::shared::text::TextStyle::from_color(params.m_color).with_alpha(0.7f).with_additive()
-				: hb::shared::text::TextStyle::with_two_point_shadow(params.m_color).with_additive();
+				? hb::shared::text::TextStyle::from_color(params.m_color).with_alpha(0.7f).with_additive().with_bold()
+				: hb::shared::text::TextStyle::with_two_point_shadow(params.m_color).with_additive().with_bold();
+
+			int custom_sX = sX - size;
+
+			// Custom logic to pair HP and MP side-by-side with a comma
+			if (msg.m_category == floating_text::Category::Notify &&
+			    (msg.m_notify_type == notify_text_type::recover_hp || msg.m_notify_type == notify_text_type::recover_mp))
+			{
+				const floating_text* paired_msg = nullptr;
+				for (int i = 0; i < max_messages; i++)
+				{
+					if (m_messages[i] && m_messages[i]->m_object_id == msg.m_object_id &&
+					    m_messages[i]->m_time == msg.m_time && m_messages[i].get() != &msg)
+					{
+						if ((msg.m_notify_type == notify_text_type::recover_hp && m_messages[i]->m_notify_type == notify_text_type::recover_mp) ||
+						    (msg.m_notify_type == notify_text_type::recover_mp && m_messages[i]->m_notify_type == notify_text_type::recover_hp))
+						{
+							paired_msg = m_messages[i].get();
+							break;
+						}
+					}
+				}
+
+				if (paired_msg)
+				{
+					int size_paired = 0;
+					for (size_t i = 0; i < paired_msg->m_text.size(); i++) {
+						if (static_cast<unsigned char>(paired_msg->m_text[i]) >= 128) { size_paired += 5; i++; }
+						else size_paired += 4;
+					}
+
+					if (msg.m_notify_type == notify_text_type::recover_hp)
+					{
+						// HP goes on the left
+						custom_sX = sX - (size + size_paired);
+					}
+					else
+					{
+						// MP goes on the right
+						custom_sX = sX + size_paired - size;
+					}
+				}
+			}
 
 			switch (lines) {
 			case 1:
-				hb::shared::text::draw_text(font_id, sX - size, base_y, msg_a.c_str(), style);
+				hb::shared::text::draw_text(font_id, custom_sX, base_y, msg_a.c_str(), style);
 				break;
 			case 2:
-				hb::shared::text::draw_text(font_id, sX - size, base_y - 16, msg_a.c_str(), style);
-				hb::shared::text::draw_text(font_id, sX - size, base_y, msg_b.c_str(), style);
+				hb::shared::text::draw_text(font_id, custom_sX, base_y - 16, msg_a.c_str(), style);
+				hb::shared::text::draw_text(font_id, custom_sX, base_y, msg_b.c_str(), style);
 				break;
 			case 3:
-				hb::shared::text::draw_text(font_id, sX - size, base_y - 32, msg_a.c_str(), style);
-				hb::shared::text::draw_text(font_id, sX - size, base_y - 16, msg_b.c_str(), style);
-				hb::shared::text::draw_text(font_id, sX - size, base_y, msg_c.c_str(), style);
+				hb::shared::text::draw_text(font_id, custom_sX, base_y - 32, msg_a.c_str(), style);
+				hb::shared::text::draw_text(font_id, custom_sX, base_y - 16, msg_b.c_str(), style);
+				hb::shared::text::draw_text(font_id, custom_sX, base_y, msg_c.c_str(), style);
 				break;
 			}
 		}
