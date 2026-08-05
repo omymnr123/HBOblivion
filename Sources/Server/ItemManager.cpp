@@ -6607,7 +6607,7 @@ bool ItemManager::reroll_item_attributes(int client_h, int item_index, uint64_t 
 	// Check if player has enough gold
 	uint64_t current_gold = get_item_count_by_id(client_h, hb::shared::item::ItemId::Gold);
 	if (current_gold < gold_cost) {
-		std::string msg = std::format("No tienes suficiente oro. Se requieren {} de oro.", gold_cost);
+		std::string msg = std::format("You do not have enough gold. {} gold is required.", gold_cost);
 		m_game->send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, msg.c_str());
 		return false;
 	}

@@ -17,7 +17,7 @@ using namespace hb::shared::net;
 DialogBox_MailBox::DialogBox_MailBox(CGame* game) : IDialogBox(DialogBoxId::MailBox, game)
 {
     // The collision box for the dialog
-    set_default_rect(237, 57, 252, 250); 
+    set_default_rect(237, 57, 258, 339); 
     for (int i = 0; i < 10; ++i) m_compose_inventory_slots[i] = -1;
 }
 
@@ -439,4 +439,31 @@ bool DialogBox_MailBox::on_disable()
         m_compose_active_field = 0;
     }
     return true;
+}
+
+void DialogBox_MailBox::cycle_active_field() {
+    if (m_mode != mode::compose) return;
+
+    int sX = m_x;
+    int sY = m_y;
+
+    if (m_compose_active_field == 1) {
+        // Go to Subject
+        text_input_manager::get().end_input();
+        text_input_manager::get().start_input(sX + 75, sY + 50, 39, m_compose_subject);
+        text_input_manager::get().set_text_color(GameColors::UIOrange);
+        m_compose_active_field = 2;
+    } else if (m_compose_active_field == 2) {
+        // Go to Body
+        text_input_manager::get().end_input();
+        text_input_manager::get().start_input(sX + 60, sY + 70, 200, m_compose_body);
+        text_input_manager::get().set_text_color(GameColors::UIOrange);
+        m_compose_active_field = 3;
+    } else {
+        // Go to Receiver
+        text_input_manager::get().end_input();
+        text_input_manager::get().start_input(sX + 60, sY + 30, 20, m_compose_receiver);
+        text_input_manager::get().set_text_color(GameColors::UIOrange);
+        m_compose_active_field = 1;
+    }
 }

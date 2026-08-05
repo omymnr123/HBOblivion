@@ -15040,7 +15040,7 @@ void CGame::request_send_mail_handler(int client_h, char* data)
     }
     uint64_t current_gold = m_item_manager->get_item_count_by_id(client_h, hb::shared::item::ItemId::Gold);
     if (current_gold < gold_cost) {
-        send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "No tienes suficiente oro para enviar este correo.");
+        send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "You do not have enough gold to send this mail.
         return;
     }
     // Deduct gold

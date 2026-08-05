@@ -15,6 +15,7 @@
 #include "DialogBox_ChatHistory.h"
 #include "DialogBox_ItemDropAmount.h"
 #include "InventoryManager.h"
+#include "DialogBox_MailBox.h"
 #include "lan_eng.h"
 #include "GlobalDef.h"
 #include "IInput.h"
@@ -263,6 +264,15 @@ bool Screen_OnGame::on_key_down(KeyCode key)
 		m_game->m_arrow_pressed = 4;
 		return true;
 	case KeyCode::Tab:
+        if ((m_game->get_dialog_box_manager().is_enabled(DialogBoxId::MailBox) == true) &&
+            (m_game->get_dialog_box_manager().get_top_id() == DialogBoxId::MailBox))
+        {
+            auto* dlg = m_game->get_dialog_box_manager().get_dialog_as<DialogBox_MailBox>(DialogBoxId::MailBox);
+            if (dlg && dlg->get_mode() == DialogBox_MailBox::mode::compose) {
+                dlg->cycle_active_field();
+                return true;
+            }
+        }
 		hotkey_tab_toggle_combat();
 		return true;
 	case KeyCode::Home:

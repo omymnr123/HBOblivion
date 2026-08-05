@@ -32,6 +32,7 @@
 #include "DialogBox_Skill.h"
 #include "DialogBox_Exchange.h"
 #include "DialogBox_NpcActionQuery.h"
+#include "DialogBox_MailBox.h"
 #include "Log.h"
 #ifdef TESTER_ONLY
 #include "DialogBox_ItemCreator.h"
@@ -280,6 +281,16 @@ void Screen_OnGame::on_update()
     // Enter key handling
     if (hb::shared::input::is_key_pressed(KeyCode::Enter) == true)
     {
+        if ((m_game->get_dialog_box_manager().is_enabled(DialogBoxId::MailBox) == true) &&
+            (m_game->get_dialog_box_manager().get_top_id() == DialogBoxId::MailBox))
+        {
+            auto* dlg = m_game->get_dialog_box_manager().get_dialog_as<DialogBox_MailBox>(DialogBoxId::MailBox);
+            if (dlg && dlg->get_mode() == DialogBox_MailBox::mode::compose) {
+                dlg->cycle_active_field();
+                return;
+            }
+        }
+
         if ((m_game->get_dialog_box_manager().is_enabled(DialogBoxId::ItemDropExternal) == true) && (m_game->get_dialog_box_manager().get_dialog_as<DialogBox_ItemDropAmount>(DialogBoxId::ItemDropExternal)->m_mode == DialogBox_ItemDropAmount::mode::input) && (m_game->get_dialog_box_manager().get_top_id() == DialogBoxId::ItemDropExternal)) {
             text_input_manager::get().end_input();
 

@@ -22,6 +22,8 @@ public:
     };
 
     void set_mode(mode new_mode) { m_mode = new_mode; }
+    mode get_mode() const { return m_mode; }
+    void cycle_active_field();
 
     mode m_mode{mode::list};
 
