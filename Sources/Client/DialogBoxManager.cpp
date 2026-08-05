@@ -47,11 +47,12 @@
 #include "DialogBox_Manufacture.h"
 #include "DialogBox_StatusOverlay.h"
 #include "DialogBox_ExtraLoot.h"
-#ifdef TESTER_ONLY
+#include "DialogBox_GameMaster.h"
 // TESTER MENU — includes (tester builds only)
+#ifdef TESTER_ONLY
 #include "DialogBox_TesterMenu.h"
-#include "DialogBox_ItemCreator.h"
 #endif // TESTER_ONLY
+#include "DialogBox_ItemCreator.h"
 #include "Game.h"
 #include "lan_eng.h"
 #include "TextInputManager.h"
@@ -118,11 +119,12 @@ void DialogBoxManager::initialize_dialog_boxes()
 	register_dialog_box(std::make_unique<DialogBox_Manufacture>(&m_game));
 	register_dialog_box(std::make_unique<DialogBox_ExtraLoot>(&m_game));
 	register_dialog_box(std::make_unique<DialogBox_MailBox>(&m_game));
-#ifdef TESTER_ONLY
+	register_dialog_box(std::make_unique<DialogBox_GameMaster>(&m_game));
 	// TESTER MENU — dialog registration (tester builds only)
+#ifdef TESTER_ONLY
 	register_dialog_box(std::make_unique<DialogBox_TesterMenu>(&m_game));
-	register_dialog_box(std::make_unique<DialogBox_ItemCreator>(&m_game));
 #endif // TESTER_ONLY
+	register_dialog_box(std::make_unique<DialogBox_ItemCreator>(&m_game));
 
 	register_dialog_box(std::make_unique<DialogBox_StatusOverlay>(&m_game));
 
@@ -641,3 +643,5 @@ bool DialogBoxManager::handle_right_click(uint32_t time)
 
 	return hit;
 }
+
+

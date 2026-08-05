@@ -1,5 +1,4 @@
 // TESTER MENU — entire file is tester-only
-#ifdef TESTER_ONLY
 #include "DialogBox_ItemCreator.h"
 #include "Game.h"
 #include "GlobalDef.h"
@@ -890,4 +889,5 @@ bool DialogBox_ItemCreator::on_enable(int type, int64_t v1, int v2, const char* 
 	m_y = ic_y;
 	return true;
 }
-#endif // TESTER_ONLY
+
+

@@ -20,10 +20,10 @@ namespace server
 constexpr int major = 0;
 constexpr int minor = 1;
 constexpr int patch = 24;
-constexpr int build_number = 4;
+constexpr int build_number = 5;
 constexpr const char* stage = "alpha";
 constexpr const char* display_version = "0.1.24-alpha";
-constexpr const char* full_version = "0.1.24-alpha+build.4";
+constexpr const char* full_version = "0.1.24-alpha+build.5";
 } // namespace server
 
 namespace client
@@ -37,6 +37,6 @@ constexpr const char* display_version = "0.2.52-alpha";
 constexpr const char* full_version = "0.2.52-alpha+build.0";
 } // namespace client
 
-constexpr const char* build_timestamp = "2026-07-27T15:41:57";
+constexpr const char* build_timestamp = "2026-08-05T19:28:27";
 
 } // namespace hb::version

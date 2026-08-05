@@ -4959,7 +4959,6 @@ void CGame::init_player_data(int client_h, char* data, uint32_t size)
 	total_points = 0;
 	for(int i = 0; i < hb::shared::limits::MaxSkillType; i++)
 	total_points += m_client_list[client_h]->m_skill_mastery[i];
-#ifndef TESTER_ONLY
 	// === NUEVO: Excepción de antitrampas para Game Masters ===
 	// Verificamos que el jugador NO sea administrador (admin_level == 0)
 	if (m_client_list[client_h]->m_admin_level == 0) 
@@ -4977,7 +4976,6 @@ void CGame::init_player_data(int client_h, char* data, uint32_t size)
 			return;
 		}
 	}
-#endif
 
 	check_special_event(client_h);
 	m_item_manager->validate_equipped_items(client_h);
@@ -6633,7 +6631,6 @@ void CGame::client_common_handler(int client_h, char* data)
 		request_accept_join_party_handler(client_h, v1);
 		break;
 
-#ifdef TESTER_ONLY
 	case CommonType::TesterAction:
 	{
 		// Validacion estricta de seguridad: solo administradores nivel 1000[cite: 15]
@@ -6984,7 +6981,6 @@ void CGame::client_common_handler(int client_h, char* data)
 			m_client_list[client_h]->m_char_name, created, item_id, attribute);
 		break;
 	}
-#endif // TESTER_ONLY
 
 	default:
 		hb::logger::log("Unknown message: 0x{:X}", command);
@@ -7848,7 +7844,6 @@ void CGame::send_notify_msg(int from_h, int to_h, uint16_t msg_type, uint32_t v1
 	}
 	break;
 
-#ifdef TESTER_ONLY
 	case Notify::Contribution:
 	{
 		hb::net::PacketNotifySimpleInt pkt{};
@@ -7858,7 +7853,6 @@ void CGame::send_notify_msg(int from_h, int to_h, uint16_t msg_type, uint32_t v1
 		ret = m_client_list[to_h]->m_socket->send_msg(reinterpret_cast<char*>(&pkt), sizeof(pkt));
 	}
 	break;
-#endif // TESTER_ONLY
 
 	case Notify::Crusade:
 	{

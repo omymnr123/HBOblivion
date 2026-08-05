@@ -1,7 +1,5 @@
 #pragma once
 #include "IDialogBox.h"
-#include "DialogBoxIDs.h"
-#include "GlobalDef.h"
 
 class DialogBox_StatusOverlay : public IDialogBox
 {
@@ -13,10 +11,7 @@ public:
 	void on_draw() override;
 	bool on_click() override;
 
-	bool is_draggable() const override { return false; }
-	bool cancels_text_input_on_enable() const override { return false; }
-
-	bool m_show_extraloot = false; // <-- Movido a public para acceso externo
+	bool m_show_extraloot = false;
 
 private:
 	static constexpr int padding = 10;
@@ -30,10 +25,9 @@ private:
 	// Button rect relative to dialog origin (x, y, w, h)
 	ui_rect m_primary_btn{};
 
-#ifdef TESTER_ONLY
+	// Botón de Game Master (El servidor valida la seguridad de nivel 1000)
 	bool m_show_tester = false;
 	ui_rect m_tester_btn{};
-#endif
 
 	const char* get_primary_text() const;
 };

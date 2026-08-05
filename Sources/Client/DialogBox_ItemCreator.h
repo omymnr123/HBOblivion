@@ -1,6 +1,5 @@
 // TESTER MENU — entire file is tester-only
 #pragma once
-#ifdef TESTER_ONLY
 #include "IDialogBox.h"
 #include "Packet/PacketNotify.h"
 #include "Item/ItemAttributes.h"
@@ -85,4 +84,5 @@ private:
 	void draw_dropdown_field(int x, int y, int w, const char* text, bool is_open, bool is_hover);
 	int get_open_dropdown_count() const;
 };
-#endif // TESTER_ONLY
+
+

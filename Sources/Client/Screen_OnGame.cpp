@@ -34,9 +34,7 @@
 #include "DialogBox_NpcActionQuery.h"
 #include "DialogBox_MailBox.h"
 #include "Log.h"
-#ifdef TESTER_ONLY
 #include "DialogBox_ItemCreator.h"
-#endif // TESTER_ONLY
 #include <string>
 #include <memory>
 #include <format>
@@ -459,7 +457,6 @@ void Screen_OnGame::on_update()
             }
             m_game->get_dialog_box_manager().disable_dialog_box(DialogBoxId::ItemDropExternal);
         }
-#ifdef TESTER_ONLY
         else if ((m_game->get_dialog_box_manager().is_enabled(DialogBoxId::ItemCreator) == true) &&
                  (m_game->get_dialog_box_manager().get_top_id() == DialogBoxId::ItemCreator))
         {
@@ -467,7 +464,6 @@ void Screen_OnGame::on_update()
                 m_game->get_dialog_box_manager().get_dialog_box(DialogBoxId::ItemCreator));
             if (dlg) dlg->on_enter_pressed();
         }
-#endif // TESTER_ONLY
         else
         {
             if (!text_input_manager::get().is_active()) {
@@ -1597,3 +1593,5 @@ void Screen_OnGame::item_drop_external_screen(char item_id, short mouse_x, short
         inventory_manager::get().lock_item(item_id);
     }
 }
+
+

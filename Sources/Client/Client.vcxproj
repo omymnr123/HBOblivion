@@ -350,6 +350,7 @@
     <ClInclude Include="Overlay_VersionNotMatch.h" />
     <ClInclude Include="Overlay_ConnectionLost.h" />
     <ClInclude Include="Overlay_Msg.h" />
+    <ClInclude Include="DialogBox_GameMaster.h" />
     <ClInclude Include="Overlay_WaitInitData.h" />
     <ClInclude Include="..\Dependencies\Shared\Net\ASIOSocket.h" />
     <ClInclude Include="..\Dependencies\Shared\Entity\ActionID.h" />
@@ -566,6 +567,7 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayerController.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="DialogBox_GameMaster.cpp" />
     <ClCompile Include="..\Dependencies\Shared\Net\ASIOSocket.cpp" />
     <ClCompile Include="..\Dependencies\Shared\Net\IOServicePool.cpp" />
     <ClCompile Include="..\Dependencies\Shared\Render\Event.cpp" />

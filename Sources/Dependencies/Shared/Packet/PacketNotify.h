@@ -915,7 +915,6 @@ namespace net {
 	};
 	// ===================================
 
-#ifdef TESTER_ONLY
 	// TESTER MENU — tester-only packet structs
 	struct HB_PACKED TesterItemSearchEntry {
 		int16_t item_id;
@@ -938,7 +937,6 @@ namespace net {
 		int16_t count;
 		TesterMapEntry entries[100];
 	};
-#endif // TESTER_ONLY
 	struct HB_PACKED PacketNotifyFloatingText {
 		PacketHeader header;
 		uint32_t object_id;

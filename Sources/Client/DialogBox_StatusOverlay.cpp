@@ -37,17 +37,11 @@ void DialogBox_StatusOverlay::on_update()
 		(m_game->m_restart_count == -1);
 
 	bool show_extra = m_show_extraloot && !m_game->get_dialog_box_manager().is_enabled(DialogBoxId::ExtraLoot);
-	// No deshabilitamos el botón aunque la ventana esté abierta
 	bool has_primary = show_extra || m_show_levelup || m_show_restart;
 
-#ifdef TESTER_ONLY
-	// En el cliente, si el usuario tiene privilegios o modo GM activo se habilita el botón
-	// (El servidor ya se encarga de bloquear estrictamente las acciones si no es admin nivel 1000)
-	m_show_tester = !m_game->get_dialog_box_manager().is_enabled(DialogBoxId::TesterMenu);
+	// El servidor se encarga de bloquear estrictamente las acciones si no es admin nivel 1000
+	m_show_tester = m_game->m_player->m_is_gm_mode && !m_game->get_dialog_box_manager().is_enabled(DialogBoxId::GameMasterMenu);
 	bool has_tester = m_show_tester;
-#else
-	bool has_tester = false;
-#endif
 
 	if (!has_primary && !has_tester)
 	{
@@ -65,51 +59,40 @@ void DialogBox_StatusOverlay::on_update()
 		primary_h = m.height;
 	}
 
-#ifdef TESTER_ONLY
 	int tester_w = 0, tester_h = 0;
 	if (m_show_tester)
 	{
-		auto m = hb::shared::text::measure_text(GameFont::Bitmap1, "Tester");
+		auto m = hb::shared::text::measure_text(GameFont::Bitmap1, "Game Master");
 		tester_w = m.width;
 		tester_h = m.height;
 	}
-#endif
 
 	// Compute dialog content size and button rects (relative to dialog origin)
 	int content_w = 0;
 	int content_h = 0;
 
-#ifdef TESTER_ONLY
 	if (has_primary && m_show_tester)
 	{
 		content_w = std::max(primary_w, tester_w);
 		content_h = tester_h + gap + primary_h;
 		int dlg_w = content_w + padding * 2;
-		m_tester_btn = { (dlg_w - tester_w) / 2, padding, tester_w, tester_h };
-		m_primary_btn = { (dlg_w - primary_w) / 2, padding + tester_h + gap, primary_w, primary_h };
+		m_tester_btn = ui_rect{ static_cast<short>((dlg_w - tester_w) / 2), static_cast<short>(padding), static_cast<short>(tester_w), static_cast<short>(tester_h) };
+		m_primary_btn = ui_rect{ static_cast<short>((dlg_w - primary_w) / 2), static_cast<short>(padding + tester_h + gap), static_cast<short>(primary_w), static_cast<short>(primary_h) };
 	}
 	else if (has_primary)
 	{
 		content_w = primary_w;
 		content_h = primary_h;
 		int dlg_w = content_w + padding * 2;
-		m_primary_btn = { (dlg_w - primary_w) / 2, padding, primary_w, primary_h };
+		m_primary_btn = ui_rect{ static_cast<short>((dlg_w - primary_w) / 2), static_cast<short>(padding), static_cast<short>(primary_w), static_cast<short>(primary_h) };
 	}
 	else
 	{
 		content_w = tester_w;
 		content_h = tester_h;
 		int dlg_w = content_w + padding * 2;
-		m_tester_btn = { (dlg_w - tester_w) / 2, padding, tester_w, tester_h };
+		m_tester_btn = ui_rect{ static_cast<short>((dlg_w - tester_w) / 2), static_cast<short>(padding), static_cast<short>(tester_w), static_cast<short>(tester_h) };
 	}
-#else
-	content_w = primary_w;
-	content_h = primary_h;
-	{
-		int dlg_w = content_w + padding * 2;
-		m_primary_btn = { (dlg_w - primary_w) / 2, padding, primary_w, primary_h };
-	}
-#endif
 
 	m_size_x = static_cast<short>(content_w + padding * 2);
 	m_size_y = static_cast<short>(content_h + padding * 2);
@@ -124,15 +107,11 @@ void DialogBox_StatusOverlay::on_draw()
 	bool show_extra = m_show_extraloot && !m_game->get_dialog_box_manager().is_enabled(DialogBoxId::ExtraLoot);
 	bool has_primary = show_extra || m_show_levelup || m_show_restart;
 
-#ifdef TESTER_ONLY
 	if (!has_primary && !m_show_tester) return;
-#else
-	if (!has_primary) return;
-#endif
 
 	int flash = (GameClock::get_time_ms() / 3) % 255;
 	auto style = hb::shared::text::TextStyle::with_integrated_shadow(
-		hb::shared::render::Color(flash, flash, 0));
+		hb::shared::render::Color(static_cast<uint8_t>(flash), static_cast<uint8_t>(flash), 0));
 
 	if (has_primary)
 	{
@@ -142,15 +121,13 @@ void DialogBox_StatusOverlay::on_draw()
 			get_primary_text(), style, hb::shared::text::Align::Center);
 	}
 
-#ifdef TESTER_ONLY
 	if (m_show_tester)
 	{
 		hb::shared::text::draw_text_aligned(GameFont::Bitmap1,
 			m_x + m_tester_btn.x, m_y + m_tester_btn.y,
 			m_tester_btn.w, m_tester_btn.h,
-			"Tester", style, hb::shared::text::Align::Center);
+			"Game Master", style, hb::shared::text::Align::Center);
 	}
-#endif
 }
 
 bool DialogBox_StatusOverlay::on_click()
@@ -158,15 +135,12 @@ bool DialogBox_StatusOverlay::on_click()
 	bool show_extra = m_show_extraloot && !m_game->get_dialog_box_manager().is_enabled(DialogBoxId::ExtraLoot);
 	bool has_primary = show_extra || m_show_levelup || m_show_restart;
 
-#ifdef TESTER_ONLY
 	if (m_show_tester && mouse_in(m_tester_btn))
 	{
-		// Seguridad en el servidor: si intentan usarlo sin permisos, el servidor lo rechaza de inmediato.
-		enable_dialog_box(DialogBoxId::TesterMenu, 0, 0, 0);
+		enable_dialog_box(DialogBoxId::GameMasterMenu, 0, 0, 0);
 		audio_manager::get().play_game_sound(sound_type::effect, 14, 5);
 		return true;
 	}
-#endif
 
 	if (has_primary && mouse_in(m_primary_btn))
 	{

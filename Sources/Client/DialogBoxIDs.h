@@ -51,18 +51,19 @@ namespace DialogBoxId
 		Resurrect = 50,
 		CommandHallMenu = 51,
 		RepairAll = 52,
-#ifdef TESTER_ONLY
 		// TESTER MENU — dialog IDs (tester builds only)
 		TesterMenu = 53,
 		ItemCreator = 54,
-#endif // TESTER_ONLY
 		Guild = 55,
 		GuildInvite = 56,
 		GuildDisbandConfirm = 57,
 		// === NUEVO: ID de la ventana de Extra Loot ===
 		ExtraLoot = 58,
 		// =============================================
-		MailBox = 59
+		MailBox = 59,
+		// === NUEVO: Menú oficial de Game Master (Release) ===
+		GameMasterMenu = 60
 
 	};
 }
+

@@ -154,13 +154,11 @@ namespace CommonType
 		UpgradeEnchant                          = 0x0A74,
 		DisenchantItem                          = 0x0A75,
 		RequestUpgradeTalent                    = 0x0A7A,
-#ifdef TESTER_ONLY
 		// TESTER MENU — tester-only commands
 		TesterAction                            = 0x0A76,
 		TesterItemSearch                        = 0x0A77,
 		TesterCreateItem                        = 0x0A78,
 		TesterMapList                           = 0x0A79,
-#endif // TESTER_ONLY
 		ReqRepairAll                            = 0x0F10,
 		ReqRepairAllDelete                      = 0x0F12,
 		ReqRepairAllConfirm                     = 0x0F13,
@@ -358,11 +356,9 @@ namespace Notify
 		FloatingText                            = 0x0A6E,
 		// =============================================
 
-#ifdef TESTER_ONLY
 		// TESTER MENU — tester-only notifications
 		TesterItemSearchResult                  = 0x0A6A,
 		TesterMapListResult                     = 0x0A6B,
-#endif // TESTER_ONLY
 	};
 }
 

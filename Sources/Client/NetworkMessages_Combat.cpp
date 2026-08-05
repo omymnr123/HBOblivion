@@ -1,12 +1,11 @@
-ï»¿#include "Game.h"
+#include "Game.h"
 #include "FloatingTextManager.h"
 #include "NetworkMessageManager.h"
 #include "Packet/SharedPackets.h"
-#ifdef TESTER_ONLY
-// TESTER MENU â€” includes (tester builds only)
+// TESTER MENU — includes (tester builds only)
 #include "DialogBox_ItemCreator.h"
 #include "DialogBox_TesterMenu.h"
-#endif // TESTER_ONLY
+#include "DialogBox_GameMaster.h"
 #include "lan_eng.h"
 #include <cstdio>
 #include <cstring>
@@ -113,8 +112,7 @@ namespace NetworkMessageHandlers {
 		game->m_player->m_contribution = pkt->value;
 	}
 
-#ifdef TESTER_ONLY
-	// TESTER MENU â€” notification handlers (tester builds only)
+	// TESTER MENU — notification handlers (tester builds only)
 	void HandleTesterItemSearchResult(CGame* game, char* data)
 	{
 		const auto* pkt = hb::net::PacketCast<hb::net::PacketNotifyTesterItemSearchResult>(
@@ -132,11 +130,10 @@ namespace NetworkMessageHandlers {
 			data, sizeof(hb::net::PacketNotifyTesterMapListResult));
 		if (!pkt) return;
 
-		auto* dlg = dynamic_cast<DialogBox_TesterMenu*>(
-			game->get_dialog_box_manager().get_dialog_box(DialogBoxId::TesterMenu));
+		auto* dlg = dynamic_cast<DialogBox_GameMaster*>(
+			game->get_dialog_box_manager().get_dialog_box(DialogBoxId::GameMasterMenu));
 		if (dlg) dlg->receive_map_list(pkt);
 	}
-#endif // TESTER_ONLY
 
 	void HandleEnemyKillReward(CGame* game, char* data)
 	{
@@ -272,4 +269,7 @@ namespace NetworkMessageHandlers {
 		game->on_game()->m_point_command_type = -1;
 	}
 }
+
+
+
 

@@ -150,11 +150,9 @@ namespace NetworkMessageHandlers {
 	void HandlePKpenalty(CGame* game, char* data);
 	void HandleEnemyKills(CGame* game, char* data);
 	void HandleContribution(CGame* game, char* data);
-#ifdef TESTER_ONLY
 	// TESTER MENU — notification handlers (tester builds only)
 	void HandleTesterItemSearchResult(CGame* game, char* data);
 	void HandleTesterMapListResult(CGame* game, char* data);
-#endif // TESTER_ONLY
 	void HandleEnemyKillReward(CGame* game, char* data);
 	void HandleGlobalAttackMode(CGame* game, char* data);
 	void HandleDamageMove(CGame* game, char* data);
@@ -459,11 +457,9 @@ bool NetworkMessageManager::process_message(uint32_t msg_id, char* data, uint32_
 		case Notify::LimitedLevel: NetworkMessageHandlers::HandleLimitedLevel(m_game, data); return true;
 		case Notify::ToBeRecalled: NetworkMessageHandlers::HandleToBeRecalled(m_game, data); return true;
 
-#ifdef TESTER_ONLY
 		// TESTER MENU — notification handlers (tester builds only)
 		case Notify::TesterItemSearchResult: NetworkMessageHandlers::HandleTesterItemSearchResult(m_game, data); return true;
 		case Notify::TesterMapListResult: NetworkMessageHandlers::HandleTesterMapListResult(m_game, data); return true;
-#endif // TESTER_ONLY
 
 		}
 		return false;
@@ -471,3 +467,5 @@ bool NetworkMessageManager::process_message(uint32_t msg_id, char* data, uint32_
 
 	return false;
 }
+
+
