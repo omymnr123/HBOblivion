@@ -110,6 +110,7 @@ namespace NetworkMessageHandlers {
 	void HandleItemPosList(CGame* game, char* data);
 	void HandleItemSold(CGame* game, char* data);
 	void HandleNotifyExtraLootAvailable(CGame* game, char* data);
+	void HandleAchievementUnlocked(CGame* game, char* data);
 	void HandleReqExtraLootList(CGame* game, char* data);
 
 	// Apocalypse

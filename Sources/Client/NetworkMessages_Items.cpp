@@ -1097,6 +1097,20 @@ namespace NetworkMessageHandlers {
 		if (hud) hud->m_show_extraloot = true;
 	}
 
+	void HandleAchievementUnlocked(CGame* game, char* data)
+	{
+		auto* pkt = reinterpret_cast<hb::net::PacketNotifyAchievementUnlocked*>(data);
+
+		char title[33] = { 0 };
+		char desc[65] = { 0 };
+		
+		strncpy_s(title, sizeof(title), pkt->title, _TRUNCATE);
+		strncpy_s(desc, sizeof(desc), pkt->description, _TRUNCATE);
+
+		// PRUEBA IRREFUTABLE: Hacemos saltar una ventana de Windows
+		MessageBoxA(nullptr, desc, title, MB_OK | MB_ICONINFORMATION);
+	}
+
 	void HandleReqExtraLootList(CGame* game, char* data)
 	{
 		auto* lootBox = game->get_dialog_box_manager().get_dialog_as<DialogBox_ExtraLoot>(DialogBoxId::ExtraLoot);

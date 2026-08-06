@@ -412,6 +412,7 @@ public:
 	int get_npc_config_id_by_name(const char * npc_name) const;
 	void send_exp_potion_status(int client_h);
 	void send_notify_msg(int from_h, int to_h, uint16_t msg_type, uint32_t v1, uint64_t v2, uint32_t v3, const char * string, uint32_t v4 = 0, uint32_t v5 = 0, uint32_t v6 = 0, uint32_t v7 = 0, uint32_t v8 = 0, uint32_t v9 = 0, const char * string2 = 0);
+	void SendAchievementUnlocked(int client_h, const char* title, const char* desc, int icon_id, int points);
 	void send_item_attribute_change(int client_h, int item_index, CItem* item, uint32_t spec_value1 = 0, uint32_t spec_value2 = 0);
 	void send_gizon_item_change(int client_h, int item_index, CItem* item);
 	void send_exchange_item_notify(int from_h, int to_h, uint16_t msg_type, int item_index, CItem* item, int amount);

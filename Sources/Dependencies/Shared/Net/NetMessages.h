@@ -357,6 +357,10 @@ namespace Notify
 		FloatingText                            = 0x0A6E,
 		// =============================================
 
+		// === NUEVO: LOGROS (SERVER -> CLIENTE) ===
+		AchievementUnlocked                     = 0x0A6F,
+		// =========================================
+
 		// TESTER MENU — tester-only notifications
 		TesterItemSearchResult                  = 0x0A6A,
 		TesterMapListResult                     = 0x0A6B,

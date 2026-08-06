@@ -15465,3 +15465,24 @@ void CGame::request_take_attachment_handler(int client_h, char* data)
         sqlite3_close(mail_db);
     }
 }
+
+void CGame::SendAchievementUnlocked(int client_h, const char* title, const char* desc, int icon_id, int points)
+{
+	if (m_client_list[client_h] == nullptr) return;
+
+	hb::net::PacketNotifyAchievementUnlocked pkt;
+	memset(&pkt, 0, sizeof(pkt));
+
+	// Escribimos la cabecera directamente en la memoria (los 8 primeros bytes exactos)
+	char* pBase = reinterpret_cast<char*>(&pkt);
+	*reinterpret_cast<uint16_t*>(pBase) = sizeof(pkt); // Tamaño (Byte 0 y 1)
+	*reinterpret_cast<uint32_t*>(pBase + 2) = hb::shared::net::MsgId::Notify; // ID de Mensaje (Bytes 2 al 5)
+	*reinterpret_cast<uint16_t*>(pBase + 6) = hb::shared::net::Notify::AchievementUnlocked; // Tipo de Notify (Byte 6 y 7)
+
+	strncpy_s(pkt.title, sizeof(pkt.title), title, _TRUNCATE);
+	strncpy_s(pkt.description, sizeof(pkt.description), desc, _TRUNCATE);
+	pkt.icon_id = icon_id;
+	pkt.reward_points = points;
+
+	m_client_list[client_h]->m_socket->send_msg(reinterpret_cast<char*>(&pkt), sizeof(pkt));
+}

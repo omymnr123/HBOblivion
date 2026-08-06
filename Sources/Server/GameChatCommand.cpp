@@ -29,6 +29,29 @@
 #include "GameCmdSetSkills.h"
 #include "GameCmdWho.h"
 
+// === NUEVO COMANDO: /LOGRO (SOLO ADMINS) ===
+class GameCmdLogro : public GameChatCommand
+{
+public:
+	// El nombre del comando en el chat
+	const char* get_name() const override { return "logro"; }
+	
+	// Nivel requerido: hb::shared::admin::Administrator (Solo GMs)
+	int get_default_level() const override { return hb::shared::admin::Administrator; }
+	
+	// Lo que pasa al escribir el comando
+	bool execute(CGame* game, int client_h, const char* args) override
+	{
+		// 1. Chivato: Un mensaje normal del servidor al chat para confirmar que haces bien el comando
+		game->send_notify_msg(0, client_h, hb::shared::net::Notify::NoticeMsg, 0, 0, 0, ">>> DISPARANDO LOGRO... <<<");
+		
+		// 2. Disparamos el logro real
+		game->SendAchievementUnlocked(client_h, "Prueba de Sistema", "Funciona a la perfeccion", 1, 100);
+		return true;
+	}
+};
+// ===========================================
+
 using namespace hb::shared::net;
 GameChatCommandManager& GameChatCommandManager::get()
 {
@@ -145,6 +168,7 @@ void GameChatCommandManager::register_built_in_commands()
 	register_command(std::make_unique<GameCmdRevive>());
 	register_command(std::make_unique<GameCmdSetSkills>());
 	register_command(std::make_unique<GameCmdWho>());
+	register_command(std::make_unique<GameCmdLogro>());
 }
 
 void GameChatCommandManager::seed_command_permissions()

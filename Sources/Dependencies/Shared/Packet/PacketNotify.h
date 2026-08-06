@@ -956,6 +956,16 @@ namespace net {
 		int32_t amount;
 	};
 
+// === NUEVO: PAQUETE DE LOGROS ===
+    struct HB_PACKED PacketNotifyAchievementUnlocked {
+        PacketHeader header;
+        char title[32];
+        char description[64];
+        uint16_t icon_id;
+        uint16_t reward_points;
+    };
+    // ================================
+
 	HB_PACK_END
 }
 }
