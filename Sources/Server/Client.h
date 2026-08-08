@@ -203,6 +203,10 @@ public:
 	int        m_exp_potion_percent; // Exp potion bonus %
 	int        m_exp_potion_time;    // Exp potion time left in ms on logout
 
+	uint8_t    m_prestige_level = 0;
+    uint16_t   m_prestige_bonus_stats = 0;
+	
+
 	uint32_t   m_auto_exp_amount;		 // Auto-Exp
 	uint32_t m_auto_exp_time;		 // Auto-Exp ? .
 

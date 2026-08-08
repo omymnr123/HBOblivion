@@ -4951,7 +4951,11 @@ void CGame::init_player_data(int client_h, char* data, uint32_t size)
 		if (m_client_list[client_h]->m_is_player_civil)
 			force_change_play_mode(client_h, false);
 
-	m_client_list[client_h]->m_next_level_exp = m_level_exp_table[m_client_list[client_h]->m_level + 1]; //get_level_exp(m_client_list[client_h]->m_level + 1);
+	// --- PRESTIGE: MODIFICADOR DE EXPERIENCIA AL CONECTAR ---
+uint32_t base_exp = m_level_exp_table[m_client_list[client_h]->m_level + 1];
+double prestige_multiplier = 1.0 + (m_client_list[client_h]->m_prestige_level * 0.15);
+m_client_list[client_h]->m_next_level_exp = static_cast<uint32_t>(base_exp * prestige_multiplier);
+// --------------------------------------------------------
 
 	m_item_manager->calc_total_item_effect(client_h, -1, true); //false
 	calc_total_weight(client_h);
@@ -6299,6 +6303,90 @@ void CGame::client_common_handler(int client_h, char* data)
 		}
 		break;
 	}
+
+	// === SISTEMA PRESTIGE: PROCESAR ORDEN ===
+        case CommonType::ReqPrestige:
+        {
+            if (m_client_list[client_h]->m_level < 180) {
+                show_client_msg(client_h, (char*)"You must be Level 180 to Prestige.");
+                break;
+            }
+
+            // Comprobar Peso de la mochila (Menos de 50 kg reales)
+            if ((m_client_list[client_h]->m_cur_weight_load / 100) > 50) {
+                show_client_msg(client_h, (char*)"Your weight must be under 50 kg to Prestige.");
+                break;
+            }
+
+            if (m_client_list[client_h]->m_prestige_level >= 20) {
+                show_client_msg(client_h, (char*)"You have reached the maximum Prestige Rank.");
+                break;
+            }
+
+            // --- EJECUTAR PRESTIGE ---
+            
+            // Incrementar Prestige Rank (+1) y Puntos Acumulados (+3 por nivel de Prestige)
+            m_client_list[client_h]->m_prestige_level++;
+            m_client_list[client_h]->m_prestige_bonus_stats = m_client_list[client_h]->m_prestige_level * 3;
+
+            // Detectar si era Mago o Guerrero según su atributo principal previo
+            bool isMage = (m_client_list[client_h]->m_mag > m_client_list[client_h]->m_str);
+
+            // Bajar a nivel 1 y reiniciar experiencia
+            m_client_list[client_h]->m_level = 1;
+            m_client_list[client_h]->m_exp = 0;
+
+            // Asignar stats base estrictos de nivel 1 según la clase
+            if (isMage) {
+                m_client_list[client_h]->m_str = 10;
+                m_client_list[client_h]->m_vit = 12;
+                m_client_list[client_h]->m_dex = 10;
+                m_client_list[client_h]->m_int = 14;
+                m_client_list[client_h]->m_mag = 14;
+                m_client_list[client_h]->m_charisma = 10;
+            } else {
+                m_client_list[client_h]->m_str = 14;
+                m_client_list[client_h]->m_vit = 12;
+                m_client_list[client_h]->m_dex = 14;
+                m_client_list[client_h]->m_int = 10;
+                m_client_list[client_h]->m_mag = 10;
+                m_client_list[client_h]->m_charisma = 10;
+            }
+
+            // Asignar los puntos de bonificación del Prestige a la reserva (pool)
+            m_client_list[client_h]->m_levelup_pool = m_client_list[client_h]->m_prestige_bonus_stats;
+
+            // Recalcular la experiencia necesaria para el siguiente nivel (Nivel 2) con el multiplicador de Prestige
+            uint32_t base_exp_pr = m_level_exp_table[2];
+            double prestige_mult_pr = 1.0 + (m_client_list[client_h]->m_prestige_level * 0.15);
+            m_client_list[client_h]->m_next_level_exp = static_cast<uint32_t>(base_exp_pr * prestige_mult_pr);
+
+            // Guardar Snapshot en SQLite inmediatamente para asegurar el reseteo en la base de datos
+            std::string dbPath;
+            sqlite3* db = nullptr;
+            if (EnsureAccountDatabase(m_client_list[client_h]->m_account_name, &db, dbPath)) {
+                SaveCharacterSnapshot(db, m_client_list[client_h]);
+                CloseAccountDatabase(db);
+            }
+
+            // --- NOTIFICACIONES DE RED EN TIEMPO REAL ---
+            // Envía la secuencia oficial para refrescar la UI, evitar "Connecting Lost" y activar el cartel de Level Up[cite: 4]
+            send_notify_msg(0, client_h, Notify::LevelUp, 0, 0, 0, nullptr);
+            send_notify_msg(0, client_h, Notify::Exp, 0, 0, 0, nullptr);
+            send_notify_msg(0, client_h, Notify::LevelUpPoints, 0, 0, 0, nullptr);
+
+            // Mensaje informativo por chat
+            char msg[256];
+            std::snprintf(msg, sizeof(msg), ">>> %s has reached Prestige Rank %d! Bonus stats: +%d <<<", 
+                m_client_list[client_h]->m_char_name, 
+                m_client_list[client_h]->m_prestige_level,
+                m_client_list[client_h]->m_prestige_bonus_stats);
+            show_client_msg(client_h, msg);
+
+            break;
+        }
+        // ========================================
+
 	case CommonType::ReqClaimExtraLoot:
     {
         if (m_client_list[client_h] == nullptr) break;
@@ -9677,7 +9765,11 @@ bool CGame::check_level_up(int client_h)
             send_notify_msg(0, client_h, Notify::LevelUp, 0, 0, 0, 0);
             send_notify_msg(0, client_h, Notify::LevelUpPoints, 0, 0, 0, 0);
 
-            m_client_list[client_h]->m_next_level_exp = m_level_exp_table[m_client_list[client_h]->m_level + 1];
+            // --- PRESTIGE: MODIFICADOR DE EXPERIENCIA AL SUBIR DE NIVEL ---
+            uint32_t base_exp_lu = m_level_exp_table[m_client_list[client_h]->m_level + 1];
+            double prestige_mult_lu = 1.0 + (m_client_list[client_h]->m_prestige_level * 0.15);
+            m_client_list[client_h]->m_next_level_exp = static_cast<uint32_t>(base_exp_lu * prestige_mult_lu);
+            // --------------------------------------------------------------
 
             m_item_manager->calc_total_item_effect(client_h, -1, false);
         }
@@ -9686,7 +9778,11 @@ bool CGame::check_level_up(int client_h)
             m_client_list[client_h]->m_exp -= m_client_list[client_h]->m_next_level_exp;
             m_client_list[client_h]->m_gizon_item_upgrade_left++;
 
-            m_client_list[client_h]->m_next_level_exp = m_level_exp_table[m_max_level + 1];
+            // --- PRESTIGE: MODIFICADOR DE EXPERIENCIA EN NIVEL MAXIMO (MAJESTIC) ---
+            uint32_t base_exp_maj = m_level_exp_table[m_max_level + 1];
+            double prestige_mult_maj = 1.0 + (m_client_list[client_h]->m_prestige_level * 0.15);
+            m_client_list[client_h]->m_next_level_exp = static_cast<uint32_t>(base_exp_maj * prestige_mult_maj);
+            // -----------------------------------------------------------------------
 
             send_notify_msg(0, client_h, Notify::GizonItemUpgradeLeft, m_client_list[client_h]->m_gizon_item_upgrade_left, 1, 0, 0);
         }

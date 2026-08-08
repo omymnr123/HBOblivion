@@ -363,6 +363,8 @@ static bool MigrateItemNamesToIds(sqlite3* db)
     sqlite3_exec(db, "ALTER TABLE character_extra_loot ADD COLUMN secondary_type INTEGER NOT NULL DEFAULT 0;", nullptr, nullptr, nullptr);
     sqlite3_exec(db, "ALTER TABLE character_extra_loot ADD COLUMN secondary_value INTEGER NOT NULL DEFAULT 0;", nullptr, nullptr, nullptr);
     sqlite3_exec(db, "ALTER TABLE character_extra_loot ADD COLUMN enchant_bonus INTEGER NOT NULL DEFAULT 0;", nullptr, nullptr, nullptr);
+    sqlite3_exec(db, "ALTER TABLE characters ADD COLUMN prestige_level INTEGER NOT NULL DEFAULT 0;", nullptr, nullptr, nullptr);
+    sqlite3_exec(db, "ALTER TABLE characters ADD COLUMN prestige_bonus_stats INTEGER NOT NULL DEFAULT 0;", nullptr, nullptr, nullptr);
     // ====================================
 
     // Commit transaction
@@ -434,6 +436,8 @@ bool EnsureAccountDatabase(const char* account_name, sqlite3** outDb, std::strin
         " underwear INTEGER NOT NULL,"
         " TalentPoints INTEGER NOT NULL DEFAULT 0,"
         " Talents TEXT NOT NULL DEFAULT '0,0,0,0,0,0,0,0',"
+        " prestige_level INTEGER NOT NULL DEFAULT 0,"
+        " prestige_bonus_stats INTEGER NOT NULL DEFAULT 0,"
         " FOREIGN KEY(account_name) REFERENCES accounts(account_name) ON DELETE CASCADE"
         ");"
         "CREATE TABLE IF NOT EXISTS character_items ("
@@ -608,7 +612,9 @@ bool EnsureAccountDatabase(const char* account_name, sqlite3** outDb, std::strin
         !AddColumnIfMissing(db, "characters", "TalentPoints", "INTEGER NOT NULL DEFAULT 0") ||
         !AddColumnIfMissing(db, "characters", "Talents", "TEXT NOT NULL DEFAULT '0,0,0,0,0,0,0,0'") ||
         !AddColumnIfMissing(db, "characters", "exp_potion_percent", "INTEGER NOT NULL DEFAULT 0") ||
-        !AddColumnIfMissing(db, "characters", "exp_potion_time", "INTEGER NOT NULL DEFAULT 0")) {
+        !AddColumnIfMissing(db, "characters", "exp_potion_time", "INTEGER NOT NULL DEFAULT 0") ||
+        !AddColumnIfMissing(db, "characters", "prestige_level", "INTEGER NOT NULL DEFAULT 0") ||
+        !AddColumnIfMissing(db, "characters", "prestige_bonus_stats", "INTEGER NOT NULL DEFAULT 0")) {
         sqlite3_close(db);
         return false;
     }
@@ -749,7 +755,8 @@ bool LoadCharacterState(sqlite3* db, const char* character_name, AccountDbCharac
         "special_event_id, super_attack_left, "
         "special_ability_time, locked_map_name, locked_map_time, crusade_job, crusade_guid, "
         "construct_point, dead_penalty_time, party_id, gizon_item_upgrade_left, "
-        "underwear_type, hair_color, hair_style, skin_color, TalentPoints, Talents, exp_potion_percent, exp_potion_time "
+        "underwear_type, hair_color, hair_style, skin_color, TalentPoints, Talents, exp_potion_percent, exp_potion_time, "
+        "prestige_level, prestige_bonus_stats "
         "FROM characters WHERE character_name = ? COLLATE NOCASE;";
 
     sqlite3_stmt* stmt = nullptr;
@@ -840,6 +847,8 @@ bool LoadCharacterState(sqlite3* db, const char* character_name, AccountDbCharac
         
         outState.exp_potion_percent = sqlite3_column_int(stmt, col++);
         outState.exp_potion_time = sqlite3_column_int(stmt, col++);
+        outState.prestige_level = static_cast<uint8_t>(sqlite3_column_int(stmt, col++));
+        outState.prestige_bonus_stats = static_cast<uint16_t>(sqlite3_column_int(stmt, col++));
 
         ok = true;
     }
@@ -1135,8 +1144,8 @@ bool InsertCharacterState(sqlite3* db, const AccountDbCharacterState& state)
         " special_event_id, super_attack_left, "
         " special_ability_time, locked_map_name, locked_map_time, crusade_job, crusade_guid, "
         " construct_point, dead_penalty_time, party_id, gizon_item_upgrade_left,"
-        " underwear_type, hair_color, hair_style, skin_color, TalentPoints, Talents, exp_potion_percent, exp_potion_time"
-        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+        " underwear_type, hair_color, hair_style, skin_color, TalentPoints, Talents, exp_potion_percent, exp_potion_time, prestige_level, prestige_bonus_stats"
+        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
 
     sqlite3_stmt* stmt = nullptr;
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
@@ -1662,9 +1671,16 @@ bool SaveCharacterSnapshot(sqlite3* db, const CClient* client)
         " special_event_id, super_attack_left,"
         " special_ability_time, locked_map_name, locked_map_time, crusade_job, crusade_guid,"
         " construct_point, dead_penalty_time, party_id, gizon_item_upgrade_left,"
-        " underwear_type, hair_color, hair_style, skin_color, TalentPoints, Talents, exp_potion_percent, exp_potion_time"
-        ") VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
-
+        " underwear_type, hair_color, hair_style, skin_color, TalentPoints, Talents, exp_potion_percent, exp_potion_time, prestige_level, prestige_bonus_stats"
+        ") VALUES("
+        "?,?,?,?,?,?,?,?,?,?,"
+        "?,?,?,?,?,?,?,?,?,?,"
+        "?,?,?,?,?,?,?,?,?,?,"
+        "?,?,?,?,?,?,?,?,?,?,"
+        "?,?,?,?,?,?,?,?,?,?,"
+        "?,?,?,?,?,?,?,?,?,?,"
+        "?,?,?,?,?,?,?,?,?,?"
+        ");";
     sqlite3_stmt* stmt = nullptr;
     if (sqlite3_prepare_v2(db, upsertSql, -1, &stmt, nullptr) != SQLITE_OK) {
         char logMsg[512] = {};
@@ -1750,6 +1766,8 @@ bool SaveCharacterSnapshot(sqlite3* db, const CClient* client)
 
     ok &= (sqlite3_bind_int(stmt, idx++, client->m_exp_potion_percent) == SQLITE_OK);
     ok &= (sqlite3_bind_int(stmt, idx++, client->m_exp_potion_time) == SQLITE_OK);
+    ok &= (sqlite3_bind_int(stmt, idx++, client->m_prestige_level) == SQLITE_OK);
+    ok &= (sqlite3_bind_int(stmt, idx++, client->m_prestige_bonus_stats) == SQLITE_OK);
 
     if (!ok) {
         char logMsg[512] = {};

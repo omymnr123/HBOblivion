@@ -166,6 +166,7 @@ namespace CommonType
 		// === NUEVO: EXTRA LOOT (CLIENTE -> SERVER) ===
 		ReqExtraLootList                        = 0x0F14,
 		ReqClaimExtraLoot                       = 0x0F15,
+		ReqPrestige                             = 0x0F16,
 		// =============================================
 	};
 }
@@ -360,6 +361,8 @@ namespace Notify
 		// === NUEVO: LOGROS (SERVER -> CLIENTE) ===
 		AchievementUnlocked                     = 0x0A6F,
 		// =========================================
+
+		OpenPrestigeWindow                      = 0x0A70,
 
 		// TESTER MENU — tester-only notifications
 		TesterItemSearchResult                  = 0x0A6A,

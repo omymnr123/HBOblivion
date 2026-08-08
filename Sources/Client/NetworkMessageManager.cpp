@@ -216,6 +216,7 @@ namespace NetworkMessageHandlers {
 	void HandleLoteryLost(CGame* game, char* data);
 	void HandleNotFlagSpot(CGame* game, char* data);
 	void HandleNpcTalk(CGame* game, char* data);
+	void HandleOpenPrestigeWindow(CGame* game, char* data);
 	void HandleTravelerLimitedLevel(CGame* game, char* data);
 	void HandleLimitedLevel(CGame* game, char* data);
 	void HandleToBeRecalled(CGame* game, char* data);
@@ -455,6 +456,7 @@ bool NetworkMessageManager::process_message(uint32_t msg_id, char* data, uint32_
 		case Notify::LoteryLost: NetworkMessageHandlers::HandleLoteryLost(m_game, data); return true;
 		case Notify::NotFlagSpot: NetworkMessageHandlers::HandleNotFlagSpot(m_game, data); return true;
 		case Notify::NpcTalk: NetworkMessageHandlers::HandleNpcTalk(m_game, data); return true;
+		case Notify::OpenPrestigeWindow: NetworkMessageHandlers::HandleOpenPrestigeWindow(m_game, data); return true;
 		case Notify::TravelerLimitedLevel: NetworkMessageHandlers::HandleTravelerLimitedLevel(m_game, data); return true;
 		case Notify::LimitedLevel: NetworkMessageHandlers::HandleLimitedLevel(m_game, data); return true;
 		case Notify::ToBeRecalled: NetworkMessageHandlers::HandleToBeRecalled(m_game, data); return true;

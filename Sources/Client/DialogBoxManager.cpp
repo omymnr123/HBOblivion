@@ -50,6 +50,7 @@
 #include "DialogBox_GameMaster.h"
 #include "DialogBox_ItemCreator.h"
 #include "DialogBox_NpcCreator.h"
+#include "DialogBox_Prestige.h"
 // TESTER MENU — includes (tester builds only)
 #ifdef TESTER_ONLY
 #include "DialogBox_TesterMenu.h"
@@ -121,6 +122,7 @@ void DialogBoxManager::initialize_dialog_boxes()
 	register_dialog_box(std::make_unique<DialogBox_ExtraLoot>(&m_game));
 	register_dialog_box(std::make_unique<DialogBox_MailBox>(&m_game));
 	register_dialog_box(std::make_unique<DialogBox_GameMaster>(&m_game));
+	register_dialog_box(std::make_unique<DialogBox_Prestige>(&m_game));
 	// TESTER MENU — dialog registration (tester builds only)
 #ifdef TESTER_ONLY
 	register_dialog_box(std::make_unique<DialogBox_TesterMenu>(&m_game));

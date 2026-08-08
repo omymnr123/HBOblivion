@@ -268,6 +268,7 @@
     <ClInclude Include="DialogBox_SellOrRepair.h" />
     <ClInclude Include="DialogBox_Manufacture.h" />
     <ClInclude Include="DialogBox_ExtraLoot.h" />
+    <ClInclude Include="DialogBox_Prestige.h" />
     <ClInclude Include="AnimationState.h" />
     <ClInclude Include="EffectManager.h" />
     <ClInclude Include="EntityMotion.h" />
@@ -473,6 +474,7 @@
     <ClCompile Include="DialogBox_CommandHallMenu.cpp" />
     <ClCompile Include="DialogBox_SellOrRepair.cpp" />
     <ClCompile Include="DialogBox_Manufacture.cpp" />
+    <ClCompile Include="DialogBox_Prestige.cpp" />
     <ClCompile Include="performance_monitor.cpp" />
     <ClCompile Include="HotkeyManager.cpp" />
     <ClCompile Include="Screen_OnGame.Hotkeys.cpp" />

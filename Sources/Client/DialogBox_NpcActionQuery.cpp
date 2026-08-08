@@ -38,7 +38,7 @@ void DialogBox_NpcActionQuery::DrawMode0_NpcMenu(short sX, short sY)
     short mouse_x = static_cast<short>(hb::shared::input::get_mouse_x());
     short mouse_y = static_cast<short>(hb::shared::input::get_mouse_y());
     if (m_action_type == 25) {
-        draw_new_dialog_box(InterfaceNdGame2, sX, sY, 5);
+        draw_new_dialog_box(InterfaceNdGame2, sX, sY, 6); // Gráfico más ancho para que quepan todos
     } else {
         draw_new_dialog_box(InterfaceNdGame2, sX, sY, 5);
     }
@@ -73,7 +73,13 @@ void DialogBox_NpcActionQuery::DrawMode0_NpcMenu(short sX, short sY)
     }
 
     if (m_game->get_dialog_box_manager().is_enabled(DialogBoxId::NpcTalk) == false) {
-        draw_highlighted_text(sX + 125, sY + 55, DRAW_DIALOGBOX_NPCACTION_QUERY25, mouse_x, mouse_y, sX + 125, sX + 180, sY + 55, sY + 70);
+        // TALK
+        draw_highlighted_text(sX + 125, sY + 55, DRAW_DIALOGBOX_NPCACTION_QUERY25, mouse_x, mouse_y, sX + 125, sX + 160, sY + 55, sY + 70);
+        
+        // PRESTIGE (Solo si es el Cityhall Officer, m_action_type == 25)
+        if (m_action_type == 25) {
+            draw_highlighted_text(sX + 165, sY + 55, "Prestige", mouse_x, mouse_y, sX + 165, sX + 225, sY + 55, sY + 70);
+        }
     }
 }
 
@@ -241,6 +247,13 @@ bool DialogBox_NpcActionQuery::on_click()
             send_game_packet(pkt);
 
             disable_this_dialog();
+            return true;
+        }
+        // CONDICIÓN: Clic en el botón Prestige para el Cityhall Officer (m_action_type == 25)
+        if ((m_action_type == 25) && (mouse_x > sX + 165) && (mouse_x < sX + 225) && (mouse_y > sY + 55) && (mouse_y < sY + 70)) {
+            // Abrir tu ventana de Prestige localmente
+            m_game->get_dialog_box_manager().enable_dialog_box(DialogBoxId::Prestige, 0, 0, 0);
+            disable_this_dialog(); // Cerrar la burbujita
             return true;
         }
 

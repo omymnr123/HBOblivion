@@ -268,4 +268,14 @@ void HandleToBeRecalled(CGame* game, char* data)
 	game->add_event_list(NOTIFY_MSG_HANDLER62, 10);
 }
 
+void HandleOpenPrestigeWindow(CGame* game, char* data)
+{
+    if (game == nullptr) return;
+
+    // Este texto rojo saldrá en el chat local para chivarnos si el cliente no está sordo
+    game->add_event_list(">>> CLIENTE: Senal de Prestige recibida <<<", 10);
+
+    game->get_dialog_box_manager().enable(DialogBoxId::Prestige);
+}
+
 } // namespace NetworkMessageHandlers

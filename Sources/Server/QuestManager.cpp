@@ -57,6 +57,16 @@ void QuestManager::npc_talk_handler(int client_h, int who)
 		quest_num = talk_to_npc_result_guard(client_h, &quest_type, &res_mode, &reward_type, &reward_amount, &contribution, target_name, &target_type, &target_count, &iX, &iY, &range);
 		if (quest_num >= 1000) return;
 		break;
+        
+    // === SISTEMA PRESTIGE (MORVATH) ===
+    case 69: // npc_type de Devlin / Morvath
+        // Si el nombre del mapa contiene "cath" (iglesias), es Morvath
+        if (strstr(m_game->m_client_list[client_h]->m_map_name, "cath") != 0) {
+            m_game->send_notify_msg(0, client_h, Notify::OpenPrestigeWindow, 0, 0, 0, 0);
+            return;
+        }
+        break; // Si es Devlin paseando por la ciudad, sigue su curso normal
+    // ==================================
 	}
 
 	std::memset(reward_name, 0, sizeof(reward_name));
@@ -66,7 +76,7 @@ void QuestManager::npc_talk_handler(int client_h, int who)
 		}
 		else {
 			switch (reward_type) {
-			case -10: strcpy(reward_name, "���F-�"); break;
+			case -10: strcpy(reward_name, "F-"); break;
 			}
 		}
 

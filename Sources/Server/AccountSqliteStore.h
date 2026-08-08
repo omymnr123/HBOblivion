@@ -121,8 +121,13 @@ struct AccountDbCharacterState
     hb::shared::entity::PlayerAppearance appearance;
     uint8_t talent_points;
     uint8_t talents[8];
-    int exp_potion_percent;
+int exp_potion_percent;
     int exp_potion_time;
+    
+    // === SISTEMA DE PRESTIGE ===
+    uint8_t prestige_level;
+    uint16_t prestige_bonus_stats;
+    // ===========================
 };
 
 struct AccountDbItemRow
