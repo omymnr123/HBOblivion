@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="D:\HB Server\Helbreath-Heldenian-Project-Development\build_server\CMakeFiles\02e53e5efc8305cdb8dac4064c950f80\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{F46CF8E9-8162-3923-B20F-033152C5E615}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

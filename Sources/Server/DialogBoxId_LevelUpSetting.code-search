@@ -1,0 +1,83 @@
+# Query: DialogBoxId::LevelUpSetting
+# ContextLines: 1
+
+17 results - 13 files
+
+Helbreath-Heldenian-Project-Development\Scripts\phase2_enable_disable_ownership.py:
+  361          "\tint tester_y = LOGICAL_HEIGHT() - 339 - ICON_PANEL_HEIGHT() - 10;",
+  362:         "\tif (m_game->m_dialog_box_manager.is_enabled(DialogBoxId::LevelUpSetting))",
+  363          "\t\ttester_y -= 30;",
+
+  377      ("ChangeStatsMajestic", "DialogBox_ChangeStatsMajestic", True, [
+  378:         "\tauto* luDlg = get_dialog_box(DialogBoxId::LevelUpSetting);",
+  379          "\tif (luDlg) { m_x = luDlg->m_x + 10; m_y = luDlg->m_y + 10; }",
+
+Helbreath-Heldenian-Project-Development\Scripts\output\DialogBox_ChangeStatsMajestic.cpp:
+  218  	if (is_enabled()) return true;
+  219: 	auto* luDlg = get_dialog_box(DialogBoxId::LevelUpSetting);
+  220  	if (luDlg) { m_x = luDlg->m_x + 10; m_y = luDlg->m_y + 10; }
+
+Helbreath-Heldenian-Project-Development\Scripts\output\DialogBox_HudPanel.cpp:
+  124  	{
+  125: 		if ((player().m_lu_point > 0) && !m_game->get_dialog_box_manager().is_enabled(DialogBoxId::LevelUpSetting))
+  126  		{
+
+Helbreath-Heldenian-Project-Development\Scripts\output\DialogBox_LevelUpSetting.cpp:
+  12  DialogBox_LevelUpSetting::DialogBox_LevelUpSetting(CGame* game)
+  13: 	: IDialogBox(DialogBoxId::LevelUpSetting, game)
+  14  {
+
+Helbreath-Heldenian-Project-Development\Scripts\output\Game.cpp:
+  4461  				{
+  4462: 					if (!get_dialog_box_manager().is_enabled(DialogBoxId::LevelUpSetting) && (m_player->m_lu_point > 0))
+  4463  					{
+  4464: 						get_dialog_box_manager().enable_dialog_box(DialogBoxId::LevelUpSetting, 0, 0, 0);
+  4465  						play_game_sound('E', 14, 5);
+
+  4515  			//ZeroEoyPnk - Bye delay...
+  4516: 			if (((get_dialog_box_manager().is_enabled(DialogBoxId::LevelUpSetting) != true) || (CursorTarget::get_selected_id() != 12))
+  4517  				&& ((get_dialog_box_manager().is_enabled(DialogBoxId::ChangeStatsMajestic) != true) || (CursorTarget::get_selected_id() != 42)))
+
+Helbreath-Heldenian-Project-Development\Scripts\output\NetworkMessages_Skills.cpp:
+  382  		game->get_dialog_box_manager().disable_dialog_box(DialogBoxId::ChangeStatsMajestic);
+  383: 		game->get_dialog_box_manager().enable_dialog_box(DialogBoxId::LevelUpSetting, 0, 0, 0);
+  384  		game->add_event_list("Your stat has been changed.", 10);
+
+Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_ChangeStatsMajestic.cpp:
+  219  	if (is_enabled()) return true;
+  220: 	auto* luDlg = get_dialog_box(DialogBoxId::LevelUpSetting);
+  221  	if (luDlg) { m_x = luDlg->m_x + 10; m_y = luDlg->m_y + 10; }
+
+Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Character.cpp:
+  543  	if (mouse_in(btn_levelup)) {
+  544: 		enable_dialog_box(DialogBoxId::LevelUpSetting, 0, 0, 0);
+  545  		disable_this_dialog();
+
+Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_LevelUpSetting.cpp:
+  14  DialogBox_LevelUpSetting::DialogBox_LevelUpSetting(CGame* game)
+  15: 	: IDialogBox(DialogBoxId::LevelUpSetting, game)
+  16  {
+
+Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_StatusOverlay.cpp:
+   30  		(m_game->m_player->m_lu_point > 0) &&
+   31: 		!m_game->get_dialog_box_manager().is_enabled(DialogBoxId::LevelUpSetting);
+   32  
+
+  168  		{
+  169: 			enable_dialog_box(DialogBoxId::LevelUpSetting, 0, 0, 0);
+  170  			audio_manager::get().play_game_sound(sound_type::effect, 14, 5);
+
+Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_TesterMenu.cpp:
+  403  	int tester_y = LOGICAL_HEIGHT() - 339 - ICON_PANEL_HEIGHT() - 10;
+  404: 	if (m_game->get_dialog_box_manager().is_enabled(DialogBoxId::LevelUpSetting))
+  405  		tester_y -= 30;
+
+Helbreath-Heldenian-Project-Development\Sources\Client\Game.cpp:
+  4608  			//ZeroEoyPnk - Bye delay...
+  4609: 			if (((get_dialog_box_manager().is_enabled(DialogBoxId::LevelUpSetting) != true) || (CursorTarget::get_selected_id() != 12))
+  4610  				&& ((get_dialog_box_manager().is_enabled(DialogBoxId::ChangeStatsMajestic) != true) || (CursorTarget::get_selected_id() != 42)))
+
+Helbreath-Heldenian-Project-Development\Sources\Client\NetworkMessages_Skills.cpp:
+  382  		game->get_dialog_box_manager().disable_dialog_box(DialogBoxId::ChangeStatsMajestic);
+  383: 		game->get_dialog_box_manager().enable_dialog_box(DialogBoxId::LevelUpSetting, 0, 0, 0);
+  384  		game->add_event_list("Your stat has been changed.", 10);

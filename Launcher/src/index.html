@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helbreath Oblivion Launcher</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Trajan+Pro:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="launcher-wrapper" data-tauri-drag-region>
+        
+        <!-- Close Button (Top right) -->
+        <button class="close-btn" id="close-btn">✕</button>
+
+        <!-- Status (Just above progress bar) -->
+        <div class="server-status-container" data-tauri-drag-region>
+            <span class="status-dot" id="status-dot"></span>
+            <span class="status-text" id="server-status-text">PLAYERS ONLINE: <span class="offline">OFFLINE</span></span>
+        </div>
+
+        <!-- Logo Banner -->
+        <div class="banner" data-tauri-drag-region></div>
+
+        <!-- News Section -->
+        <div class="news-panel">
+            <h2 class="news-title-main">NEWS</h2>
+            <div class="news-list" id="news-list">
+                <!-- JS Inject -->
+            </div>
+        </div>
+
+        <!-- Play Button (Invisible overlay over the background image) -->
+        <button id="btn-play" class="btn-play"></button>
+        <div class="hover-play-bg"></div>
+
+        <!-- Progress Bar -->
+        <div class="progress-section-global">
+            <div class="progress-frame-global">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progress-bar"></div>
+                </div>
+                <!-- Textos sobre la barra -->
+                <div class="progress-text-overlay">
+                    <span id="status-text" class="status-label">CHECKING FILE INTEGRITY...</span>
+                    <span id="percentage-text" class="percentage-label">0% COMPLETED</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module" src="/main.js"></script>
+    <script>
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('selectstart', event => event.preventDefault());
+    </script>
+</body>
+</html>

@@ -1,0 +1,2233 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Helbreath Manager</title>
+    <!-- Librería Profesional para la gráfica del Dashboard -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .panel-header {
+            padding: 12px 20px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #1a1a1a;
+        }
+
+        .panel-header h1 {
+            margin: 0;
+            font-size: 20px;
+            color: #e0e0e0;
+        }
+
+        .player-count-box {
+            background-color: #1a237e;
+            border: 1px solid #283593;
+            color: #00ffcc;
+            padding: 6px 14px;
+            border-radius: 4px;
+            font-size: 15px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+            margin-right: 15px;
+            user-select: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .player-count-box:hover {
+            background-color: #283593;
+            transform: scale(1.03);
+            border-color: #3f51b5;
+        }
+
+        .header-buttons {
+            display: flex;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: 0.2s;
+            min-width: 160px;
+        }
+
+        .btn:hover {
+            opacity: 0.8;
+        }
+
+        .btn-start {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .btn-stop {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .main-content {
+            display: flex;
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #1e1e1e;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            overflow-y: auto;
+            border-right: 1px solid #333;
+        }
+
+        .sidebar-title {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #888;
+            margin-bottom: 4px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .dropdown-btn {
+            padding: 10px 12px;
+            background-color: #2d2d30;
+            border: 1px solid #3e3e42;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 5px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-btn:hover {
+            background-color: #3e3e42;
+        }
+
+        .arrow {
+            font-size: 11px;
+            transition: transform 0.3s ease;
+            display: inline-block;
+        }
+
+        .dropdown-container {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            padding-left: 10px;
+            border-left: 2px solid #333;
+            margin-top: 4px;
+            margin-left: 6px;
+        }
+
+        .cat-btn {
+            padding: 8px 10px;
+            background-color: transparent;
+            border: 1px solid transparent;
+            color: #aaa;
+            cursor: pointer;
+            border-radius: 4px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .cat-btn:hover {
+            background-color: #2a2a2a;
+            color: #fff;
+        }
+
+        .cat-btn.active {
+            background-color: #0d47a1;
+            color: white;
+            border-color: #1565c0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .console-area {
+            flex-grow: 1;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            background-color: #000;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #console-box {
+            flex-grow: 1;
+            overflow-y: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            padding-right: 8px;
+            margin-bottom: 8px;
+        }
+
+        .panel-view {
+            display: none;
+            flex-grow: 1;
+            overflow-y: auto;
+            background-color: #141416;
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        .config-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #2d2d32;
+            padding-bottom: 8px;
+            margin-bottom: 12px;
+        }
+
+        .config-header h2 {
+            margin: 0;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        .config-section {
+            background-color: #1c1c20;
+            border: 1px solid #2d2d32;
+            padding: 8px 10px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+        }
+
+        .config-section h3 {
+            margin: 0 0 6px 0;
+            color: #00ffcc;
+            font-size: 12px;
+            border-bottom: 1px solid #2d2d32;
+            padding-bottom: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 6px;
+        }
+
+        .config-field {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .config-field label {
+            font-size: 9px;
+            color: #aaa;
+            text-transform: uppercase;
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .config-field input {
+            background-color: #0d0d0f;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            height: 24px;
+            box-sizing: border-box;
+        }
+
+        .config-field input:focus {
+            border-color: #0d47a1;
+            outline: none;
+        }
+
+        .config-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 8px;
+            padding-top: 6px;
+        }
+
+        .mina-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #1c1c20;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .mina-table th {
+            background-color: #2d2d32;
+            color: #00ffcc;
+            text-align: left;
+            padding: 10px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .mina-table td {
+            padding: 10px;
+            border-bottom: 1px solid #2d2d32;
+            font-size: 13px;
+            color: #d4d4d4;
+        }
+
+        .mina-table tr:hover td {
+            background-color: #25252a;
+        }
+
+        .faction-aresden {
+            color: #ff4d4d;
+            font-weight: bold;
+        }
+
+        .faction-elvine {
+            color: #4d79ff;
+            font-weight: bold;
+        }
+
+        .faction-neutral {
+            color: #b3b3b3;
+            font-weight: bold;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(3px);
+        }
+
+        #player-modal,
+        #ban-modal,
+        #confirm-modal,
+        #item-modal,
+        #log-detail-modal {
+            z-index: 10000;
+        }
+
+        .modal-box {
+            background: #1c1c22;
+            border: 1px solid #333;
+            padding: 25px;
+            border-radius: 8px;
+            width: 380px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+            animation: modalPop 0.2s ease-out;
+        }
+
+        @keyframes modalPop {
+            0% {
+                transform: scale(0.9);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-box h3 {
+            margin-top: 0;
+            color: #00ffcc;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .modal-box p {
+            color: #ccc;
+            font-size: 13px;
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .command-bar {
+            display: flex;
+            gap: 8px;
+            background-color: #1a1a1a;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #333;
+        }
+
+        .command-input {
+            flex-grow: 1;
+            background-color: #121212;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .command-input:focus {
+            border-color: #0d47a1;
+        }
+
+        .btn-send {
+            background-color: #0d47a1;
+            color: white;
+            padding: 8px 16px;
+            font-size: 13px;
+            min-width: auto;
+        }
+
+        .btn-save {
+            background-color: #28a745;
+            color: white;
+            padding: 6px 14px;
+            font-size: 13px;
+            min-width: auto;
+        }
+
+        .log-line {
+            margin: 0;
+            padding: 2px 0;
+            border-bottom: 1px solid #111;
+            word-wrap: break-word;
+        }
+
+        .log-line.hidden {
+            display: none !important;
+        }
+
+        .tag {
+            color: #00ffcc;
+            font-weight: bold;
+            margin-right: 6px;
+            user-select: none;
+        }
+
+        .msg-text {
+            color: #d4d4d4;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #111;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #444;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #666;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: #333;
+            margin: 4px 0;
+        }
+
+        /* ==========================================
+           SISTEMA DE LOGIN VISUAL SEGURO CON FONDO
+           ========================================== */
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('/fondo.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: 999999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .login-card {
+            background: rgba(26, 26, 32, 0.9);
+            border: 1px solid #333;
+            padding: 35px 30px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.9);
+            width: 320px;
+            backdrop-filter: blur(5px);
+        }
+
+        .login-card h2 {
+            margin-top: 0;
+            color: #d8a417;
+            font-size: 22px;
+            margin-bottom: 8px;
+        }
+
+        .login-card p {
+            color: #aaa;
+            font-size: 13px;
+            margin-bottom: 25px;
+        }
+
+        .login-card input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            background: #121212;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+
+        .login-card input:focus {
+            border-color: #00ffcc;
+            outline: none;
+        }
+
+        .login-card button {
+            width: 100%;
+            padding: 12px;
+            background: #a88012;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 15px;
+            transition: 0.2s;
+        }
+
+        .login-card button:hover {
+            background: #d8a417;
+        }
+
+        #login-error {
+            color: #ff4d4d;
+            font-size: 13px;
+            margin-top: 15px;
+            display: none;
+            font-weight: bold;
+        }
+
+        .msg-text.red-output {
+            color: #ff4d4d;
+        }
+
+        .player-info-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            text-align: left;
+            margin-bottom: 20px;
+            font-size: 14px;
+            background: #121216;
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        .player-info-box div span {
+            color: #00ffcc;
+            font-weight: bold;
+        }
+
+        .ban-textarea {
+            width: 100%;
+            height: 70px;
+            background: #121212;
+            border: 1px solid #444;
+            color: #fff;
+            padding: 8px;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-bottom: 15px;
+            resize: none;
+        }
+
+        /* Estilos DB Editor */
+        .db-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 8px;
+            background: #1c1c20;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #2d2d32;
+        }
+
+        .db-table-wrapper {
+            flex-grow: 1;
+            overflow: auto;
+            background: #1c1c20;
+            border-radius: 6px;
+            border: 1px solid #2d2d32;
+        }
+
+        .db-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .db-table th {
+            background-color: #2d2d32;
+            color: #00ffcc;
+            text-align: left;
+            padding: 8px 10px;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            border-bottom: 1px solid #444;
+        }
+
+        .db-table td {
+            padding: 6px 10px;
+            border-bottom: 1px solid #2d2d32;
+            border-right: 1px solid #2d2d32;
+            color: #d4d4d4;
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .db-table td.editable {
+            transition: background 0.15s;
+        }
+
+        .db-table td.editable:hover {
+            background-color: #2a2a35;
+            cursor: cell;
+        }
+
+        .db-table td.editing {
+            padding: 0;
+        }
+
+        .db-table td.editing input {
+            width: 100%;
+            height: 100%;
+            min-height: 28px;
+            box-sizing: border-box;
+            background: #000;
+            color: #fff;
+            border: 1px solid #00ffcc;
+            padding: 0 8px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        /* ESTILOS DEL DASHBOARD GRÁFICO */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #1c1c20;
+            border: 1px solid #2d2d32;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+        }
+
+        .stat-card.cpu::before {
+            background: #ff4d4d;
+        }
+
+        .stat-card.ram::before {
+            background: #cddc39;
+        }
+
+        .stat-card.players::before {
+            background: #ffaa00;
+        }
+
+        .stat-card.uptime::before {
+            background: #0d47a1;
+        }
+
+        .stat-card h4 {
+            margin: 0;
+            color: #aaa;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #fff;
+            margin: 10px 0 0 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            transition: color 0.3s ease;
+        }
+
+        .chart-container {
+            background: #1c1c20;
+            border: 1px solid #2d2d32;
+            border-radius: 8px;
+            padding: 15px;
+            height: 300px;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .dashboard-history-box {
+            margin-top: 20px;
+            background: #1c1c20;
+            border: 1px solid #2d2d32;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- PANTALLA DE LOGIN GIGANTE CON USUARIO Y CONTRASEÑA -->
+    <div id="login-overlay">
+        <div class="login-card">
+            <h2>🛠️ Helbreath Server Manager</h2>
+            <p>Introduce tus credenciales de administrador.</p>
+            <input type="text" id="login-user" placeholder="Usuario..." onkeydown="checkLoginEnter(event)">
+            <input type="password" id="login-pass" placeholder="Contraseña..." onkeydown="checkLoginEnter(event)">
+            <button onclick="attemptLogin()">Conectar al Panel</button>
+            <div id="login-error">❌ Usuario o contraseña incorrectos.</div>
+        </div>
+        <div
+            style="margin-top: 12px; color: #aaa; font-size: 11px; letter-spacing: 0.5px; text-shadow: 0 1px 2px rgba(0,0,0,0.8);">
+            Diseñado por OhmyWeed
+        </div>
+    </div>
+
+    <!-- EL RESTO DE TU PANEL -->
+    <div class="panel-header">
+        <h1>🛠️ Helbreath Server Manager - Dashboard</h1>
+        <div class="header-buttons">
+            <div class="player-count-box" title="Ver Lista de Jugadores" onclick="abrirOnline()">
+                👥 <span id="online-count">0</span>
+            </div>
+
+            <!-- BOTÓN DEL UPDATER JUNTO AL SERVIDOR -->
+            <button id="btn-updater-header" class="btn btn-start" style="margin-right: 8px; background-color: #0d47a1;"
+                onclick="toggleUpdater()">▶ Encender Updater</button>
+
+            <button id="btn-power" class="btn btn-start" onclick="toggleServerPower()">▶ Encender Server</button>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIGURACIÓN -->
+    <div id="config-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>⚠️ ¿Aplicar Configuración?</h3>
+            <p>¿Quieres aceptar los cambios y recargar automáticamente la configuración en el servidor?</p>
+            <div class="modal-buttons">
+                <button class="btn" style="background-color: #333; color: #fff; min-width:auto;"
+                    onclick="cerrarModalConfig()">Cancelar</button>
+                <button class="btn btn-save" onclick="ejecutarGuardadoYReload()">Aceptar y Recargar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE APAGADO SEGURO -->
+    <div id="shutdown-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 style="color: #dc3545;">🛑 ¿Apagar Servidor?</h3>
+            <p>Se enviará el comando de apagado al servidor para guardar los datos de todos los jugadores de forma
+                segura antes de cerrar.</p>
+            <div class="modal-buttons">
+                <button class="btn" style="background-color: #333; color: #fff; min-width:auto;"
+                    onclick="cerrarModalShutdown()">Cancelar</button>
+                <button class="btn btn-stop" style="min-width:auto;" onclick="ejecutarShutdown()">Apagar y
+                    Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMACIÓN GENÉRICO PERSONALIZADO -->
+    <div id="confirm-modal" class="modal-overlay">
+        <div class="modal-box" style="width: 380px;">
+            <h3 id="confirm-title" style="color: #ffaa00;">⚠️ Confirmación</h3>
+            <p id="confirm-message">¿Estás seguro de realizar esta acción?</p>
+            <div class="modal-buttons">
+                <button class="btn" style="background-color: #333; color: #fff; min-width:auto;"
+                    onclick="cerrarConfirmModal()">Cancelar</button>
+                <button id="confirm-accept-btn" class="btn"
+                    style="min-width:auto; background-color: #0d47a1; color: white;">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE INFORMACIÓN Y ACCIONES DEL JUGADOR -->
+    <div id="player-modal" class="modal-overlay">
+        <div class="modal-box" style="width: 420px;">
+            <h3 id="modal-char-name">👤 Ficha de Personaje</h3>
+            <div class="player-info-box">
+                <div>Nivel: <span id="m-level">-</span></div>
+                <div>Facción: <span id="m-faction">-</span></div>
+                <div>Clase: <span id="m-class">-</span></div>
+                <div>Clan: <span id="m-guild">-</span></div>
+                <div>Mapa: <span id="m-map">-</span></div>
+                <div>Cuenta: <span id="m-account">-</span></div>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn" style="background-color: #333; color: #fff;"
+                    onclick="cerrarPlayerModal()">Cerrar</button>
+                <button class="btn btn-stop" onclick="confirmarKick()">⚡ Expulsar</button>
+                <button class="btn" style="background-color: #b71c1c; color: white;" onclick="abrirBanModal()">🔨
+                    Banear</button>
+                <button class="btn" style="background-color: #28a745; color: white;" onclick="ejecutarUnbanDirecto()">✅
+                    Desbanear</button>
+                <button class="btn" style="background-color: #00897b; color: white;" onclick="abrirItemModal()">🎁 Dar
+                    Item</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE DAR ITEM -->
+    <div id="item-modal" class="modal-overlay">
+        <div class="modal-box" style="width: 450px;">
+            <h3 style="color: #00ffcc;">🎁 Dar Item a <span id="item-target-name">-</span></h3>
+            <p>Busca y selecciona el item que deseas entregar.</p>
+            <div style="text-align: left; margin-bottom: 10px;">
+                <input type="text" id="item-search-input" class="command-input" style="width: 100%; margin-bottom: 8px;"
+                    placeholder="Buscar por nombre o ID..." oninput="filtrarListaItems()">
+                <select id="item-select-dropdown" class="command-input"
+                    style="width: 100%; height: 130px; background-color: #121212;" size="5">
+                    <option disabled>Cargando ítems...</option>
+                </select>
+            </div>
+            <div style="text-align: left; margin-bottom: 15px;">
+                <label
+                    style="font-size: 11px; color: #aaa; text-transform: uppercase; font-weight: bold;">Cantidad:</label>
+                <input type="number" id="item-amount-input" class="command-input" style="width: 100%; margin-top: 4px;"
+                    value="1" min="1">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn" style="background-color: #333; color: #fff;"
+                    onclick="cerrarItemModal()">Cancelar</button>
+                <button class="btn btn-save" onclick="enviarItemAJugador()">Entregar Item</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE BANEO CON TIEMPO Y MOTIVO -->
+    <div id="ban-modal" class="modal-overlay">
+        <div class="modal-box" style="width: 400px;">
+            <h3 style="color: #ff4d4d;">🔨 Banear Personaje / Cuenta</h3>
+            <p>Selecciona el tiempo de baneo e introduce el motivo.</p>
+            <div style="text-align: left; margin-bottom: 10px;">
+                <label style="font-size: 11px; color: #aaa; text-transform: uppercase; font-weight: bold;">Duración del
+                    Baneo:</label>
+                <select id="ban-duration-select" class="command-input"
+                    style="width: 100%; margin-top: 4px; margin-bottom: 10px;" onchange="handleDurationChange(this)">
+                    <option value="perma">Permanente (perma)</option>
+                    <option value="3600">1 Hora (3600s)</option>
+                    <option value="86400">1 Día (86400s)</option>
+                    <option value="604800">1 Semana (604800s)</option>
+                    <option value="custom">Personalizado (Segundos)...</option>
+                </select>
+                <input type="text" id="ban-duration-custom" class="command-input"
+                    style="width: 100%; margin-bottom: 10px; display: none;" placeholder="Ej: 1800 (segundos)">
+            </div>
+            <div style="text-align: left; margin-bottom: 4px;">
+                <label
+                    style="font-size: 11px; color: #aaa; text-transform: uppercase; font-weight: bold;">Motivo:</label>
+            </div>
+            <textarea id="ban-reason-input" class="ban-textarea" placeholder="Motivo del baneo..."></textarea>
+            <div class="modal-buttons">
+                <button class="btn" style="background-color: #333; color: #fff;"
+                    onclick="cerrarBanModal()">Cancelar</button>
+                <button class="btn" style="background-color: #b71c1c; color: white;" onclick="ejecutarBan()">Confirmar
+                    Baneo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DETALLE DE LOG 12H -->
+    <div id="log-detail-modal" class="modal-overlay">
+        <div class="modal-box" style="width: 400px; text-align: left;">
+            <h3 style="color: #e040fb; text-align: center;">📊 Detalle del Log</h3>
+            <div class="player-info-box" style="grid-template-columns: 1fr; margin-bottom: 25px;">
+                <div>Fecha de Creación: <span id="log-detail-date">-</span></div>
+                <div>Período: <span id="log-detail-period">-</span></div>
+                <div>Pico de Jugadores: <span id="log-detail-peak" style="color: #ffaa00; font-size: 16px;">-</span>
+                </div>
+                <div>CPU Promedio: <span id="log-detail-cpu">-</span></div>
+                <div>RAM Promedio: <span id="log-detail-ram">-</span></div>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn" style="background-color: #333; color: #fff;"
+                    onclick="cerrarLogModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-title">Vistas de Panel</div>
+            <button class="cat-btn" id="btn-DASHBOARD" onclick="abrirDashboard()"
+                style="color: #e040fb; font-weight: bold;">📈 Dashboard Visual</button>
+            <button class="cat-btn" id="btn-ONLINE" onclick="abrirOnline()"
+                style="color: #ffaa00; font-weight: bold;">👥 Jugadores Online</button>
+            <button class="cat-btn" id="btn-BANNED" onclick="abrirBanned()"
+                style="color: #ff4d4d; font-weight: bold;">🔨 Lista de Baneados</button>
+            <button class="cat-btn" id="btn-CONFIG" onclick="abrirConfiguracion()"
+                style="color: #00ffcc; font-weight: bold;">⚙️ Editar Config</button>
+            <button class="cat-btn" id="btn-DB" onclick="abrirDbEditor()" style="color: #cddc39; font-weight: bold;">🗄️
+                Editor de DBs</button>
+
+            <!-- NUEVAS VISTAS DEL UPDATER -->
+            <div class="sidebar-title" style="margin-top: 15px;">Auto-Updater</div>
+            <button class="cat-btn" id="btn-UPDATER" onclick="abrirUpdater()"
+                style="color: #4db8ff; font-weight: bold;">🌐 Servidor Updater</button>
+            <button class="cat-btn" id="btn-MANIFEST" onclick="abrirManifest()"
+                style="color: #d1ff4d; font-weight: bold;">📦 Creador de Manifest</button>
+
+            <div class="divider" style="margin: 8px 0;"></div>
+
+            <div class="sidebar-title">Filtros de Logs</div>
+            <button class="cat-btn active" id="btn-TODOS" onclick="filtrarLogs('TODOS')">📁 Servidor</button>
+            <button class="cat-btn" id="btn-SISTEMA" onclick="filtrarLogs('SISTEMA')">⚙️ Consola de Sistema</button>
+
+            <div class="sidebar-title" style="margin-top: 15px;">Monitoreo Dinámico</div>
+            <button class="dropdown-btn" onclick="toggleDropdown('dynamic-logs', 'arrow-logs')">
+                <span>📂 Archivos de Log</span>
+                <span class="arrow" id="arrow-logs" style="transform: rotate(-90deg);">▼</span>
+            </button>
+            <div id="dynamic-logs" class="dropdown-container" style="display: none;"></div>
+
+            <div class="sidebar-title" style="margin-top: 15px;">Herramientas</div>
+            <button class="dropdown-btn" onclick="toggleDropdown('command-list', 'arrow-cmds')">
+                <span>⚡ Comandos Server</span>
+                <span class="arrow" id="arrow-cmds" style="transform: rotate(-90deg);">▼</span>
+            </button>
+            <div id="command-list" class="dropdown-container" style="display: none;">
+                <div style="color: #aaa; font-size: 10px; margin: 4px 0 2px 8px;">💻 Consola del Servidor</div>
+                <button class="cat-btn" style="color: #ff4d4d;" onclick="insertCommand('ban-player ')">🔨
+                    ban-player</button>
+                <button class="cat-btn" style="color: #00ffcc;" onclick="insertCommand('unban-player ')">✅
+                    unban-player</button>
+                <button class="cat-btn" style="color: #ffaa00;" onclick="insertCommand('shutdown ')">🛑
+                    shutdown</button>
+                <button class="cat-btn" style="color: #ffaa00;" onclick="insertCommand('broadcast ')">📢
+                    broadcast</button>
+                <button class="cat-btn" style="color: #ffaa00;" onclick="insertCommand('setadmin ')">🔑
+                    setadmin</button>
+                <button class="cat-btn" style="color: #ffaa00;" onclick="insertCommand('setcmdlevel ')">⚙️
+                    setcmdlevel</button>
+                <button class="cat-btn" style="color: #ffaa00;" onclick="insertCommand('giveitem ')">📦
+                    giveitem</button>
+                <button class="cat-btn" style="color: #ffaa00;" onclick="insertCommand('reload ')">🔄 reload</button>
+                <button class="cat-btn" style="color: #ffaa00;" onclick="insertCommand('help')">❓ help</button>
+                <div class="divider"></div>
+                <div style="color: #aaa; font-size: 10px; margin: 4px 0 2px 8px;">👥 Jugadores</div>
+                <button class="cat-btn" onclick="insertCommand('/block ')">🚫 /block</button>
+                <button class="cat-btn" onclick="insertCommand('/to ')">💬 /to</button>
+                <button class="cat-btn" onclick="insertCommand('/unblock ')">✅ /unblock</button>
+                <button class="cat-btn" onclick="insertCommand('/reroll ')">🔨 /reroll</button>
+                <div class="divider"></div>
+                <div style="color: #aaa; font-size: 10px; margin: 4px 0 2px 8px;">⚔️ Clanes (Guild)</div>
+                <button class="cat-btn" onclick="insertCommand('/guild')">🛡️ /guild (Ayuda)</button>
+                <button class="cat-btn" onclick="insertCommand('/guild create ')">➕ /guild create</button>
+                <button class="cat-btn" onclick="insertCommand('/guild invite ')">✉️ /guild invite</button>
+                <button class="cat-btn" onclick="insertCommand('/guild accept')">✔️ /guild accept</button>
+                <button class="cat-btn" onclick="insertCommand('/guild kick ')">🥾 /guild kick</button>
+                <button class="cat-btn" onclick="insertCommand('/guild leave')">🚪 /guild leave</button>
+                <button class="cat-btn" onclick="insertCommand('/guild info')">ℹ️ /guild info</button>
+                <button class="cat-btn" onclick="insertCommand('/guild donate ')">💰 /guild donate</button>
+                <button class="cat-btn" onclick="insertCommand('/guild shop ')">🛒 /guild shop</button>
+                <button class="cat-btn" onclick="insertCommand('/guild promote ')">⬆️ /guild promote</button>
+                <button class="cat-btn" onclick="insertCommand('/guild demote ')">⬇️ /guild demote</button>
+                <button class="cat-btn" onclick="insertCommand('/guild members')">📋 /guild members</button>
+                <button class="cat-btn" onclick="insertCommand('/guild disband')">💥 /guild disband</button>
+                <div class="divider"></div>
+                <div style="color: #aaa; font-size: 10px; margin: 4px 0 2px 8px;">👑 Game Master</div>
+                <button class="cat-btn" onclick="insertCommand('/come ')">📍 /come</button>
+                <button class="cat-btn" onclick="insertCommand('/gm ')">🛡️ /gm</button>
+                <button class="cat-btn" onclick="insertCommand('/goto ')">🌀 /goto</button>
+                <button class="cat-btn" onclick="insertCommand('/invis')">👻 /invis</button>
+                <button class="cat-btn" onclick="insertCommand('/regen ')">💖 /regen</button>
+                <button class="cat-btn" onclick="insertCommand('/saveall')">💾 /saveall</button>
+                <button class="cat-btn" onclick="insertCommand('/createitem ')">🎁 /create</button>
+                <button class="cat-btn" onclick="insertCommand('/giveitem ')">📦 /give</button>
+                <button class="cat-btn" onclick="insertCommand('/spawn ')">🐉 /spawn</button>
+            </div>
+        </div>
+
+        <div class="console-area">
+            <div id="console-box"></div>
+
+            <!-- PANEL DE ESTADÍSTICAS DASHBOARD VISUAL -->
+            <div id="dashboard-panel" class="panel-view">
+                <div class="config-header">
+                    <h2>📈 Panel de Estadísticas en Tiempo Real</h2>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-stop" onclick="volverAConsola()"
+                            style="padding: 5px 12px; font-size: 12px; min-width:auto;">Cerrar</button>
+                    </div>
+                </div>
+
+                <div class="dashboard-grid">
+                    <div class="stat-card cpu">
+                        <h4>Servidor CPU</h4>
+                        <div class="value" id="stat-cpu">0%</div>
+                    </div>
+                    <div class="stat-card ram">
+                        <h4>Servidor RAM</h4>
+                        <div class="value" id="stat-ram">0.0%</div>
+                    </div>
+                    <div class="stat-card players">
+                        <h4>Jugadores Online</h4>
+                        <div class="value" id="stat-players">0</div>
+                    </div>
+                    <div class="stat-card uptime">
+                        <h4>Uptime Server</h4>
+                        <div class="value" id="stat-uptime">00:00:00</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="playersChart"></canvas>
+                </div>
+
+                <!-- TABLA DE LOGS DE 12 HORAS CON PAGINACIÓN -->
+                <div class="dashboard-history-box">
+                    <h3 style="margin: 0 0 10px 0; color: #e040fb; font-size: 14px; text-transform: uppercase;">📋
+                        Historial de Rendimiento (Logs 12h)</h3>
+                    <table class="mina-table">
+                        <thead>
+                            <tr>
+                                <th>Fecha y Hora</th>
+                                <th>Pico Jugadores</th>
+                                <th>CPU Prom.</th>
+                                <th>RAM Prom.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboard-logs-tbody">
+                            <!-- Inserción dinámica -->
+                        </tbody>
+                    </table>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+                        <button class="btn"
+                            style="background-color: #333; color: #fff; padding: 5px 12px; min-width: auto;"
+                            onclick="cambiarPaginaLogs(-1)">◀ Anterior</button>
+                        <span id="log-pagination-info" style="color: #aaa; font-size: 12px; font-weight: bold;">Página 1
+                            de 1</span>
+                        <button class="btn"
+                            style="background-color: #333; color: #fff; padding: 5px 12px; min-width: auto;"
+                            onclick="cambiarPaginaLogs(1)">Siguiente ▶</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="config-panel" class="panel-view">
+                <div class="config-header">
+                    <h2>⚙️ Editor de <code>server_config.json</code></h2>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-stop" onclick="volverAConsola()"
+                            style="padding: 5px 12px; font-size: 12px; min-width:auto;">Cerrar</button>
+                        <button class="btn btn-save" onclick="guardarConfiguracion()">💾 Guardar Cambios</button>
+                    </div>
+                </div>
+                <div id="config-form-container"></div>
+                <div class="config-actions">
+                    <button class="btn btn-save" onclick="guardarConfiguracion()">💾 Guardar Cambios</button>
+                </div>
+            </div>
+
+            <!-- PANEL DE EDITOR DE DB CON BÚSQUEDA -->
+            <div id="db-panel" class="panel-view">
+                <div class="config-header">
+                    <h2>🗄️ Editor Maestro de Bases de Datos SQLite</h2>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-save" onclick="cargarTablaDb()"
+                            style="padding: 5px 12px; font-size: 12px; background-color: #0d47a1; min-width:auto;">🔄
+                            Refrescar Tabla</button>
+                        <button class="btn btn-stop" onclick="volverAConsola()"
+                            style="padding: 5px 12px; font-size: 12px; min-width:auto;">Cerrar</button>
+                    </div>
+                </div>
+
+                <div class="db-controls">
+                    <select id="db-select" class="command-input" style="width: 250px;" onchange="onDbChange()">
+                        <option value="" disabled selected>Cargando archivos DB...</option>
+                    </select>
+
+                    <select id="table-select" class="command-input" style="width: 250px;" onchange="onTableChange()">
+                        <option value="" disabled selected>Esperando Selección...</option>
+                    </select>
+
+                    <div style="flex-grow: 1; display: flex; gap: 5px;">
+                        <input type="text" id="db-search-input" class="command-input" style="width: 100%;"
+                            placeholder="Buscar contenido clave en toda la tabla (Presiona Enter)..."
+                            onkeydown="verificarEnterBusqueda(event)" disabled>
+                        <button class="btn btn-save" style="min-width: auto; padding: 6px 12px;"
+                            onclick="cargarTablaDb()" id="btn-db-search" disabled>🔍 Buscar</button>
+                    </div>
+                </div>
+
+                <div style="font-size: 11px; color: #888; font-style: italic; margin-bottom: 10px; margin-left: 5px;">
+                    Selecciona la celda para editarla. Los cambios se guardan al pulsar Enter.</div>
+
+                <div id="db-table-container" class="db-table-wrapper">
+                    <div style="color: #aaa; text-align: center; padding-top: 50px;">Selecciona una Base de Datos y una
+                        Tabla para comenzar.</div>
+                </div>
+            </div>
+
+            <div id="online-panel" class="panel-view">
+                <div class="config-header">
+                    <h2>👥 Lista de Jugadores en Línea</h2>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-save" onclick="refrescarOnline()"
+                            style="padding: 5px 12px; font-size: 12px; background-color: #0d47a1; min-width:auto;">🔄
+                            Refrescar Lista</button>
+                        <button class="btn btn-stop" onclick="volverAConsola()"
+                            style="padding: 5px 12px; font-size: 12px; min-width:auto;">Cerrar</button>
+                    </div>
+                </div>
+                <table class="mina-table">
+                    <thead>
+                        <tr>
+                            <th>Nivel</th>
+                            <th>Nombre</th>
+                            <th>Facción</th>
+                            <th>Clase</th>
+                            <th>Clan</th>
+                            <th>Mapa</th>
+                        </tr>
+                    </thead>
+                    <tbody id="online-tbody"></tbody>
+                </table>
+            </div>
+
+            <!-- PANEL DE LISTA DE BANEADOS -->
+            <div id="banned-panel" class="panel-view">
+                <div class="config-header">
+                    <h2>🔨 Lista de Cuentas y Personajes Baneados</h2>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-save" onclick="refrescarBanned()"
+                            style="padding: 5px 12px; font-size: 12px; background-color: #0d47a1; min-width:auto;">🔄
+                            Refrescar Lista</button>
+                        <button class="btn btn-stop" onclick="volverAConsola()"
+                            style="padding: 5px 12px; font-size: 12px; min-width:auto;">Cerrar</button>
+                    </div>
+                </div>
+                <table class="mina-table">
+                    <thead>
+                        <tr>
+                            <th>Cuenta / Personaje</th>
+                            <th>Duración / Expira</th>
+                            <th>Motivo</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="banned-tbody"></tbody>
+                </table>
+            </div>
+
+            <!-- PANEL DE UPDATER SERVER -->
+            <div id="updater-panel" class="panel-view" style="flex-direction: column;">
+                <div class="config-header">
+                    <h2>🌐 Servidor de Actualizaciones (update_server.py)</h2>
+                    <div style="display: flex; gap: 8px;">
+                        <button id="btn-updater-toggle" class="btn btn-start" onclick="toggleUpdater()">▶ Encender
+                            Updater</button>
+                        <button class="btn btn-stop" onclick="volverAConsola()"
+                            style="padding: 5px 12px; font-size: 12px; min-width:auto;">Cerrar</button>
+                    </div>
+                </div>
+                <div id="updater-console-box"
+                    style="flex-grow: 1; background: #080808; color: #4db8ff; font-family: 'Courier New', Courier, monospace; font-size: 13px; padding: 10px; overflow-y: auto; border-radius: 4px; border: 1px solid #333; line-height: 1.5;">
+                </div>
+            </div>
+
+            <!-- PANEL DE MANIFEST GENERATOR -->
+            <div id="manifest-panel" class="panel-view" style="flex-direction: column;">
+                <div class="config-header">
+                    <h2>📦 Creador de Manifest (gen_update_manifest.py)</h2>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-save" onclick="generarManifest()"
+                            style="background-color: #d1ff4d; color: #000;">⚡ Generar Manifest Ahora</button>
+                        <button class="btn btn-stop" onclick="volverAConsola()"
+                            style="padding: 5px 12px; font-size: 12px; min-width:auto;">Cerrar</button>
+                    </div>
+                </div>
+                <div id="manifest-console-box"
+                    style="flex-grow: 1; background: #080808; color: #d1ff4d; font-family: 'Courier New', Courier, monospace; font-size: 13px; padding: 10px; overflow-y: auto; border-radius: 4px; border: 1px solid #333; line-height: 1.5;">
+                </div>
+            </div>
+
+            <div class="command-bar" id="command-bar-container">
+                <input type="text" id="cmdInput" class="command-input"
+                    placeholder="Escribe un comando o usa las flechas arriba/abajo para el historial..."
+                    onkeydown="handleKeyDown(event)">
+                <button class="btn btn-send" onclick="sendCommand()">Enviar Comando</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const consoleBox = document.getElementById('console-box');
+        const dashboardPanel = document.getElementById('dashboard-panel');
+        const configPanel = document.getElementById('config-panel');
+        const dbPanel = document.getElementById('db-panel');
+        const onlinePanel = document.getElementById('online-panel');
+        const bannedPanel = document.getElementById('banned-panel');
+
+        // Elementos Updater
+        const updaterPanel = document.getElementById('updater-panel');
+        const manifestPanel = document.getElementById('manifest-panel');
+        const updaterConsole = document.getElementById('updater-console-box');
+        const manifestConsole = document.getElementById('manifest-console-box');
+
+        const commandBarContainer = document.getElementById('command-bar-container');
+        const dynamicLogs = document.getElementById('dynamic-logs');
+        const cmdInput = document.getElementById('cmdInput');
+
+        const configModal = document.getElementById('config-modal');
+        const shutdownModal = document.getElementById('shutdown-modal');
+        const confirmModal = document.getElementById('confirm-modal');
+        const itemModal = document.getElementById('item-modal');
+        const loginOverlay = document.getElementById('login-overlay');
+        const loginError = document.getElementById('login-error');
+
+        const onlineCount = document.getElementById('online-count');
+        const btnPower = document.getElementById('btn-power');
+
+        const categoriasConocidas = new Set(['TODOS', 'SISTEMA', 'COMMANDS']);
+        let filtroActual = 'TODOS';
+        let configActualData = null;
+        let isServerOn = false;
+        let isUpdaterOn = false;
+        let selectedPlayer = null;
+        let confirmCallback = null;
+        let allAvailableItems = [];
+
+        const commandHistory = [];
+        let historyIndex = -1;
+
+        // Variables DB Editor
+        let currentDbId = null;
+        let currentTable = null;
+        let editando = false;
+
+        // Variables Dashboard Logs
+        let allDashboardLogs = [];
+        let currentLogPage = 1;
+        const logsPerPage = 10;
+
+        // --- SISTEMA DE LOGIN Y PERSISTENCIA (SESSIONSTORAGE) ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUser = sessionStorage.getItem('mina_user');
+            const savedPass = sessionStorage.getItem('mina_pass');
+            if (savedUser && savedPass) {
+                socket.emit('login', { username: savedUser, password: savedPass });
+            }
+            // Iniciar gráfico de Dashboard
+            initChart();
+        });
+
+        function attemptLogin() {
+            const user = document.getElementById('login-user').value.trim();
+            const pass = document.getElementById('login-pass').value;
+            socket.emit('login', { username: user, password: pass });
+        }
+        function checkLoginEnter(e) {
+            if (e.key === 'Enter') attemptLogin();
+        }
+
+        socket.on('login-success', () => {
+            const userInput = document.getElementById('login-user').value.trim();
+            const passInput = document.getElementById('login-pass').value;
+            if (userInput && passInput) {
+                sessionStorage.setItem('mina_user', userInput);
+                sessionStorage.setItem('mina_pass', passInput);
+            }
+            loginOverlay.style.display = 'none';
+            cmdInput.focus();
+        });
+
+        socket.on('login-failed', () => {
+            sessionStorage.removeItem('mina_user');
+            sessionStorage.removeItem('mina_pass');
+            loginError.style.display = 'block';
+            setTimeout(() => { loginError.style.display = 'none'; }, 3000);
+        });
+
+        // --- RECEPCIÓN DEL ESTADO REAL DEL SERVIDOR ---
+        socket.on('server-state', (state) => {
+            isServerOn = state.isRunning;
+            if (isServerOn) {
+                btnPower.className = 'btn btn-stop';
+                btnPower.innerHTML = '🛑 Apagar Server';
+            } else {
+                btnPower.className = 'btn btn-start';
+                btnPower.innerHTML = '▶ Encender Server';
+            }
+        });
+
+        // --- LÓGICA DEL BOTÓN ENCENDER/APAGAR ---
+        function toggleServerPower() {
+            if (!isServerOn) {
+                socket.emit('start-server');
+                isServerOn = true;
+                btnPower.className = 'btn btn-stop';
+                btnPower.innerHTML = '🛑 Apagar Server';
+            } else {
+                shutdownModal.style.display = 'flex';
+            }
+        }
+
+        function cerrarModalShutdown() { shutdownModal.style.display = 'none'; }
+        function ejecutarShutdown() {
+            cerrarModalShutdown();
+            socket.emit('send-command', 'shutdown');
+            isServerOn = false;
+            btnPower.className = 'btn btn-start';
+            btnPower.innerHTML = '▶ Encender Server';
+        }
+
+        // --- MODAL DE CONFIRMACIÓN GENÉRICO PERSONALIZADO ---
+        function mostrarConfirmacion(titulo, mensaje, colorTitulo, textoBotonAceptar, colorBotonAceptar, callback) {
+            document.getElementById('confirm-title').textContent = titulo;
+            document.getElementById('confirm-title').style.color = colorTitulo || '#ffaa00';
+            document.getElementById('confirm-message').textContent = mensaje;
+
+            const acceptBtn = document.getElementById('confirm-accept-btn');
+            acceptBtn.textContent = textoBotonAceptar || 'Aceptar';
+            acceptBtn.style.backgroundColor = colorBotonAceptar || '#0d47a1';
+
+            confirmCallback = callback;
+            confirmModal.style.display = 'flex';
+        }
+
+        function cerrarConfirmModal() {
+            confirmModal.style.display = 'none';
+            confirmCallback = null;
+        }
+
+        document.getElementById('confirm-accept-btn').onclick = function () {
+            if (confirmCallback) confirmCallback();
+            cerrarConfirmModal();
+        };
+
+        socket.on('player-count', (count) => { onlineCount.textContent = count; });
+
+        socket.on('online-players-data', (players) => {
+            const tbody = document.getElementById('online-tbody');
+            tbody.innerHTML = '';
+
+            if (players.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; font-style: italic; color: #888;">No hay jugadores conectados en este momento.</td></tr>';
+                return;
+            }
+
+            players.forEach(p => {
+                let factionClass = 'faction-neutral';
+                if (p.faction && p.faction.toLowerCase() === 'aresden') factionClass = 'faction-aresden';
+                if (p.faction && p.faction.toLowerCase() === 'elvine') factionClass = 'faction-elvine';
+
+                const tr = document.createElement('tr');
+                tr.onclick = () => abrirPlayerModal(p);
+
+                tr.innerHTML = `
+                    <td style="font-weight: bold; color: #ffaa00;">${p.level || '-'}</td>
+                    <td style="font-weight: bold; color: #fff;">${p.name || 'Desconocido'}</td>
+                    <td class="${factionClass}">${p.faction || 'Neutral'}</td>
+                    <td>${p.class || '-'}</td>
+                    <td>${p.guild || 'Ninguno'}</td>
+                    <td style="color: #00ffcc;">${p.map || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+
+        // --- LÓGICA DE MODALES Y ACCIONES DE JUGADOR ---
+        function abrirPlayerModal(player) {
+            selectedPlayer = player;
+            document.getElementById('modal-char-name').textContent = `👤 ${player.name}`;
+            document.getElementById('m-level').textContent = player.level || '-';
+            document.getElementById('m-faction').textContent = player.faction || 'Neutral';
+            document.getElementById('m-class').textContent = player.class || '-';
+            document.getElementById('m-guild').textContent = player.guild || 'Ninguno';
+            document.getElementById('m-map').textContent = player.map || '-';
+            document.getElementById('m-account').textContent = player.account || 'Desconocida';
+
+            document.getElementById('player-modal').style.display = 'flex';
+        }
+
+        function cerrarPlayerModal() {
+            document.getElementById('player-modal').style.display = 'none';
+        }
+
+        // --- LÓGICA DE DAR ITEM ---
+        function abrirItemModal() {
+            if (!selectedPlayer) return;
+            cerrarPlayerModal();
+            document.getElementById('item-target-name').textContent = selectedPlayer.name;
+            document.getElementById('item-search-input').value = '';
+            document.getElementById('item-amount-input').value = '1';
+            itemModal.style.display = 'flex';
+
+            socket.emit('get-items-list');
+        }
+
+        function cerrarItemModal() {
+            itemModal.style.display = 'none';
+        }
+
+        socket.on('items-list-data', (rows) => {
+            allAvailableItems = rows || [];
+            renderizarSelectItems(allAvailableItems);
+        });
+
+        function renderizarSelectItems(items) {
+            const select = document.getElementById('item-select-dropdown');
+            select.innerHTML = '';
+            if (items.length === 0) {
+                select.innerHTML = '<option disabled>No se encontraron ítems en gamedata.db</option>';
+                return;
+            }
+            items.forEach(row => {
+                const keys = Object.keys(row);
+                const idKey = keys.find(k => k.toLowerCase().includes('id')) || keys[0];
+                const nameKey = keys.find(k => k.toLowerCase().includes('name') || k.toLowerCase().includes('desc')) || keys[1] || keys[0];
+
+                const itemId = row[idKey];
+                const itemName = row[nameKey] || `Item #${itemId}`;
+
+                const opt = document.createElement('option');
+                opt.value = itemId;
+                opt.textContent = `[ID: ${itemId}] ${itemName}`;
+                select.appendChild(opt);
+            });
+        }
+
+        function filtrarListaItems() {
+            const query = document.getElementById('item-search-input').value.toLowerCase();
+            const filtered = allAvailableItems.filter(row => {
+                const keys = Object.keys(row);
+                const text = keys.map(k => String(row[k])).join(' ').toLowerCase();
+                return text.includes(query);
+            });
+            renderizarSelectItems(filtered);
+        }
+
+        function enviarItemAJugador() {
+            if (!selectedPlayer) return;
+            const select = document.getElementById('item-select-dropdown');
+            const itemId = select.value;
+            const amount = parseInt(document.getElementById('item-amount-input').value, 10) || 1;
+
+            if (!itemId) {
+                alert("Por favor, selecciona un ítem.");
+                return;
+            }
+
+            socket.emit('give-item-to-player', {
+                charName: selectedPlayer.name,
+                itemId: itemId,
+                amount: amount
+            });
+
+            cerrarItemModal();
+        }
+
+        function confirmarKick() {
+            if (!selectedPlayer) return;
+            cerrarPlayerModal();
+            mostrarConfirmacion(
+                '⚡ Expulsar Jugador',
+                `¿Seguro que deseas expulsar a ${selectedPlayer.name} del servidor?`,
+                '#dc3545',
+                'Expulsar',
+                '#dc3545',
+                () => {
+                    socket.emit('kick-player', { charName: selectedPlayer.name });
+                }
+            );
+        }
+
+        function abrirBanModal() {
+            cerrarPlayerModal();
+            document.getElementById('ban-duration-select').value = 'perma';
+            document.getElementById('ban-duration-custom').style.display = 'none';
+            document.getElementById('ban-duration-custom').value = '';
+            document.getElementById('ban-reason-input').value = '';
+            document.getElementById('ban-modal').style.display = 'flex';
+        }
+
+        function cerrarBanModal() {
+            document.getElementById('ban-modal').style.display = 'none';
+        }
+
+        function handleDurationChange(select) {
+            const customInput = document.getElementById('ban-duration-custom');
+            if (select.value === 'custom') {
+                customInput.style.display = 'block';
+                customInput.focus();
+            } else {
+                customInput.style.display = 'none';
+            }
+        }
+
+        function ejecutarBan() {
+            if (!selectedPlayer) return;
+            const selectVal = document.getElementById('ban-duration-select').value;
+            let duration = selectVal;
+            if (selectVal === 'custom') {
+                duration = document.getElementById('ban-duration-custom').value.trim() || 'perma';
+            }
+            const reason = document.getElementById('ban-reason-input').value.trim() || 'Sin motivo especificado';
+
+            socket.emit('ban-player', {
+                charName: selectedPlayer.name,
+                duration: duration,
+                reason: reason
+            });
+
+            cerrarBanModal();
+        }
+
+        function ejecutarUnbanDirecto() {
+            if (!selectedPlayer) return;
+            cerrarPlayerModal();
+            mostrarConfirmacion(
+                '✅ Desbanear Cuenta',
+                `¿Seguro que deseas desbanear al personaje ${selectedPlayer.name}?`,
+                '#28a745',
+                'Desbanear',
+                '#28a745',
+                () => {
+                    socket.emit('unban-player', { charName: selectedPlayer.name });
+                }
+            );
+        }
+
+        // --- GESTIÓN DE LA VISTA DE BANEADOS ---
+        function abrirBanned() {
+            ocultarTodasLasVistas();
+            bannedPanel.style.display = 'flex';
+            bannedPanel.style.flexDirection = 'column';
+            document.getElementById('btn-BANNED').classList.add('active');
+            refrescarBanned();
+        }
+
+        function refrescarBanned() {
+            socket.emit('get-banned-players');
+        }
+
+        socket.on('banned-players-data', (bannedList) => {
+            const tbody = document.getElementById('banned-tbody');
+            tbody.innerHTML = '';
+
+            if (bannedList.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; font-style: italic; color: #888;">No hay cuentas baneadas actualmente.</td></tr>';
+                return;
+            }
+
+            bannedList.forEach(b => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="font-weight: bold; color: #ff4d4d;">${b.account}</td>
+                    <td>${b.banUntil}</td>
+                    <td>${b.reason}</td>
+                    <td><button class="btn btn-save" style="padding: 4px 10px; font-size: 11px; min-width:auto; background-color: #28a745;" onclick="desbanearDesdePanel('${b.account}')">✅ Desbanear</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        });
+
+        function desbanearDesdePanel(accountName) {
+            mostrarConfirmacion(
+                '✅ Desbanear Cuenta',
+                `¿Seguro que deseas desbanear la cuenta/personaje ${accountName}?`,
+                '#28a745',
+                'Desbanear',
+                '#28a745',
+                () => {
+                    socket.emit('unban-player', { charName: accountName });
+                    setTimeout(() => { refrescarBanned(); }, 1500);
+                }
+            );
+        }
+
+        function toggleDropdown(containerId, arrowId) {
+            const container = document.getElementById(containerId);
+            const arrow = document.getElementById(arrowId);
+            if (container.style.display === 'none') {
+                container.style.display = 'flex'; arrow.style.transform = 'rotate(0deg)';
+            } else {
+                container.style.display = 'none'; arrow.style.transform = 'rotate(-90deg)';
+            }
+        }
+
+        socket.on('init-categories', (listaCategorias) => {
+            listaCategorias.forEach(cat => {
+                if (!categoriasConocidas.has(cat)) {
+                    categoriasConocidas.add(cat);
+                    const btn = document.createElement('button');
+                    btn.className = 'cat-btn';
+                    btn.id = 'btn-' + cat;
+
+                    let icono = '📄 ';
+                    if (cat === 'CHAT') icono = '💬 ';
+                    if (cat === 'COMMANDS') icono = '⌨️ ';
+                    if (cat === 'SHOP') icono = '🛒 ';
+                    if (cat === 'BANK') icono = '🏦 ';
+                    if (cat === 'UPGRADES' || cat === 'CRAFTING') icono = '⚒️ ';
+                    if (cat === 'MONSTER_DROPS') icono = '🗡️ ';
+
+                    btn.textContent = icono + cat;
+                    btn.onclick = () => filtrarLogs(cat);
+                    dynamicLogs.appendChild(btn);
+                }
+            });
+        });
+
+        socket.on('console-log', (dato) => {
+            const cat = dato.category;
+            const mensaje = dato.text.trim();
+            if (!mensaje) return;
+
+            const div = document.createElement('div');
+            div.className = 'log-line';
+            div.dataset.categoria = cat;
+
+            const textClass = dato.isRed ? 'msg-text red-output' : 'msg-text';
+            div.innerHTML = `<span class="tag">[${cat}]</span> <span class="${textClass}">${mensaje}</span>`;
+
+            // FILTRAR VISTA PRINCIPAL (TODOS): Solo mostrar SERVER, SISTEMA y COMMANDS
+            if (filtroActual === 'TODOS') {
+                if (cat !== 'SERVER' && cat !== 'SISTEMA' && cat !== 'COMMANDS') {
+                    div.classList.add('hidden');
+                }
+            } else if (filtroActual !== cat) {
+                div.classList.add('hidden');
+            }
+
+            consoleBox.appendChild(div);
+
+            if (consoleBox.childNodes.length > 4000) {
+                consoleBox.removeChild(consoleBox.firstChild);
+            }
+
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+        });
+
+        function ocultarTodasLasVistas() {
+            consoleBox.style.display = 'none';
+            configPanel.style.display = 'none';
+            dbPanel.style.display = 'none';
+            onlinePanel.style.display = 'none';
+            bannedPanel.style.display = 'none';
+            dashboardPanel.style.display = 'none';
+            updaterPanel.style.display = 'none';
+            manifestPanel.style.display = 'none';
+            commandBarContainer.style.display = 'none';
+            document.querySelectorAll('.cat-btn').forEach(btn => btn.classList.remove('active'));
+        }
+
+        function volverAConsola() { filtrarLogs(filtroActual); }
+
+        function filtrarLogs(categoria) {
+            ocultarTodasLasVistas();
+            consoleBox.style.display = 'block'; commandBarContainer.style.display = 'flex';
+            filtroActual = categoria;
+            const botonActivo = document.getElementById('btn-' + categoria);
+            if (botonActivo) botonActivo.classList.add('active');
+
+            document.querySelectorAll('.log-line').forEach(linea => {
+                const cat = linea.dataset.categoria;
+                if (filtroActual === 'TODOS') {
+                    if (cat === 'SERVER' || cat === 'SISTEMA' || cat === 'COMMANDS') {
+                        linea.classList.remove('hidden');
+                    } else {
+                        linea.classList.add('hidden');
+                    }
+                } else {
+                    if (cat === filtroActual) {
+                        linea.classList.remove('hidden');
+                    } else {
+                        linea.classList.add('hidden');
+                    }
+                }
+            });
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+        }
+
+        function abrirConfiguracion() {
+            ocultarTodasLasVistas();
+            configPanel.style.display = 'flex'; configPanel.style.flexDirection = 'column';
+            document.getElementById('btn-CONFIG').classList.add('active');
+            socket.emit('get-config');
+        }
+
+        function abrirOnline() {
+            ocultarTodasLasVistas();
+            onlinePanel.style.display = 'flex'; onlinePanel.style.flexDirection = 'column';
+            document.getElementById('btn-ONLINE').classList.add('active');
+            refrescarOnline();
+        }
+        function refrescarOnline() { socket.emit('get-online-players'); }
+
+        socket.on('config-data', (configObj) => {
+            configActualData = configObj; renderizarFormularioConfig(configObj);
+        });
+
+        socket.on('config-saved', (res) => {
+            if (res.success) volverAConsola();
+            else alert("Error al guardar: " + res.error);
+        });
+
+        function renderizarFormularioConfig(obj) {
+            const container = document.getElementById('config-form-container');
+            container.innerHTML = '';
+            for (const [sectionKey, sectionVal] of Object.entries(obj)) {
+                const sectionDiv = document.createElement('div');
+                sectionDiv.className = 'config-section';
+                const title = document.createElement('h3');
+                title.textContent = sectionKey.toUpperCase();
+                sectionDiv.appendChild(title);
+                const gridDiv = document.createElement('div');
+                gridDiv.className = 'config-grid';
+
+                for (const [paramKey, paramVal] of Object.entries(sectionVal)) {
+                    const fieldDiv = document.createElement('div');
+                    fieldDiv.className = 'config-field';
+                    const label = document.createElement('label');
+                    label.textContent = paramKey; label.title = paramKey;
+                    fieldDiv.appendChild(label);
+                    const input = document.createElement('input');
+                    input.dataset.section = sectionKey; input.dataset.param = paramKey;
+
+                    if (typeof paramVal === 'number') {
+                        input.type = 'number'; input.step = Number.isInteger(paramVal) ? '1' : '0.1';
+                        input.value = paramVal;
+                    } else {
+                        input.type = 'text'; input.value = paramVal;
+                    }
+                    fieldDiv.appendChild(input); gridDiv.appendChild(fieldDiv);
+                }
+                sectionDiv.appendChild(gridDiv); container.appendChild(sectionDiv);
+            }
+        }
+
+        function guardarConfiguracion() { configModal.style.display = 'flex'; }
+        function cerrarModalConfig() { configModal.style.display = 'none'; }
+
+        function ejecutarGuardadoYReload() {
+            cerrarModalConfig();
+            if (!configActualData) return;
+            const inputs = configPanel.querySelectorAll('input');
+            inputs.forEach(input => {
+                const sec = input.dataset.section; const param = input.dataset.param;
+                let val = input.value;
+                if (input.type === 'number') val = val.includes('.') ? parseFloat(val) : parseInt(val, 10);
+                configActualData[sec][param] = val;
+            });
+            socket.emit('save-config', configActualData);
+            insertCommand('reload config'); sendCommand();
+        }
+
+        function insertCommand(commandText) { cmdInput.value = commandText; cmdInput.focus(); }
+
+        function sendCommand() {
+            const text = cmdInput.value.trim();
+            if (text !== '') {
+                socket.emit('send-command', text);
+                if (commandHistory.length === 0 || commandHistory[commandHistory.length - 1] !== text) {
+                    commandHistory.push(text);
+                    if (commandHistory.length > 5) commandHistory.shift();
+                }
+                historyIndex = commandHistory.length;
+                cmdInput.value = '';
+            }
+        }
+
+        function handleKeyDown(event) {
+            if (event.key === 'Enter') {
+                sendCommand();
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                if (commandHistory.length > 0) {
+                    if (historyIndex > 0) historyIndex--;
+                    cmdInput.value = commandHistory[historyIndex];
+                }
+            } else if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                if (commandHistory.length > 0) {
+                    if (historyIndex < commandHistory.length - 1) {
+                        historyIndex++; cmdInput.value = commandHistory[historyIndex];
+                    } else {
+                        historyIndex = commandHistory.length; cmdInput.value = '';
+                    }
+                }
+            }
+        }
+
+        // ==========================================
+        // 🗄️ LÓGICA DEL EDITOR DE BASES DE DATOS
+        // ==========================================
+        function abrirDbEditor() {
+            ocultarTodasLasVistas();
+            dbPanel.style.display = 'flex';
+            dbPanel.style.flexDirection = 'column';
+            document.getElementById('btn-DB').classList.add('active');
+
+            socket.emit('get-db-list');
+        }
+
+        socket.on('db-list', (dbs) => {
+            const select = document.getElementById('db-select');
+            select.innerHTML = '<option value="" disabled selected>Selecciona una Base de Datos...</option>';
+            dbs.forEach(db => {
+                const opt = document.createElement('option');
+                opt.value = db.id;
+                opt.textContent = db.name;
+                select.appendChild(opt);
+            });
+        });
+
+        function onDbChange() {
+            currentDbId = document.getElementById('db-select').value;
+            currentTable = null;
+            document.getElementById('db-table-container').innerHTML = '<div style="color: #aaa; text-align: center; padding-top: 50px;">Selecciona una Tabla del menú superior.</div>';
+
+            document.getElementById('db-search-input').disabled = true;
+            document.getElementById('db-search-input').value = '';
+            document.getElementById('btn-db-search').disabled = true;
+
+            socket.emit('get-db-tables', currentDbId);
+            const tblSelect = document.getElementById('table-select');
+            tblSelect.innerHTML = '<option value="" disabled selected>Cargando tablas...</option>';
+        }
+
+        socket.on('db-tables', (tables) => {
+            const select = document.getElementById('table-select');
+            select.innerHTML = '<option value="" disabled selected>Selecciona una Tabla...</option>';
+            tables.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t;
+                opt.textContent = t;
+                select.appendChild(opt);
+            });
+        });
+
+        function onTableChange() {
+            currentTable = document.getElementById('table-select').value;
+
+            document.getElementById('db-search-input').disabled = false;
+            document.getElementById('db-search-input').value = '';
+            document.getElementById('btn-db-search').disabled = false;
+
+            cargarTablaDb();
+        }
+
+        function verificarEnterBusqueda(e) {
+            if (e.key === 'Enter') {
+                cargarTablaDb();
+            }
+        }
+
+        function cargarTablaDb() {
+            if (!currentDbId || !currentTable) return;
+            const searchTerm = document.getElementById('db-search-input').value || '';
+            document.getElementById('db-table-container').innerHTML = '<div style="color: #00ffcc; text-align: center; padding-top: 50px;">🔄 Buscando y cargando datos...</div>';
+            socket.emit('get-table-data', { dbId: currentDbId, tableName: currentTable, searchTerm: searchTerm });
+        }
+
+        socket.on('table-data', (data) => {
+            const container = document.getElementById('db-table-container');
+            if (data.error) {
+                container.innerHTML = `<div style="color: #ff4d4d; text-align: center; padding-top: 50px;">❌ Error: ${data.error}</div>`;
+                return;
+            }
+
+            const rows = data.rows;
+            if (rows.length === 0) {
+                container.innerHTML = '<div style="color: #aaa; text-align: center; padding-top: 50px;">No se encontraron resultados en esta tabla.</div>';
+                return;
+            }
+
+            const columns = Object.keys(rows[0]).filter(k => k !== '_rowid_');
+
+            let html = '<table class="db-table"><thead><tr>';
+            html += `<th style="width: 50px;">ID</th>`;
+            columns.forEach(col => { html += `<th>${col}</th>`; });
+            html += '</tr></thead><tbody>';
+
+            rows.forEach(row => {
+                html += `<tr>`;
+                html += `<td style="color: #888; text-align: center;">${row._rowid_}</td>`;
+                columns.forEach(col => {
+                    const rawVal = row[col] === null ? 'NULL' : String(row[col]);
+                    const escapedVal = rawVal.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                    html += `<td class="editable" data-raw="${escapedVal}" onclick="editarCelda(this, ${row._rowid_}, '${col}')">${escapedVal}</td>`;
+                });
+                html += `</tr>`;
+            });
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        });
+
+        function editarCelda(td, rowid, col) {
+            if (editando) return;
+            editando = true;
+
+            const valorActual = td.getAttribute('data-raw').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"');
+
+            td.classList.add('editing');
+            td.innerHTML = `<input type="text" id="cell-edit-input">`;
+
+            const input = document.getElementById('cell-edit-input');
+            input.value = valorActual === 'NULL' ? '' : valorActual;
+            input.focus();
+
+            let guardado = false;
+
+            const finalizarEdicion = () => {
+                if (guardado) return;
+                guardado = true;
+                guardarCelda(td, rowid, col, valorActual, input.value);
+            };
+
+            input.addEventListener('blur', finalizarEdicion);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    finalizarEdicion();
+                } else if (e.key === 'Escape') {
+                    guardado = true;
+                    const revertedVal = valorActual.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                    td.innerHTML = revertedVal;
+                    td.classList.remove('editing');
+                    editando = false;
+                }
+            });
+        }
+
+        function guardarCelda(td, rowid, col, valorOriginal, nuevoValor) {
+            td.classList.remove('editing');
+
+            if (nuevoValor === valorOriginal || (nuevoValor === '' && valorOriginal === 'NULL')) {
+                const escapedOriginal = valorOriginal.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                td.innerHTML = escapedOriginal;
+                editando = false;
+                return;
+            }
+
+            td.innerHTML = '<span style="color:#ffaa00; font-style:italic;">guardando...</span>';
+
+            socket.emit('update-table-data', {
+                dbId: currentDbId,
+                tableName: currentTable,
+                rowid: rowid,
+                column: col,
+                value: nuevoValor
+            });
+
+            const escapedNew = nuevoValor.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+            td.setAttribute('data-raw', escapedNew);
+            td.innerHTML = escapedNew;
+            editando = false;
+        }
+
+        socket.on('update-data-result', (res) => {
+            if (!res.success) {
+                alert("❌ Error al guardar en la base de datos:\n" + res.error + "\n\nComprueba que estás escribiendo el tipo de dato correcto.");
+                cargarTablaDb();
+            }
+        });
+
+        // ==========================================
+        // 📈 LÓGICA DEL DASHBOARD VISUAL Y LOGS DE 12H
+        // ==========================================
+        let playersChart;
+
+        function initChart() {
+            const ctx = document.getElementById('playersChart').getContext('2d');
+
+            let gradient = ctx.createLinearGradient(0, 0, 0, 300);
+            gradient.addColorStop(0, 'rgba(255, 170, 0, 0.4)');
+            gradient.addColorStop(1, 'rgba(255, 170, 0, 0.0)');
+
+            playersChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: Array(30).fill(''),
+                    datasets: [{
+                        label: 'Jugadores Conectados',
+                        data: Array(30).fill(0),
+                        borderColor: '#ffaa00',
+                        backgroundColor: gradient,
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#ccc', font: { family: 'Courier New' } } }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#888' }, grid: { color: '#333' } },
+                        y: { ticks: { color: '#888', stepSize: 1 }, grid: { color: '#333' }, beginAtZero: true }
+                    },
+                    animation: { duration: 0 }
+                }
+            });
+        }
+
+        function abrirDashboard() {
+            ocultarTodasLasVistas();
+            dashboardPanel.style.display = 'flex';
+            dashboardPanel.style.flexDirection = 'column';
+            document.getElementById('btn-DASHBOARD').classList.add('active');
+
+            // Solicitar los logs al abrir el panel
+            socket.emit('get-dashboard-logs');
+        }
+
+        socket.on('dashboard-stats', (stats) => {
+            const cpuVal = document.getElementById('stat-cpu');
+            const ramVal = document.getElementById('stat-ram');
+            const playersVal = document.getElementById('stat-players');
+
+            // Lógica visual de apagado total
+            if (!isServerOn) {
+                cpuVal.textContent = 'OFF';
+                ramVal.textContent = 'OFF';
+                cpuVal.style.color = '#ff4d4d';
+                ramVal.style.color = '#ff4d4d';
+                playersVal.textContent = '0';
+                document.getElementById('stat-uptime').textContent = '00:00:00';
+            } else {
+                cpuVal.textContent = stats.cpu + '%';
+                ramVal.textContent = stats.ram + '%';
+                cpuVal.style.color = stats.cpu > 80 ? '#ff4d4d' : '#fff';
+                ramVal.style.color = stats.ram > 80 ? '#ff4d4d' : '#fff';
+                playersVal.textContent = stats.playersHistory[stats.playersHistory.length - 1];
+
+                let s = stats.uptime;
+                let h = Math.floor(s / 3600);
+                let m = Math.floor((s % 3600) / 60);
+                let sc = s % 60;
+                document.getElementById('stat-uptime').textContent =
+                    `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${sc.toString().padStart(2, '0')}`;
+            }
+
+            if (playersChart) {
+                playersChart.data.labels = stats.labelsHistory;
+                playersChart.data.datasets[0].data = stats.playersHistory;
+                playersChart.update();
+            }
+        });
+
+        // Recepción y renderizado de la lista de logs de 12h
+        socket.on('dashboard-logs-data', (logs) => {
+            allDashboardLogs = logs || [];
+            currentLogPage = 1;
+            renderDashboardLogs();
+        });
+
+        function renderDashboardLogs() {
+            const tbody = document.getElementById('dashboard-logs-tbody');
+            tbody.innerHTML = '';
+
+            if (allDashboardLogs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #888; font-style: italic;">Aún no se ha generado ningún log de 12 horas.</td></tr>';
+                document.getElementById('log-pagination-info').textContent = 'Página 1 de 1';
+                return;
+            }
+
+            const totalPages = Math.ceil(allDashboardLogs.length / logsPerPage);
+            if (currentLogPage < 1) currentLogPage = 1;
+            if (currentLogPage > totalPages) currentLogPage = totalPages;
+
+            document.getElementById('log-pagination-info').textContent = `Página ${currentLogPage} de ${totalPages}`;
+
+            const startIdx = (currentLogPage - 1) * logsPerPage;
+            const endIdx = startIdx + logsPerPage;
+            const currentLogs = allDashboardLogs.slice(startIdx, endIdx);
+
+            currentLogs.forEach(log => {
+                const tr = document.createElement('tr');
+                tr.onclick = () => abrirDetalleLog(log);
+                tr.innerHTML = `
+                    <td>${log.date} ${log.time}</td>
+                    <td style="color: #ffaa00; font-weight: bold;">${log.peakPlayers}</td>
+                    <td>${log.avgCpu}%</td>
+                    <td>${log.avgRam}%</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function cambiarPaginaLogs(dir) {
+            const totalPages = Math.ceil(allDashboardLogs.length / logsPerPage);
+            if (totalPages === 0) return;
+
+            currentLogPage += dir;
+            if (currentLogPage < 1) currentLogPage = 1;
+            if (currentLogPage > totalPages) currentLogPage = totalPages;
+            renderDashboardLogs();
+        }
+
+        function abrirDetalleLog(log) {
+            document.getElementById('log-detail-date').textContent = `${log.date} ${log.time}`;
+            document.getElementById('log-detail-period').textContent = `${log.periodStart} - ${log.periodEnd}`;
+            document.getElementById('log-detail-peak').textContent = log.peakPlayers;
+            document.getElementById('log-detail-cpu').textContent = `${log.avgCpu}%`;
+            document.getElementById('log-detail-ram').textContent = `${log.avgRam}%`;
+            document.getElementById('log-detail-modal').style.display = 'flex';
+        }
+
+        function cerrarLogModal() {
+            document.getElementById('log-detail-modal').style.display = 'none';
+        }
+
+        // ==========================================
+        // 🌐 LÓGICA DEL AUTO-UPDATER
+        // ==========================================
+
+        function abrirUpdater() {
+            ocultarTodasLasVistas();
+            updaterPanel.style.display = 'flex';
+            document.getElementById('btn-UPDATER').classList.add('active');
+            socket.emit('updater-check-status');
+        }
+
+        function abrirManifest() {
+            ocultarTodasLasVistas();
+            manifestPanel.style.display = 'flex';
+            document.getElementById('btn-MANIFEST').classList.add('active');
+        }
+
+        function toggleUpdater() {
+            if (isUpdaterOn) {
+                socket.emit('updater-stop');
+            } else {
+                updaterConsole.innerHTML = '';
+                socket.emit('updater-start');
+            }
+        }
+
+        socket.on('updater-status', (status) => {
+            isUpdaterOn = status;
+            const btn1 = document.getElementById('btn-updater-toggle');
+            const btn2 = document.getElementById('btn-updater-header');
+
+            if (isUpdaterOn) {
+                if (btn1) { btn1.className = 'btn btn-stop'; btn1.innerHTML = '🛑 Apagar Updater'; }
+                if (btn2) { btn2.className = 'btn btn-stop'; btn2.innerHTML = '🛑 Apagar Updater'; btn2.style.backgroundColor = '#dc3545'; }
+            } else {
+                if (btn1) { btn1.className = 'btn btn-start'; btn1.innerHTML = '▶ Encender Updater'; }
+                if (btn2) { btn2.className = 'btn btn-start'; btn2.innerHTML = '▶ Encender Updater'; btn2.style.backgroundColor = '#0d47a1'; }
+            }
+        });
+
+        socket.on('updater-log', (text) => {
+            updaterConsole.innerHTML += `<div>${text}</div>`;
+            updaterConsole.scrollTop = updaterConsole.scrollHeight;
+        });
+
+        function generarManifest() {
+            manifestConsole.innerHTML = '';
+            socket.emit('manifest-generate');
+        }
+
+        socket.on('manifest-log', (text) => {
+            manifestConsole.innerHTML += `<div>${text}</div>`;
+            manifestConsole.scrollTop = manifestConsole.scrollHeight;
+        });
+
+    </script>
+</body>
+
+</html>

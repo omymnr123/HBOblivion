@@ -1,0 +1,331 @@
+/* Reset and Variables */
+:root {
+    --bg-dark: #141311;
+    --text-primary: #d4c5a9;
+    --text-muted: #888;
+    --gold: #dfb36b;
+    --gold-bright: #fce8aa;
+    --border-metal: #383430;
+    --border-highlight: #5c554e;
+    --border-shadow: #1a1815;
+    --red-offline: #a32c2c;
+    --font-cinzel: 'Cinzel', serif;
+    --font-ui: sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+}
+
+body {
+    background-color: transparent;
+    font-family: var(--font-ui);
+    color: var(--text-primary);
+    overflow: hidden;
+}
+
+/* Wrapper */
+.launcher-wrapper {
+    width: 1026px;
+    height: 626px;
+    background-image: url('launcher1.png');
+    background-size: 1026px 626px;
+    background-position: top left;
+    background-repeat: no-repeat;
+    position: relative;
+    overflow: hidden;
+    /* Evitar esquinas cuadradas si el PNG tiene bordes curvos */
+    border-radius: 6px;
+}
+
+/* Fondo interior oscuro para tapar la transparencia */
+.launcher-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    bottom: 5px;
+    left: 5px;
+    background-color: #141311;
+    z-index: -1;
+    border-radius: 6px;
+}
+
+/* Server Status */
+.server-status-container {
+    position: absolute;
+    bottom: 60px;
+    /* Justo encima de la barra de descarga (bottom: 35px + 22px + 3px padding) */
+    left: 30px;
+    /* Perfectamente alineado con el left de la barra de descarga */
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #999;
+    letter-spacing: 1px;
+    z-index: 10;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--red-offline);
+    border-radius: 50%;
+    box-shadow: 0 0 5px var(--red-offline);
+    transition: background 0.3s, box-shadow 0.3s;
+}
+
+.offline {
+    color: var(--red-offline);
+    font-weight: bold;
+}
+
+.online {
+    color: #2ca336;
+    font-weight: bold;
+}
+
+.shutdown {
+    color: #d4a322;
+    font-weight: bold;
+}
+
+/* Close Button */
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: #a32c2c;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0 5px;
+    z-index: 20;
+}
+
+.close-btn:hover {
+    color: #ff4444;
+}
+
+/* Banner Section */
+.banner {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 996px;
+    height: 163px;
+    background-image: url('banner_launcher.png');
+    background-size: cover;
+    /* cover para evitar distorsión mientras llena el hueco */
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    /* Para que la parte de abajo quede pegada si se recorta */
+}
+
+/* News Panel */
+.news-panel {
+    position: absolute;
+    top: 196px;
+    /* Movido un pelín más abajo */
+    left: 30px;
+    /* Alineado exactamente con el left: 30px de la barra de progreso */
+    width: 501px;
+    height: 341px;
+    background-image: url('marco_news.png');
+    background-size: 501px 341px;
+    padding: 15px 40px 30px 40px;
+    display: flex;
+    flex-direction: column;
+}
+
+.news-title-main {
+    font-family: var(--font-cinzel);
+    color: var(--gold);
+    font-size: 20px;
+    letter-spacing: 3px;
+    text-shadow: 2px 2px 3px #000;
+    text-align: center;
+    margin-top: 2px;
+    /* Bajado solo unos milímetros, 3px más que antes (5px) */
+    margin-bottom: 15px;
+}
+
+.news-list {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 15px;
+    margin-bottom: 6px;
+}
+
+.news-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.news-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.news-list::-webkit-scrollbar-thumb {
+    background: #555;
+}
+
+.news-list::-webkit-scrollbar-thumb:hover {
+    background: #777;
+}
+
+.news-item {
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 15px;
+}
+
+.news-item:last-child {
+    border-bottom: none;
+}
+
+.news-title {
+    font-family: var(--font-cinzel);
+    color: var(--gold-bright);
+    font-size: 14px;
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+}
+
+.lang-btn {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.lang-btn:hover {
+    background: var(--gold);
+    color: #1a1a1a;
+}
+
+.news-date {
+    color: #888;
+    font-size: 10px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+}
+
+.news-desc {
+    font-size: 12px;
+    line-height: 1.4;
+    color: #aaa;
+}
+
+/* Invisible Play Button Overlay */
+.btn-play {
+    position: absolute;
+    bottom: 38px;
+    right: 24px;
+    width: 320px;
+    height: 100px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    z-index: 20;
+}
+
+/* Imagen completa del botón Play iluminado */
+.hover-play-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('botonplay.png');
+    background-size: 1026px 626px;
+    /* Ajustado al marco recortado */
+    background-position: top left;
+    background-repeat: no-repeat;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+    z-index: 15;
+    /* Por debajo del botón invisible, por encima del fondo */
+}
+
+/* Cuando el ratón pasa por btn-play, mostrar la imagen de hover */
+.btn-play:hover+.hover-play-bg {
+    opacity: 1;
+}
+
+/* Progress Bar */
+.progress-section-global {
+    position: absolute;
+    bottom: 35px;
+    left: 30px;
+    width: 610px;
+    /* Acortado para que no toque el botón Jugar */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 10;
+}
+
+.progress-frame-global {
+    width: 100%;
+    height: 22px;
+    /* Aumentado ligeramente para que el texto respire por dentro */
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid #333;
+    position: relative;
+    box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.8);
+}
+
+.progress-text-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.status-label,
+.percentage-label {
+    font-size: 10px;
+    color: var(--gold);
+    /* Mismo color dorado que el texto News */
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+    /* Evita que el texto salte de línea */
+    text-shadow: 1px 1px 2px #000, -1px -1px 2px #000, 1px -1px 2px #000, -1px 1px 2px #000;
+}
+
+.progress-bar-bg {
+    width: 100%;
+    height: 100%;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: #ff0000;
+    /* Red from the mockup */
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+    transition: width 0.3s;
+}

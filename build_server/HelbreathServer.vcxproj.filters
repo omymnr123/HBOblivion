@@ -1,0 +1,205 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\AccountSqliteStore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\Client.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\CmdBroadcast.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\CmdGiveItem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\CmdHelp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\CmdReload.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\CmdSetAdmin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\CmdSaveAll.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\CmdSetCmdLevel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\CmdShutdown.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\CmdShowChat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\CombatManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\CommonTypes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\CraftingManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\RegenManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\DelayEventManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\DynamicObjectManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\EntityManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\FishingManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\Game.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\GameChatCommand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\GameCmdBlock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\GameCmdCome.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\GameCmdCreateItem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\GameCmdGiveItem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\GameCmdGM.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\GameCmdGoto.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\GameCmdGuild.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\GameCmdInvis.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\GameCmdRegen.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\GameCmdSaveAll.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\GameCmdSpawn.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\GameCmdUnblock.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\GameCmdWhisper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\GameConfigSqliteStore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\ServerConfig.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\GuildManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\GuildSqliteStore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\ItemManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\LoginServer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\LootManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\MagicManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\Map.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\MapInfoSqliteStore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\MiningManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\NetworkMsg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\Npc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\PartyManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\Quest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\QuestManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\ServerCommand.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\ServerConsole.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\ServerLog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\SkillManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\StatusEffectManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\Tile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\WarManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\Wmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Dependencies\Shared\Net\ASIOSocket.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Dependencies\Shared\Net\IOServicePool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Dependencies\Shared\Log\LogBackend.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Dependencies\Shared\Util\SHA256.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Dependencies\Shared\Game\FormulaEngine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Dependencies\Server\Includes\SQLite\sqlite3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Server\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{7CB44922-7EA7-3376-887E-229065A08E82}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

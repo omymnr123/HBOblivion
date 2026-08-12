@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drop Manager - Helbreath</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: #181620;
+            color: #ddd8d0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Navbar */
+        .navbar {
+            background: linear-gradient(to right, #7a5c34, #3a3248);
+            padding: 12px 24px;
+            border-bottom: 2px solid #3a3248;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-shrink: 0;
+        }
+
+        .navbar h1 {
+            font-size: 20px;
+            color: #fff;
+            white-space: nowrap;
+        }
+
+        .navbar-search {
+            flex: 1;
+            max-width: 400px;
+            position: relative;
+        }
+
+        .navbar-search input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #3a3248;
+            border-radius: 4px;
+            background: #181620;
+            color: #ddd8d0;
+            font-size: 14px;
+        }
+
+        .navbar-search input:focus { outline: none; border-color: #c8a850; }
+        .navbar-search input::placeholder { color: #686058; }
+
+        .navbar-actions { display: flex; gap: 8px; align-items: center; }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .btn-snapshot { background: #3a3468; color: #fff; }
+        .btn-snapshot:hover { background: #2e2a56; }
+
+        .app {
+            display: grid;
+            grid-template-columns: 280px 1fr 350px;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: #22202c;
+            border-right: 1px solid #3a3248;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .npc-search {
+            padding: 12px;
+            border-bottom: 1px solid #3a3248;
+        }
+
+        .npc-search input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #332e3a;
+            border-radius: 4px;
+            background: #181620;
+            color: #ddd8d0;
+            font-size: 14px;
+        }
+
+        .npc-search input:focus { outline: none; border-color: #c8a850; }
+
+        .npc-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 6px;
+        }
+
+        .npc-item {
+            padding: 10px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 2px;
+            border-left: 3px solid transparent;
+            transition: background 0.15s;
+        }
+
+        .npc-item:hover { background: #181620; }
+
+        .npc-item.active {
+            background: #181620;
+            border-left-color: #c8a850;
+        }
+
+        .npc-item .name { font-weight: 600; font-size: 14px; }
+        .npc-item .id { font-size: 12px; color: #887868; }
+        .npc-item.active .id { color: #a89888; }
+
+        /* Main Content */
+        .main {
+            padding: 20px 24px;
+            overflow-y: auto;
+        }
+
+        .main-header { margin-bottom: 20px; }
+
+        .main-header h2 {
+            font-size: 20px;
+            color: #c8a850;
+        }
+
+        .tier-section {
+            background: #22202c;
+            border: 1px solid #3a3248;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .tier-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #2e2838;
+        }
+
+        .tier-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #c8a850;
+        }
+
+        .drop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+
+        .drop-card {
+            background: #181620;
+            border: 1px solid #332e3a;
+            border-radius: 4px;
+            padding: 12px;
+            position: relative;
+            transition: border-color 0.15s;
+        }
+
+        .drop-card:hover { border-color: #c8a850; }
+
+        .drop-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .drop-weight {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .drop-weight input {
+            width: 70px;
+            padding: 4px 8px;
+            border: 1px solid #332e3a;
+            border-radius: 4px;
+            background: #14121c;
+            color: #ddd8d0;
+            font-size: 13px;
+            text-align: center;
+        }
+
+        .drop-weight input:focus { outline: none; border-color: #c8a850; }
+
+        .drop-percent {
+            color: #c8a850;
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .drop-remove {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: rgba(220, 53, 69, 0.3);
+            border: none;
+            color: #fff;
+            width: 22px;
+            height: 22px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+
+        .drop-card:hover .drop-remove { opacity: 1; }
+        .drop-remove:hover { background: #8b2828; }
+
+        /* Item Picker Panel */
+        .picker {
+            background: #22202c;
+            border-left: 1px solid #3a3248;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .picker-header {
+            padding: 12px 16px;
+            background: #3a3248;
+        }
+
+        .picker-header h3 {
+            margin-bottom: 12px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .picker-search input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #332e3a;
+            border-radius: 4px;
+            background: #181620;
+            color: #ddd8d0;
+            font-size: 14px;
+        }
+
+        .picker-search input:focus { outline: none; border-color: #c8a850; }
+
+        .picker-tier-select {
+            margin-top: 8px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .picker-tier-select button {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #3a3248;
+            border-radius: 4px;
+            background: transparent;
+            color: #ddd8d0;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.15s;
+        }
+
+        .picker-tier-select button:hover { background: #22202c; }
+
+        .picker-tier-select button.active {
+            background: #c8a850;
+            border-color: #c8a850;
+            color: #181620;
+        }
+
+        .picker-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 6px;
+        }
+
+        .picker-item {
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 2px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.15s;
+        }
+
+        .picker-item:hover { background: #181620; }
+        .picker-item .id { color: #887868; font-size: 12px; }
+
+        .picker-item .add-btn {
+            background: #6e5530;
+            border: none;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.15s;
+        }
+
+        .picker-item:hover .add-btn { opacity: 1; }
+        .picker-item .add-btn:hover { background: #7e6538; }
+
+        /* Status bar */
+        .status {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2e2818;
+            color: #d8ccb0;
+            padding: 8px 20px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .status.show { opacity: 1; }
+
+        /* Empty state */
+        .empty {
+            text-align: center;
+            padding: 40px;
+            color: #686058;
+            font-size: 15px;
+        }
+
+        /* Editable gate cards */
+        .gate-card {
+            background: #22202c;
+            border: 1px solid #3a3248;
+            padding: 12px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        .gate-card:hover { background: #1e2a4a; }
+
+        .gate-card.gold { border-left: 3px solid #6e5530; }
+        .gate-card.items { border-left: 3px solid #c8a850; }
+        .gate-card.rare { border-left: 3px solid #3a3468; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.show { display: flex; }
+
+        .modal {
+            background: #22202c;
+            border: 1px solid #3a3248;
+            padding: 24px;
+            border-radius: 6px;
+            min-width: 400px;
+        }
+
+        .modal h3 {
+            margin-bottom: 16px;
+            font-size: 16px;
+            color: #c8a850;
+        }
+
+        .modal-field { margin-bottom: 12px; }
+
+        .modal-field label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 12px;
+            color: #887868;
+        }
+
+        .modal-field input {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #332e3a;
+            border-radius: 4px;
+            background: #181620;
+            color: #ddd8d0;
+            font-size: 14px;
+        }
+
+        .modal-field input:focus { outline: none; border-color: #c8a850; }
+
+        .modal-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .btn-save { background: #6e5530; color: #fff; }
+        .btn-save:hover { background: #7e6538; }
+        .btn-cancel { background: transparent; border: 1px solid #3a3248; color: #ddd8d0; }
+        .btn-cancel:hover { background: #3a3248; }
+
+        /* Changelog panel */
+        .changelog-section {
+            border-top: 1px solid #3a3248;
+            padding: 12px;
+            height: 200px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+
+        .changelog-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .changelog-header h4 { font-size: 12px; color: #887868; text-transform: uppercase; }
+
+        .changelog-content {
+            flex: 1;
+            overflow-y: auto;
+            background: #181620;
+            border: 1px solid #332e3a;
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 12px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            color: #887868;
+            min-height: 100px;
+        }
+
+        .changelog-content:focus { outline: none; border-color: #c8a850; color: #ddd8d0; }
+
+        .btn-small {
+            padding: 4px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            background: #3a3248;
+            color: #ddd8d0;
+        }
+
+        .btn-small:hover { background: #c8a850; color: #181620; }
+        
+        /* Dropdown Menu para añadir items */
+        .add-menu {
+            position: fixed;
+            background: #22202c;
+            border: 1px solid #c8a850;
+            border-radius: 4px;
+            padding: 4px 0;
+            z-index: 2000;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            min-width: 180px;
+        }
+        .add-menu.show { display: block; }
+        .add-menu button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 8px 16px;
+            background: transparent;
+            border: none;
+            color: #ddd8d0;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .add-menu button:hover { background: #3a3248; color: #fff; }
+    </style>
+</head>
+
+<body>
+    <!-- Top Navbar -->
+    <nav class="navbar">
+        <h1>Drop Manager</h1>
+        <div class="navbar-search">
+            <input type="text" id="itemDropSearch" placeholder="Search item to find who drops it...">
+        </div>
+        <div class="navbar-actions">
+            <button class="btn btn-snapshot" onclick="openChangelogModal()">Changelog</button>
+        </div>
+    </nav>
+
+    <div class="app">
+        <!-- NPC List -->
+        <div class="sidebar">
+            <div class="npc-search">
+                <input type="text" id="npcSearch" placeholder="Search NPC...">
+            </div>
+            <div class="npc-list" id="npcList">
+                <!-- NPCs loaded here -->
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main" id="mainContent">
+            <div class="empty">
+                <h2>Select an NPC</h2>
+                <p>Choose an NPC from the list to edit its drops</p>
+            </div>
+        </div>
+
+        <!-- Item Picker -->
+        <div class="picker">
+            <div class="picker-header">
+                <h3>Add Item</h3>
+                <div class="picker-search">
+                    <input type="text" id="itemSearch" placeholder="Search items...">
+                </div>
+                <div class="picker-tier-select">
+                    <button id="tierBtn1" class="active" onclick="setPickerTier(1)">Tier 1</button>
+                    <button id="tierBtn2" onclick="setPickerTier(2)">Tier 2</button>
+                </div>
+                <button onclick="addItem(0, 'Nothing')"
+                    style="width: 100%; margin-top: 10px; background: transparent; border: 1px dashed #686058; color: #887868; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 600;">
+                    + Add "Nothing" (ID 0)
+                </button>
+            </div>
+            <div class="picker-list" id="itemList">
+                <!-- Items loaded here -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Menú desplegable para Añadir Items -->
+    <div id="addMenu" class="add-menu">
+        <button onclick="addDropToSelected()">Añadir al NPC actual</button>
+        <button onclick="addDropToAll()" style="color: #c8a850;">Añadir a TODOS los NPCs</button>
+    </div>
+
+    <div class="status" id="status">Saved!</div>
+    <!-- Settings Modal -->
+    <div class="modal-overlay" id="settingsModal" onclick="closeSettingsModal(event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <h3>Edit Drop Rates</h3>
+
+            <div style="background: #181620; padding: 10px 12px; border-radius: 4px; margin-bottom: 12px; border: 1px solid #332e3a;">
+                <div style="font-size: 12px; color: #887868; margin-bottom: 4px;">Global Base Rates</div>
+                <div style="display: flex; gap: 20px; font-size: 13px;">
+                    <div><strong>Base Primary:</strong> 10%</div>
+                    <div><strong>Base Gold:</strong> 30%</div>
+                    <div><strong>Base Secondary:</strong> 5%</div>
+                </div>
+            </div>
+
+            <div class="modal-field">
+                <label>Primary Drop Rate Multiplier</label>
+                <input type="number" id="primaryDropRate" min="0.1" max="100.0" step="0.1" value="1.0">
+                <small style="color: #887868">Multiplier for 10% base chance. 1.0 = 10%, 2.0 = 20%.</small>
+            </div>
+            <div class="modal-field">
+                <label>Gold Drop Rate Multiplier</label>
+                <input type="number" id="goldDropRate" min="0.1" max="100.0" step="0.1" value="1.0">
+                <small style="color: #887868">Multiplier for 30% base chance. 1.0 = 30%, 1.5 = 45%.</small>
+            </div>
+            <div class="modal-field">
+                <label>Secondary Drop Rate Multiplier</label>
+                <input type="number" id="secondaryDropRate" min="0.1" max="100.0" step="0.1" value="1.0">
+                <small style="color: #887868">Multiplier for 5% base chance. 1.0 = 5%, 2.0 = 10%.</small>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeSettingsModal()">Cancel</button>
+                <button class="btn-save" onclick="saveSettings()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Changelog Modal -->
+    <div class="modal-overlay" id="changelogModal" onclick="closeChangelogModal(event)">
+        <div class="modal" onclick="event.stopPropagation()" style="min-width: 600px; max-height: 80vh;">
+            <h3>Changelog</h3>
+            <p style="color: #887868; font-size: 13px; margin-bottom: 12px;">All drop changes are automatically
+                logged here</p>
+            <div id="changelogContent" contenteditable="true" style="
+                background: #181620;
+                border: 1px solid #332e3a;
+                border-radius: 4px;
+                padding: 12px;
+                font-family: monospace;
+                font-size: 12px;
+                white-space: pre-wrap;
+                color: #887868;
+                max-height: 400px;
+                overflow-y: auto;
+                min-height: 200px;
+            ">Loading...</div>
+            <div class="modal-buttons">
+                <button class="btn-cancel" onclick="closeChangelogModal()">Close</button>
+                <button class="btn-save" onclick="saveChangelog()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let npcs = [];
+        let items = [];
+        let drops = [];
+        let selectedNpc = null;
+        let pickerTier = 1;
+        let config = { settings: {}, global_drops: [] };
+        
+        let pendingAddItem = null;
+
+        // Mostrar el menú flotante en la posición del ratón
+        function showAddMenu(event, itemId, itemName) {
+            event.stopPropagation(); // Evitar que se cierre al instante
+            pendingAddItem = { id: itemId, name: itemName };
+            const menu = document.getElementById('addMenu');
+            
+            // Posicionarlo a la izquierda del botón "Add"
+            const rect = event.target.getBoundingClientRect();
+            menu.style.left = (rect.left - 180) + 'px'; 
+            menu.style.top = rect.bottom + 'px';
+            menu.classList.add('show');
+        }
+
+        // Cerrar menú al hacer clic en cualquier otro lado
+        document.addEventListener('click', () => {
+            const menu = document.getElementById('addMenu');
+            if (menu) menu.classList.remove('show');
+        });
+
+        // Opción 1: Añadir solo al NPC seleccionado (reutiliza lógica existente)
+        async function addDropToSelected() {
+            if (!pendingAddItem) return;
+            await addItem(pendingAddItem.id, pendingAddItem.name);
+        }
+
+        // Opción 2: Añadir a TODOS los NPCs
+        async function addDropToAll() {
+            if (!pendingAddItem) return;
+            
+            if (!confirm(`¿Estás seguro de que quieres añadir "${pendingAddItem.name}" a TODOS los NPCs del servidor?`)) return;
+
+            const result = await fetch('/api/drops/add_all', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    tier: pickerTier,
+                    item_id: pendingAddItem.id,
+                    weight: 100, // Peso por defecto
+                    min_count: 1,
+                    max_count: 1
+                })
+            }).then(r => r.json());
+
+            if (result.success) {
+                // Guardar qué NPC teníamos abierto
+                const currentNpcId = selectedNpc ? selectedNpc.id : null;
+                
+                // Recargar toda la base de datos
+                await loadData();
+                
+                // Si teníamos un NPC seleccionado, recargar su vista para ver el nuevo drop
+                if (currentNpcId) {
+                    selectNpc(currentNpcId);
+                }
+                
+                showStatus('¡Añadido a TODOS los NPCs!');
+                loadChangelog();
+            } else {
+                alert('Error: ' + result.error);
+            }
+        }
+
+        // Load data
+        async function loadData() {
+            try {
+                [npcs, items, drops, config] = await Promise.all([
+                    fetch('/api/npcs').then(r => r.json()),
+                    fetch('/api/items').then(r => r.json()),
+                    fetch('/api/drops').then(r => r.json()),
+                    fetch('/api/config').then(r => r.json())
+                ]);
+                renderNpcs();
+                renderItems();
+            } catch (e) {
+                console.error('Failed to load data:', e);
+            }
+        }
+
+        // Render NPC list
+        function renderNpcs(filter = '') {
+            const list = document.getElementById('npcList');
+            const filtered = npcs.filter(n =>
+                n.name.toLowerCase().includes(filter.toLowerCase()) ||
+                n.id.toString().includes(filter)
+            );
+
+            list.innerHTML = filtered.map(npc => `
+                <div class="npc-item ${selectedNpc?.id === npc.id ? 'active' : ''}" 
+                     onclick="selectNpc(${npc.id})">
+                    <div class="name">${npc.name}</div>
+                    <div class="id">ID: ${npc.id}</div>
+                </div>
+            `).join('');
+        }
+
+        // Select NPC
+        function selectNpc(id) {
+            selectedNpc = npcs.find(n => n.id === id);
+            renderNpcs(document.getElementById('npcSearch').value);
+            renderDrops();
+        }
+
+        // Render drops for selected NPC
+        function renderDrops() {
+            const main = document.getElementById('mainContent');
+            if (!selectedNpc) {
+                main.innerHTML = '<div class="empty"><h2>Select an NPC</h2></div>';
+                return;
+            }
+
+            const npcDrops = drops.filter(d => d.drop_table_id === selectedNpc.id);
+            const tier1 = npcDrops.filter(d => d.tier === 1);
+            const tier2 = npcDrops.filter(d => d.tier === 2);
+
+            const calcPercent = (tierItems, weight, tier) => {
+                const total = tierItems.reduce((sum, d) => sum + d.weight, 0);
+                const localProp = total > 0 ? (weight / total) : 0;
+
+                // New Logic: Base Rates * Multipliers
+                const primaryMult = parseFloat(config.settings['primary-drop-rate'] || 1.0);
+                const goldMult = parseFloat(config.settings['gold-drop-rate'] || 1.0);
+                const secondaryMult = parseFloat(config.settings['secondary-drop-rate'] || 1.0);
+
+                let gateProb = 0;
+
+                if (tier === 1) {
+                    // Tier 1 Items: Base 10% * Multiplier
+                    const baseChance = 0.10;
+                    gateProb = baseChance * primaryMult;
+                } else if (tier === 2) {
+                    // Tier 2 (Rare): Base 5% * Multiplier
+                    const baseChance = 0.05;
+                    gateProb = baseChance * secondaryMult;
+                }
+
+                return (localProp * gateProb * 100).toFixed(4);
+            };
+
+            // Values for display
+            const primaryMult = parseFloat(config.settings['primary-drop-rate'] || 1.0);
+            const goldMult = parseFloat(config.settings['gold-drop-rate'] || 1.0);
+            const secondaryMult = parseFloat(config.settings['secondary-drop-rate'] || 1.0);
+
+            const primaryPct = (10.0 * primaryMult).toFixed(2);
+            const goldPct = (30.0 * goldMult).toFixed(2);
+            const secondaryPct = (5.0 * secondaryMult).toFixed(2);
+
+            main.innerHTML = `
+                <div class="main-header">
+                    <h2>${selectedNpc.name}</h2>
+                    <p style="color: #887868">ID: ${selectedNpc.id} &bull; ${selectedNpc.description}</p>
+                </div>
+
+                <div style="background: #181620; border: 1px solid #332e3a; padding: 8px 12px; border-radius: 4px; margin-bottom: 12px; font-size: 12px; color: #887868">
+                    <strong>Config:</strong> Primary x${primaryMult} | Gold x${goldMult} | Secondary x${secondaryMult}
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px;">
+                    <div class="gate-card gold" onclick="openSettingsModal()">
+                        <div style="font-size: 11px; color: #887868; text-transform: uppercase;">Gold Rate</div>
+                        <div style="font-size: 20px; font-weight: 700;">${goldPct}%</div>
+                        <div style="font-size: 11px; color: #887868">Base 30% * ${goldMult}</div>
+                    </div>
+                    <div class="gate-card items" onclick="openSettingsModal()">
+                        <div style="font-size: 11px; color: #887868; text-transform: uppercase;">Items (T1)</div>
+                        <div style="font-size: 20px; font-weight: 700;">${primaryPct}%</div>
+                        <div style="font-size: 11px; color: #887868">Base 10% * ${primaryMult}</div>
+                    </div>
+                    <div class="gate-card rare" onclick="openSettingsModal()">
+                        <div style="font-size: 11px; color: #887868; text-transform: uppercase;">Rare (T2)</div>
+                        <div style="font-size: 20px; font-weight: 700;">${secondaryPct}%</div>
+                        <div style="font-size: 11px; color: #887868">Base 5% * ${secondaryMult}</div>
+                    </div>
+                </div>
+
+                <div class="tier-section">
+                    <div class="tier-header">
+                        <span class="tier-title">Tier 1 - Common Items</span>
+                        <div style="display: flex; gap: 12px; align-items: center;">
+                            <span style="color: #887868; font-size: 12px;">Weights: ${tier1.reduce((s, d) => s + d.weight, 0)}</span>
+                            <span style="color: #443e4a">|</span>
+                            <span style="color: #887868; font-size: 12px;">${tier1.length} entries</span>
+                        </div>
+                    </div>
+                    <div class="drop-grid">
+                        ${tier1.map(d => `
+                            <div class="drop-card">
+                                <button class="drop-remove" onclick="removeDrop(${d.drop_table_id}, ${d.tier}, ${d.item_id})">×</button>
+                                <div class="drop-name">${d.item_name}</div>
+                                <div class="drop-weight">
+                                    <input type="number" value="${d.weight}" min="1" 
+                                           onchange="updateWeight(${d.drop_table_id}, ${d.tier}, ${d.item_id}, this.value)">
+                                    <span class="drop-percent" title="Absolute Chance">${calcPercent(tier1, d.weight, 1)}%</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                        ${tier1.length === 0 ? '<div class="empty">No items. Add from right panel →</div>' : ''}
+                    </div>
+                </div>
+
+                <div class="tier-section">
+                    <div class="tier-header">
+                        <span class="tier-title">Tier 2 - Parts & Rares</span>
+                        <span style="color: #887868; font-size: 12px;">${tier2.length} items</span>
+                    </div>
+                    <div class="drop-grid">
+                        ${tier2.map(d => `
+                            <div class="drop-card">
+                                <button class="drop-remove" onclick="removeDrop(${d.drop_table_id}, ${d.tier}, ${d.item_id})">×</button>
+                                <div class="drop-name">${d.item_name}</div>
+                                <div class="drop-weight">
+                                    <input type="number" value="${d.weight}" min="1"
+                                           onchange="updateWeight(${d.drop_table_id}, ${d.tier}, ${d.item_id}, this.value)">
+                                    <span class="drop-percent" title="Absolute Chance">${calcPercent(tier2, d.weight, 2)}%</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                        ${tier2.length === 0 ? '<div class="empty">No items. Add from right panel →</div>' : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render item picker
+        function renderItems(filter = '') {
+            const list = document.getElementById('itemList');
+            const filtered = items.filter(i =>
+                i.name.toLowerCase().includes(filter.toLowerCase()) ||
+                i.id.toString().includes(filter)
+            ).slice(0, 100);
+
+            list.innerHTML = filtered.map(item => `
+                <div class="picker-item">
+                    <div>
+                        <div>${item.name}</div>
+                        <div class="id">ID: ${item.id}</div>
+                    </div>
+                    <button class="add-btn" onclick="showAddMenu(event, ${item.id}, '${item.name.replace(/'/g, "\\'").replace(/"/g, "&quot;")}')">Add</button>
+                </div>
+            `).join('');
+        }
+
+        // Set picker tier
+        function setPickerTier(tier) {
+            pickerTier = tier;
+            document.getElementById('tierBtn1').classList.toggle('active', tier === 1);
+            document.getElementById('tierBtn2').classList.toggle('active', tier === 2);
+        }
+
+        // Add item to NPC
+        async function addItem(itemId, itemName) {
+            if (!selectedNpc) return alert('Select an NPC first!');
+
+            const result = await fetch('/api/drops/add', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    drop_table_id: selectedNpc.id,
+                    tier: pickerTier,
+                    item_id: itemId,
+                    weight: 100,
+                    min_count: 1,
+                    max_count: 1
+                })
+            }).then(r => r.json());
+
+            if (result.success) {
+                drops.push({
+                    drop_table_id: selectedNpc.id,
+                    tier: pickerTier,
+                    item_id: itemId,
+                    item_name: itemName,
+                    weight: 100,
+                    min_count: 1,
+                    max_count: 1
+                });
+                renderDrops();
+                loadChangelog();
+                showStatus('Added!');
+            }
+        }
+
+        // Remove drop
+        async function removeDrop(tableId, tier, itemId) {
+            const result = await fetch('/api/drops/remove', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ drop_table_id: tableId, tier, item_id: itemId })
+            }).then(r => r.json());
+
+            if (result.success) {
+                drops = drops.filter(d => !(d.drop_table_id === tableId && d.tier === tier && d.item_id === itemId));
+                renderDrops();
+                loadChangelog();
+                showStatus('Removed!');
+            }
+        }
+
+        // Update weight
+        async function updateWeight(tableId, tier, itemId, weight) {
+            const result = await fetch('/api/drops/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ drop_table_id: tableId, tier, item_id: itemId, weight: parseInt(weight) })
+            }).then(r => r.json());
+
+            if (result.success) {
+                const drop = drops.find(d => d.drop_table_id === tableId && d.tier === tier && d.item_id === itemId);
+                if (drop) drop.weight = parseInt(weight);
+                renderDrops();
+                showStatus('Saved!');
+            }
+        }
+
+        // Show status message
+        function showStatus(msg) {
+            const status = document.getElementById('status');
+            status.textContent = msg;
+            status.classList.add('show');
+            setTimeout(() => status.classList.remove('show'), 2000);
+        }
+
+        // Event listeners
+        document.getElementById('npcSearch').addEventListener('input', e => renderNpcs(e.target.value));
+        document.getElementById('itemSearch').addEventListener('input', e => renderItems(e.target.value));
+
+        // Settings Modal Functions
+        function openSettingsModal() {
+            document.getElementById('primaryDropRate').value = config.settings['primary-drop-rate'] || 1;
+            document.getElementById('secondaryDropRate').value = config.settings['secondary-drop-rate'] || 400;
+            document.getElementById('settingsModal').classList.add('show');
+        }
+
+        function closeSettingsModal(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('settingsModal').classList.remove('show');
+        }
+
+        async function saveSettings() {
+            const primaryRate = parseInt(document.getElementById('primaryDropRate').value);
+            const secondaryRate = parseInt(document.getElementById('secondaryDropRate').value);
+
+            const result = await fetch('/api/settings/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    'primary-drop-rate': primaryRate,
+                    'secondary-drop-rate': secondaryRate
+                })
+            }).then(r => r.json());
+
+            if (result.success) {
+                config.settings['primary-drop-rate'] = primaryRate;
+                config.settings['secondary-drop-rate'] = secondaryRate;
+                closeSettingsModal();
+                renderDrops();
+                loadChangelog(); // Refresh changelog
+                showStatus('Settings saved!');
+            } else {
+                alert('Error: ' + (result.error || 'Unknown error'));
+            }
+        }
+
+        // Changelog Functions
+        async function loadChangelog() {
+            try {
+                const data = await fetch('/api/changelog').then(r => r.json());
+                document.getElementById('changelogContent').textContent = data.content || 'No changes yet...';
+            } catch (e) {
+                console.error('Failed to load changelog:', e);
+            }
+        }
+
+        async function saveChangelog() {
+            const content = document.getElementById('changelogContent').textContent;
+            const result = await fetch('/api/changelog/update', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content })
+            }).then(r => r.json());
+
+            if (result.success) {
+                showStatus('Changelog saved!');
+                closeChangelogModal();
+            }
+        }
+
+        function openChangelogModal() {
+            loadChangelog();
+            document.getElementById('changelogModal').classList.add('show');
+        }
+
+        function closeChangelogModal(event) {
+            if (event && event.target !== event.currentTarget) return;
+            document.getElementById('changelogModal').classList.remove('show');
+        }
+
+        // Item Drop Search - find which NPCs drop an item
+        function searchItemDrops(query) {
+            if (!query.trim()) {
+                renderNpcs('');
+                return;
+            }
+
+            const lowerQuery = query.toLowerCase();
+
+            // Find matching item IDs
+            const matchingItems = items.filter(i =>
+                i.name.toLowerCase().includes(lowerQuery) ||
+                i.id.toString() === query
+            );
+
+            if (matchingItems.length === 0) {
+                renderNpcs(''); // No matches, show all
+                return;
+            }
+
+            const matchingItemIds = new Set(matchingItems.map(i => i.id));
+
+            // Find NPCs that drop any of these items
+            const npcIdsWithItem = new Set();
+            drops.forEach(d => {
+                if (matchingItemIds.has(d.item_id)) {
+                    npcIdsWithItem.add(d.drop_table_id);
+                }
+            });
+
+            // Filter and render NPCs
+            const list = document.getElementById('npcList');
+            const filtered = npcs.filter(n => npcIdsWithItem.has(n.id));
+
+            if (filtered.length === 0) {
+                list.innerHTML = '<div class="empty" style="padding: 20px; text-align: center; color: #686058;">No NPCs drop this item</div>';
+                return;
+            }
+
+            list.innerHTML = filtered.map(npc => `
+                <div class="npc-item ${selectedNpc?.id === npc.id ? 'active' : ''}" 
+                     onclick="selectNpc(${npc.id})">
+                    <div class="name">${npc.name}</div>
+                    <div class="id">ID: ${npc.id}</div>
+                </div>
+            `).join('');
+        }
+
+        // Init
+        loadData();
+        loadChangelog();
+
+        // Item drop search listener
+        document.getElementById('itemDropSearch').addEventListener('input', e => searchItemDrops(e.target.value));
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,50 @@
+{
+    "audio": {
+        "ambientEnabled": true,
+        "ambientVolume": 20,
+        "masterEnabled": true,
+        "masterVolume": 21,
+        "musicEnabled": false,
+        "musicVolume": 15,
+        "soundEnabled": false,
+        "soundVolume": 22,
+        "uiEnabled": false,
+        "uiVolume": 14
+    },
+    "display": {
+        "backgroundFpsThrottle": false,
+        "borderless": false,
+        "captureMouse": true,
+        "detailLevel": 2,
+        "dialogTransparency": false,
+        "fpsLimit": 0,
+        "fullscreen": true,
+        "fullscreenStretch": false,
+        "hoverHealthBar": true,
+        "patchingGrid": false,
+        "reducedMotion": true,
+        "runningMode": true,
+        "showFps": false,
+        "showLatency": false,
+        "tileGrid": true,
+        "tileGridColor": 0,
+        "tileGridTrans": true,
+        "toggleToChat": true,
+        "vsync": false,
+        "zoomMap": false
+    },
+    "shortcuts": {
+        "magic": 26,
+        "slots": [
+            -1,
+            -1,
+            6,
+            18,
+            -1
+        ]
+    },
+    "window": {
+        "height": 960,
+        "width": 1280
+    }
+}

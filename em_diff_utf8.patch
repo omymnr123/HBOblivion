@@ -1,0 +1,520 @@
+﻿diff --git a/Sources/Server/EntityManager.cpp b/Sources/Server/EntityManager.cpp
+index a9121b6..634d2f7 100644
+--- a/Sources/Server/EntityManager.cpp
++++ b/Sources/Server/EntityManager.cpp
+@@ -107,6 +107,14 @@ void CEntityManager::process_spawns()
+     if (m_game->m_on_exit_process)
+         return;
+ 
++    static uint32_t s_last_mana_node_time = 0;
++    uint32_t current_time = GameClock::GetTimeMS();
++    if (s_last_mana_node_time == 0) s_last_mana_node_time = current_time;
++    if (current_time - s_last_mana_node_time > 1000 * 60 * 30) {
++        s_last_mana_node_time = current_time;
++        spawn_mana_node_event();
++    }
++
+     process_random_spawns(0);
+ 
+     // Loop through all maps and process their spot spawn generators
+@@ -158,7 +166,6 @@ int CEntityManager::create_entity(
+ 
+             // initialize NPC attributes from config
+             if (init_entity_attributes(m_npc_list[i], npc_config_id, sClass, sa) == false) {
+-                hb::logger::log("Invalid NPC creation request (config_id={}), ignored", npc_config_id);
+                 delete m_npc_list[i];
+                 m_npc_list[i] = nullptr;
+                 return -1;
+@@ -319,6 +326,56 @@ int CEntityManager::create_entity(
+             // Add to active entity list for efficient iteration (Performance!)
+             add_to_active_list(i);
+ 
++            if (npc_config_id >= 150 && npc_config_id <= 152) {
++                // Find an elite for this map
++                int elite_npc_id = 0;
++                std::vector<int> valid_spots;
++                for(int s = 0; s < hb::server::map::MaxSpotMobGenerator; s++) {
++                    if (m_map_list[map_index]->m_spot_mob_generator[s].npc_config_id > 0) {
++                        valid_spots.push_back(s);
++                    }
++                }
++                if (!valid_spots.empty()) {
++                    int spot_idx = valid_spots[rand() % valid_spots.size()];
++                    elite_npc_id = m_map_list[map_index]->m_spot_mob_generator[spot_idx].npc_config_id;
++                }
++                
++                if (elite_npc_id > 0) {
++                    for(int e = 0; e < 3; e++) {
++                        char gname[20];
++                        sprintf(gname, "_MNGRD%d", rand() % 9999);
++                        int dummy_offset_x = 0, dummy_offset_y = 0;
++                        int guard_x = sX + (rand() % 7) - 3;
++                        int guard_y = sY + (rand() % 7) - 3;
++                        int guard_h = create_entity(
++                            elite_npc_id, gname, m_map_list[map_index]->m_name,
++                            0, 0, MoveType::RandomArea,
++                            &dummy_offset_x, &dummy_offset_y,
++                            nullptr, nullptr,
++                            0, 0, false, false,
++                            false, false, true
++                        );
++                        if (guard_h > 0) {
++                            CNpc* guard = m_npc_list[guard_h];
++                            if (guard) {
++                                guard->m_x = guard_x;
++                                guard->m_y = guard_y;
++                                guard->m_status.hero = true; // IMPORTANT: flag it as Elite/Hero!
++                                guard->m_max_hp *= 4;
++                                guard->m_hp = guard->m_max_hp;
++                                guard->m_hit_ratio = std::min(guard->m_hit_ratio * 4, 99);
++                                guard->m_defense_ratio = std::min(guard->m_defense_ratio * 4, 99);
++                                guard->m_min_damage *= 4;
++                                guard->m_max_damage *= 4;
++                                guard->m_follow_owner_index = i;
++                                guard->m_follow_owner_type = hb::shared::owner_class::Npc;
++                                m_map_list[map_index]->set_owner(guard_h, 2, guard_x, guard_y);
++                            }
++                        }
++                    }
++                }
++            }
++
+             m_game->send_event_to_near_client_type_a(i, hb::shared::owner_class::Npc, MsgId::EventLog, MsgType::Confirm, 0, 0, 0);
+             return i; // Return entity handle (SUCCESS)
+         }
+@@ -2830,6 +2887,201 @@ void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char a
+     uint32_t primaryChance = ApplyDropMultiplier(BASE_PRIMARY_DROP_CHANCE, m_game->m_primary_drop_rate);
+     uint32_t goldChance = ApplyDropMultiplier(BASE_GOLD_DROP_CHANCE, m_game->m_gold_drop_rate);
+ 
++    float cazador_bonus = 1.0f;
++    if (attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[attacker_h] != nullptr) {
++
++                    // 1. Spawneamos a los 3 Elites de inmediato en el centro
++                    int baseX = static_cast<int>(m_npc_list[npc_h]->m_x);
++                    int baseY = static_cast<int>(m_npc_list[npc_h]->m_y);
++                    
++                    if (spot.rcRect.width > 0 && spot.rcRect.height > 0) {
++                        baseX = spot.rcRect.x + (spot.rcRect.width / 2);
++                        baseY = spot.rcRect.y + (spot.rcRect.height / 2);
++                    }
++
++                    char waypoint[11] = {0};
++                    char realMoveType = MoveType::Random; 
++                    hb::shared::geometry::GameRectangle* pArea = nullptr;
++
++                    if (spot.type == 1) { 
++                        realMoveType = MoveType::RandomArea;
++                        pArea = &spot.rcRect;
++                    } else if (spot.type == 2) { 
++                        realMoveType = MoveType::RandomWaypoint;
++                        for (int k = 0; k < 10; k++) waypoint[k] = spot.waypoints[k];
++                    }
++
++                    char uniqueName[21];
++                    for (int e = 0; e < 3; e++) {
++                        std::snprintf(uniqueName, sizeof(uniqueName), "Elite_%d", e);
++                        
++                        int targetX = baseX;
++                        if (e == 1) targetX -= 2;
++                        else if (e == 2) targetX += 2;
++                        int targetY = baseY;
++
++                        int eliteHandle = -1;
++                        int attempts = 0;
++                        int outX = 0, outY = 0;
++
++                        while (eliteHandle <= 0 && attempts < 10) {
++                            hb::shared::geometry::GameRectangle exactArea;
++                            exactArea.x = (targetX < 0) ? 0 : targetX;
++                            exactArea.y = (targetY < 0) ? 0 : targetY;
++                            exactArea.width = 2;
++                            exactArea.height = 2;
++
++                            eliteHandle = create_entity(
++                                spot.npc_config_id, uniqueName, m_map_list[map_idx]->m_name,
++                                0, 0, MoveType::RandomArea, &outX, &outY, waypoint, 
++                                &exactArea, spot_idx, -1, false, false, true, true, 0
++                            );
++
++                            if (eliteHandle <= 0) {
++                                targetX += 1;
++                                targetY += 1;
++                                attempts++;
++                            }
++                        }
++
++                        if (eliteHandle > 0 && m_npc_list[eliteHandle] != nullptr) {
++                            CNpc* eliteMob = m_npc_list[eliteHandle];
++                            
++                            eliteMob->m_move_type = realMoveType;
++                            if (pArea != nullptr) {
++                                eliteMob->m_random_area = *pArea;
++                            }
++
++                            eliteMob->m_hp_min *= 4;
++                            eliteMob->m_hp_max *= 4;
++                            eliteMob->m_hp = eliteMob->m_hp_max;
++                            eliteMob->m_max_hp = eliteMob->m_hp_max;
++                            eliteMob->m_min_damage *= 4;
++                            eliteMob->m_max_damage *= 4;
++
++                            eliteMob->m_status.hero = true; 
++                            eliteMob->m_summoned_time = GameClock::GetTimeMS();
++
++                            eliteMob->m_behavior_turn_count = 0; 
++                            calc_next_waypoint_destination(eliteHandle); 
++                        }
++                    }
++
++                    // 2. Limpiar y eliminar instant├íneamente al resto de NPCs normales de este spot
++                    for (int i = 1; i < hb::server::config::MaxNpcs; i++) {
++                        if (m_npc_list[i] != nullptr && 
++                            m_npc_list[i]->m_map_index == map_idx && 
++                            m_npc_list[i]->m_spot_mob_index == spot_idx && 
++                            i != npc_h && 
++                            !m_npc_list[i]->m_status.hero) {
++                            
++                            delete_npc_internal(i);
++                        }
++                    }
++                }
++            }
++        }
++    }
++    // =========================================================================
++
++    const DropTable* table = m_game->m_item_manager->get_drop_table(m_npc_list[npc_h]->m_drop_table_id);
++
++    // =========================================================================
++    // EXTRA LOOT SYSTEM
++    // =========================================================================
++    // Probabilidad de que el monstruo de Extra Loot. 
++    // Funciona de 1 a 10000 (Ejemplo: 10000 = 100%, 5000 = 50%, 100 = 1%).
++    // Lo dejamos al 10000 (100%) para que te salga todo el rato y puedas probarlo.
++    // Cuando vayas a abrir el servidor, cambialo por algo como 50 (0.5%) o 100 (1%).
++    int extra_loot_chance = 75; 
++
++    if (table != nullptr && attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[attacker_h] != nullptr) {
++        if ((int)m_game->dice(1, 10000) <= extra_loot_chance) {
++            std::vector<int> eligible_members;
++            int party_id = m_game->m_client_list[attacker_h]->m_party_id;
++            
++        // Find eligible members (party members on same map, or just the attacker)
++        if (party_id != 0 && m_game->m_party_info[party_id].total_members > 0) {
++            for (int i = 0; i < m_game->m_party_info[party_id].total_members; i++) {
++                int iH = m_game->m_party_info[party_id].index[i];
++                if (m_game->m_client_list[iH] != nullptr && m_game->m_client_list[iH]->m_hp > 0) {
++                    if (m_game->m_client_list[iH]->m_map_index == m_game->m_client_list[attacker_h]->m_map_index) {
++                        eligible_members.push_back(iH);
++                    }
++                }
++            }
++        } else {
++            eligible_members.push_back(attacker_h);
++        }
++
++        // Calculate max drops based on party size (1 per 10 members)
++        int max_drops = static_cast<int>(eligible_members.size() / 10);
++        if (max_drops < 1) max_drops = 1;
++
++        // Collect valid items from the drop table
++        std::vector<int> valid_items;
++        for (int tier = 1; tier <= 2; tier++) {
++            for (const auto& entry : table->tierEntries[tier]) {
++                // Check for duplicates
++                bool exists = false;
++                for (int vid : valid_items) {
++                    if (vid == entry.item_id) { exists = true; break; }
++                }
++                if (exists) continue;
++
++                CItem temp_config;
++                if (m_game->m_item_manager->init_item_attr(&temp_config, entry.item_id)) {
++                    if (temp_config.m_item_sub_type == hb::shared::item::item_sub_type::weapon ||
++                        temp_config.m_item_sub_type == hb::shared::item::item_sub_type::armor ||
++                        temp_config.m_item_sub_type == hb::shared::item::item_sub_type::accessory ||
++                        temp_config.m_id_num == 650 || // ZemstoneOfSacrifice
++                        temp_config.m_id_num == 656 || // XelimaStone
++                        temp_config.m_id_num == 657)   // MerienStone
++                    {
++                        valid_items.push_back(entry.item_id);
++                    }
++                }
++            }
++        }
++
++        if (!valid_items.empty()) {
++            // Shuffle eligible members to distribute loot randomly
++            for (size_t i = 0; i < eligible_members.size(); ++i) {
++                size_t j = static_cast<size_t>(m_game->dice(1, static_cast<int>(eligible_members.size()))) - 1;
++                std::swap(eligible_members[i], eligible_members[j]);
++            }
++            
++            // Limit max drops to available unique items and available members
++            if (max_drops > static_cast<int>(eligible_members.size())) max_drops = static_cast<int>(eligible_members.size());
++            if (max_drops > static_cast<int>(valid_items.size())) max_drops = static_cast<int>(valid_items.size());
++
++            // Shuffle valid items
++            for (size_t i = 0; i < valid_items.size(); ++i) {
++                size_t j = static_cast<size_t>(m_game->dice(1, static_cast<int>(valid_items.size()))) - 1;
++                std::swap(valid_items[i], valid_items[j]);
++            }
++
++            for (int i = 0; i < max_drops; i++) {
++                int winner_h = eligible_members[i];
++                int chosen_item_id = valid_items[i];
++                
++                CItem* extra_loot_item = new CItem;
++                if (m_game->m_item_manager->init_item_attr(extra_loot_item, chosen_item_id)) {
++                    m_game->m_item_manager->generate_item_attributes(extra_loot_item);
++                    m_game->add_extra_loot(winner_h, extra_loot_item);
++                }
++                delete extra_loot_item;
++            }
++        }
++    }
++        }
++    // =========================================================================
++
++    // Apply drop rate multipliers to base chances
++    // At 1.0: normal, at 1.5: 150% more likely, at 2.0: 200%, etc.
++    uint32_t primaryChance = ApplyDropMultiplier(BASE_PRIMARY_DROP_CHANCE, m_game->m_primary_drop_rate);
++    uint32_t goldChance = ApplyDropMultiplier(BASE_GOLD_DROP_CHANCE, m_game->m_gold_drop_rate);
++
+     float cazador_bonus = 1.0f;
+     if (attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[attacker_h] != nullptr) {
+         int cazador_level = m_game->m_guild_manager->get_player_guild_skill(attacker_h, static_cast<int>(GuildSkillId::Cazador));
+@@ -2845,6 +3097,12 @@ void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char a
+         primaryChance = static_cast<uint32_t>(static_cast<float>(primaryChance) * 4.0f);
+         goldChance = static_cast<uint32_t>(static_cast<float>(goldChance) * 4.0f);
+     }
++    
++    // === Boost para Nodos de Man├í ===
++    if (m_npc_list[npc_h]->m_type == 42) {
++        primaryChance = 10000;
++        goldChance = 10000;
++    }
+     // =====================================
+ 
+     bool droppedGold = false;
+@@ -2872,7 +3130,8 @@ void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char a
+     }
+ 
+     // Primary item drop (from drop table tier 1) - uses same primary chance
+-    if (!droppedGold && table != nullptr) {
++    // Nodos de Man├í (type 42) siempre dropean item y oro.
++    if ((!droppedGold || m_npc_list[npc_h]->m_type == 42) && table != nullptr) {
+         if (m_game->dice(1, 10000) <= primaryChance) {
+             int min_count = 1;
+             int max_count = 1;
+@@ -2906,6 +3165,11 @@ void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char a
+         if (m_npc_list[npc_h]->m_status.hero) {
+             effectiveSecondary *= 5.0f;
+         }
++        
++        // === Secondary Boost para Nodos de Man├í ===
++        if (m_npc_list[npc_h]->m_type == 42) {
++            effectiveSecondary = 10000.0;
++        }
+         // ================================================
+ 
+         if (effectiveSecondary > 10000.0) effectiveSecondary = 10000.0;
+@@ -2980,15 +3244,79 @@ bool CEntityManager::spawn_npc_drop_item(int npc_h, int item_id, int min_count,
+ 		delete item;
+ 		return false;
+ 	}
++
++	// === Nodos de Man├í: Chunk gold si es mayor a 10000 ===
++	if (item_id == 90 && m_npc_list[npc_h]->m_type == 42 && count > 10000) {
++		int remaining = count;
++		int map_idx = m_npc_list[npc_h]->m_map_index;
++		
++		while (remaining > 0) {
++			int chunk = 3000 + m_game->dice(1, 4000); // 3k to 7k piles
++			if (chunk > remaining) chunk = remaining;
++			
++			CItem* pile = new CItem;
++			if (m_game->m_item_manager->init_item_attr(pile, 90) == false) {
++				delete pile;
++				continue;
++			}
++			pile->m_instance.count = chunk;
++			m_game->m_item_manager->generate_item_attributes(pile);
++			pile->set_touch_effect_type(TouchEffectType::ID);
++			pile->m_instance.touch_effect_value1 = static_cast<short>(m_game->dice(1, 100000));
++			pile->m_instance.touch_effect_value2 = static_cast<short>(m_game->dice(1, 100000));
++			pile->m_instance.touch_effect_value3 = (short)GameClock::GetTimeMS();
++			
++			int drop_x = m_npc_list[npc_h]->m_x;
++			int drop_y = m_npc_list[npc_h]->m_y;
++			
++			for(int t = 0; t < 20; t++) {
++				int rX = drop_x + (m_game->dice(1, 9) - 5); // -4 to +4
++				int rY = drop_y + (m_game->dice(1, 9) - 5);
++				if (m_map_list[map_idx]->get_moveable(rX, rY)) {
++					drop_x = rX;
++					drop_y = rY;
++					break;
++				}
++			}
++			
++			m_map_list[map_idx]->set_item(drop_x, drop_y, pile);
++			m_game->send_ground_item_event(CommonType::ItemDrop, map_idx, drop_x, drop_y, pile);
++			m_game->m_item_manager->item_log(ItemLogAction::NewGenDrop, 0, m_npc_list[npc_h]->m_npc_name, pile);
++			
++			remaining -= chunk;
++		}
++		delete item;
++		return true;
++	}
++	// =======================================================
++
+ 	item->m_instance.count = count;
+ 	m_game->m_item_manager->generate_item_attributes(item);
+ 	item->set_touch_effect_type(TouchEffectType::ID);
+ 	item->m_instance.touch_effect_value1 = static_cast<short>(m_game->dice(1, 100000));
+ 	item->m_instance.touch_effect_value2 = static_cast<short>(m_game->dice(1, 100000));
+ 	item->m_instance.touch_effect_value3 = (short)GameClock::GetTimeMS();
+-	m_map_list[m_npc_list[npc_h]->m_map_index]->set_item(m_npc_list[npc_h]->m_x, m_npc_list[npc_h]->m_y, item);
+-	m_game->send_ground_item_event(CommonType::ItemDrop, m_npc_list[npc_h]->m_map_index,
+-		m_npc_list[npc_h]->m_x, m_npc_list[npc_h]->m_y, item);
++
++	int drop_x = m_npc_list[npc_h]->m_x;
++	int drop_y = m_npc_list[npc_h]->m_y;
++	int map_idx = m_npc_list[npc_h]->m_map_index;
++
++	// === Nodos de Man├í: Scatter normal items ===
++	if (m_npc_list[npc_h]->m_type == 42) {
++		for(int t = 0; t < 20; t++) {
++			int rX = drop_x + (m_game->dice(1, 7) - 4); // -3 to +3
++			int rY = drop_y + (m_game->dice(1, 7) - 4);
++			if (m_map_list[map_idx]->get_moveable(rX, rY)) {
++				drop_x = rX;
++				drop_y = rY;
++				break;
++			}
++		}
++	}
++	// ===========================================
++
++	m_map_list[map_idx]->set_item(drop_x, drop_y, item);
++	m_game->send_ground_item_event(CommonType::ItemDrop, map_idx, drop_x, drop_y, item);
+ 	m_game->m_item_manager->item_log(ItemLogAction::NewGenDrop, 0, m_npc_list[npc_h]->m_npc_name, item);
+ 	return true;
+ }
+@@ -3086,6 +3414,14 @@ void CEntityManager::generate_entity_loot(int entity_handle, short attacker_h, c
+ // Active Entity List Management (Performance Optimization)
+ // ========================================================================
+ 
++CNpc* CEntityManager::get_entity(int entity_handle) const
++{
++    if (entity_handle < 0 || entity_handle >= hb::server::config::MaxNpcs)
++        return nullptr;
++        
++    return m_npc_list[entity_handle];
++}
++
+ void CEntityManager::add_to_active_list(int entity_handle)
+ {
+     // Add entity to active list for fast iteration
+@@ -4057,3 +4393,100 @@ uint32_t CEntityManager::generate_entity_guid()
+ 
+     return guid;
+ }
++
++// ========================================================================
++// Ancient Mana Nodes Event
++// ========================================================================
++
++void CEntityManager::spawn_mana_node_event()
++{
++    // 1. Select a random combat map (not cities like aresden or elvine)
++    std::vector<int> valid_maps;
++    for (int i = 0; i < m_max_maps; i++) {
++        if (m_map_list[i] != nullptr) {
++            std::string map_name = m_map_list[i]->m_name;
++            // Basic blacklist of safe/town maps
++            if (map_name.find("aresden") != std::string::npos ||
++                map_name.find("elvine") != std::string::npos ||
++                map_name.find("arenal") != std::string::npos ||
++                map_name.find("jail") != std::string::npos ||
++                map_name.find("resurr") != std::string::npos ||
++                map_name.find("fight") != std::string::npos ||
++                map_name == "gldhall_1" || map_name == "gldhall_2" ||
++                map_name == "toh1" || map_name == "toh2" || map_name == "toh3") {
++                continue;
++            }
++            
++            // Collect valid maps that have spots configured
++            bool has_mobs = false;
++            for(int s = 0; s < hb::server::map::MaxSpotMobGenerator; s++) {
++                if (m_map_list[i]->m_spot_mob_generator[s].is_defined) {
++                    has_mobs = true;
++                    break;
++                }
++            }
++            if (has_mobs) {
++                valid_maps.push_back(i);
++            }
++        }
++    }
++
++    if (valid_maps.empty()) return;
++
++    int map_idx = valid_maps[rand() % valid_maps.size()];
++    CMap* map = m_map_list[map_idx];
++
++    // 2. Pick a random location within the map (avoid edges)
++    int spawn_x = 15 + (rand() % (map->m_size_x - 30));
++    int spawn_y = 15 + (rand() % (map->m_size_y - 30));
++
++    // Try to find a walkable tile nearby
++    bool found_tile = false;
++    for(int try_count = 0; try_count < 10; try_count++) {
++        if (map->get_moveable(spawn_x, spawn_y)) {
++            found_tile = true;
++            break;
++        }
++        spawn_x += (rand() % 5) - 2;
++        spawn_y += (rand() % 5) - 2;
++    }
++
++    if (!found_tile) return; // Unlucky
++
++    // 3. Instantiate the Mana Node
++    // Tiers 1, 2, 3 -> NPC IDs 150, 151, 152
++    int tier = (rand() % 100);
++    int node_npc_id = 150; // Tier 1
++    if (tier > 85) node_npc_id = 152; // 15% Tier 3
++    else if (tier > 50) node_npc_id = 151; // 35% Tier 2
++    
++    char name_buf[20];
++    sprintf(name_buf, "_MANANODE%d", rand() % 9999);
++    
++    int dummy_offset_x = 0, dummy_offset_y = 0;
++    
++    int node_h = create_entity(
++        node_npc_id, name_buf, map->m_name,
++        1 /* Class: non-moving */, 0 /* sa */, MoveType::Guard /* MoveType */,
++        &dummy_offset_x, &dummy_offset_y,
++        nullptr /* waypoints */, nullptr /* area */,
++        0, 0 /* side */,
++        false /* hide */, false /* summoned */,
++        false /* berserk */, false /* master */,
++        true /* bypass limit */
++    );
++
++    if (node_h > 0) {
++        CNpc* node = get_entity(node_h);
++        if (node) {
++            node->m_x = spawn_x;
++            node->m_y = spawn_y;
++            node->m_type = 42; // ManaStone
++            map->set_owner(node_h, 2 /* NPC */, spawn_x, spawn_y);
++
++            char msg[128];
++            sprintf(msg, "--> A new Ancient Mana Node has appeared in %s! <--", map->m_name);
++            hb::logger::log("{}", msg);
++        }
++    }
++}

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Solution>
+	<Configurations>
+		<BuildType Name="Debug"/>
+		<BuildType Name="Release"/>
+		<BuildType Name="MinSizeRel"/>
+		<BuildType Name="RelWithDebInfo"/>
+		<Platform Name="x64"/>
+	</Configurations>
+	<Project Path="AutoUpdater.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="18455cde-2d3b-3148-969d-9c2c040c3c2d">
+		<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+	</Project>
+	<Project Path="CControls_build/CControls.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="4d8a2311-905e-3efa-8e30-fb665509b268">
+		<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+	</Project>
+	<Project Path="HelbreathClient.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="7b9ab095-e6af-3ffd-8bde-8dae549247bc">
+		<BuildDependency Project="AutoUpdater.vcxproj"/>
+		<BuildDependency Project="CControls_build/CControls.vcxproj"/>
+		<BuildDependency Project="SFMLEngine.vcxproj"/>
+		<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		<BuildDependency Project="_deps/freetype-build/freetype.vcxproj"/>
+		<BuildDependency Project="_deps/sfml-build/src/SFML/Graphics/sfml-graphics.vcxproj"/>
+		<BuildDependency Project="_deps/sfml-build/src/SFML/System/sfml-system.vcxproj"/>
+		<BuildDependency Project="_deps/sfml-build/src/SFML/Window/sfml-window.vcxproj"/>
+	</Project>
+	<Project Path="SFMLEngine.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="a3ff12ad-d1ce-3a72-910e-4a683f1909e7">
+		<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		<BuildDependency Project="_deps/freetype-build/freetype.vcxproj"/>
+		<BuildDependency Project="_deps/sfml-build/src/SFML/Graphics/sfml-graphics.vcxproj"/>
+		<BuildDependency Project="_deps/sfml-build/src/SFML/System/sfml-system.vcxproj"/>
+		<BuildDependency Project="_deps/sfml-build/src/SFML/Window/sfml-window.vcxproj"/>
+	</Project>
+	<Folder Name="/CMake/">
+		<Project Path="ALL_BUILD.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="b8cf52ac-233d-3328-8a7c-2c3952e003b4" DefaultStartup="true">
+			<BuildDependency Project="AutoUpdater.vcxproj"/>
+			<BuildDependency Project="CControls_build/CControls.vcxproj"/>
+			<BuildDependency Project="HelbreathClient.vcxproj"/>
+			<BuildDependency Project="SFMLEngine.vcxproj"/>
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="_deps/freetype-build/freetype.vcxproj"/>
+			<BuildDependency Project="_deps/sfml-build/src/SFML/Graphics/sfml-graphics.vcxproj"/>
+			<BuildDependency Project="_deps/sfml-build/src/SFML/Main/sfml-main.vcxproj"/>
+			<BuildDependency Project="_deps/sfml-build/src/SFML/System/sfml-system.vcxproj"/>
+			<BuildDependency Project="_deps/sfml-build/src/SFML/Window/sfml-window.vcxproj"/>
+		</Project>
+		<Project Path="INSTALL.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="23b36ea5-be3b-3370-94ef-ea90c68022ad">
+			<BuildDependency Project="ALL_BUILD.vcxproj"/>
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<Build Solution="Debug|*" Project="false"/>
+			<Build Solution="Release|*" Project="false"/>
+			<Build Solution="MinSizeRel|*" Project="false"/>
+			<Build Solution="RelWithDebInfo|*" Project="false"/>
+		</Project>
+		<Project Path="PACKAGE.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="239f671f-dcb5-3dd4-8788-03cdb41b482a">
+			<BuildDependency Project="ALL_BUILD.vcxproj"/>
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<Build Solution="Debug|*" Project="false"/>
+			<Build Solution="Release|*" Project="false"/>
+			<Build Solution="MinSizeRel|*" Project="false"/>
+			<Build Solution="RelWithDebInfo|*" Project="false"/>
+		</Project>
+		<Project Path="ZERO_CHECK.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="a8805c12-625c-336b-8820-8379c3072a24"/>
+	</Folder>
+	<Folder Name="/Dependencies/">
+		<Project Path="_deps/freetype-build/freetype.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="b086c5a3-770a-3873-af66-cd03cdf34dcd">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		</Project>
+	</Folder>
+	<Folder Name="/SFML/">
+		<Project Path="_deps/sfml-build/src/SFML/Graphics/sfml-graphics.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="6cda1012-94d8-3a8d-bcc9-973a4a9e4385">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="_deps/freetype-build/freetype.vcxproj"/>
+			<BuildDependency Project="_deps/sfml-build/src/SFML/System/sfml-system.vcxproj"/>
+			<BuildDependency Project="_deps/sfml-build/src/SFML/Window/sfml-window.vcxproj"/>
+		</Project>
+		<Project Path="_deps/sfml-build/src/SFML/Main/sfml-main.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="57a87e36-7768-3f92-b075-77b93f11d62f">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		</Project>
+		<Project Path="_deps/sfml-build/src/SFML/System/sfml-system.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="0bcebdbb-b1ba-3ee6-a1e5-836bf21e8b9b">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+		</Project>
+		<Project Path="_deps/sfml-build/src/SFML/Window/sfml-window.vcxproj" Type="8bc9ceb8-8b4a-11d0-8d11-00a0c91bc942" Id="db55bc61-5f2b-3baf-a5fc-d877a101dd9c">
+			<BuildDependency Project="ZERO_CHECK.vcxproj"/>
+			<BuildDependency Project="_deps/sfml-build/src/SFML/System/sfml-system.vcxproj"/>
+		</Project>
+	</Folder>
+</Solution>

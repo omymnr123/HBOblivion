@@ -1,0 +1,6 @@
+{
+    "directory": "D:\\HB Server\\Helbreath-Heldenian-Project-Development\\Binaries\\Game",
+    "host": "0.0.0.0",
+    "port": 8081,
+    "rate_limit_mbps": 0.0
+}

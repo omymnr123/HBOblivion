@@ -1,0 +1,228 @@
+﻿
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+367:  C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX86\x64\CL.exe /c /ZI 
+/nologo /W3 /WX- /diagnostics:column /sdl /MP /Od /D WIN32 /D _DEBUG /D _WINDOWS /D _VC80_UPGRADE=0x0600 /D 
+SFML_STATIC /D SFML_ENGINE /GF /Gm- /EHsc /MDd /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++20 
+/Fo"Debug_x64\\" /Fd"Debug_x64\vc143.pdb" /external:W3 /Gd /TP /FC /errorReport:queue ConfigManager.cpp 
+DialogBoxManager.cpp IDialogBox.cpp DialogBox_WarningMsg.cpp DialogBox_Resurrect.cpp DialogBox_Noticement.cpp 
+DialogBox_RepairAll.cpp DialogBox_ConfirmExchange.cpp DialogBox_Help.cpp DialogBox_ItemDrop.cpp 
+DialogBox_LevelUpSetting.cpp DialogBox_Character.cpp DialogBox_Inventory.cpp DialogBox_Skill.cpp 
+DialogBox_Enchanting.cpp DialogBox_Magic.cpp DialogBox_HudPanel.cpp DialogBox_StatusOverlay.cpp DialogBox_GuideMap.cpp 
+DialogBox_Fishing.cpp DialogBox_CrusadeJob.cpp DialogBox_ItemDropAmount.cpp DialogBox_Map.cpp 
+DialogBox_NpcActionQuery.cpp DialogBox_SysMenu.cpp DialogBox_Text.cpp DialogBox_MagicShop.cpp DialogBox_MailBox.cpp 
+DialogBox_NpcTalk.cpp DialogBox_ChatHistory.cpp DialogBox_CityHallMenu.cpp DialogBox_Shop.cpp 
+DialogBox_ItemUpgrade.cpp DialogBox_SellList.cpp DialogBox_GuildMenu.cpp DialogBox_Guild.cpp DialogBox_GuildInvite.cpp 
+DialogBox_GuildDisbandConfirm.cpp DialogBox_GuildOperation.cpp DialogBox_Bank.cpp DialogBox_Exchange.cpp 
+DialogBox_Party.cpp DialogBox_Quest.cpp DialogBox_Commander.cpp DialogBox_Constructor.cpp DialogBox_Soldier.cpp 
+DialogBox_Slates.cpp DialogBox_ChangeStatsMajestic.cpp DialogBox_ItemCreator.cpp DialogBox_CommandHallMenu.cpp 
+DialogBox_SellOrRepair.cpp DialogBox_Manufacture.cpp DialogBox_Prestige.cpp Screen_OnGame.Hotkeys.cpp 
+Screen_OnGame.DrawObjects.cpp DialogBox_ExtraLoot.cpp RenderHelpers.cpp PlayerRenderer.cpp NpcRenderer.cpp Game.cpp 
+GameModeManager.cpp IGameScreen.cpp Screen_OnGame.cpp Screen_OnGame.Network.cpp Screen_MainMenu.cpp Screen_Login.cpp 
+Screen_SelectCharacter.cpp Screen_CreateNewCharacter.cpp Screen_CreateAccount.cpp Screen_Quit.cpp Screen_Loading.cpp 
+Screen_Splash.cpp Screen_Test.cpp Screen_TestPrimitives.cpp Overlay_Connecting.cpp Overlay_WaitingResponse.cpp 
+Overlay_LogResMsg.cpp Overlay_QueryForceLogin.cpp Overlay_QueryDeleteCharacter.cpp Overlay_ChangePassword.cpp 
+Overlay_VersionNotMatch.cpp Overlay_ConnectionLost.cpp Overlay_Msg.cpp Overlay_WaitInitData.cpp EffectManager.cpp 
+Effect_Add.cpp Effect_Update.cpp Effect_Draw.cpp Effect_Lights.cpp NetworkMessageManager.cpp NetworkMessages_Admin.cpp 
+NetworkMessages_Agriculture.cpp NetworkMessages_Angels.cpp NetworkMessages_Apocalypse.cpp NetworkMessages_Bank.cpp 
+NetworkMessages_Combat.cpp NetworkMessages_Crafting.cpp NetworkMessages_Crusade.cpp NetworkMessages_Events.cpp 
+NetworkMessages_Exchange.cpp NetworkMessages_Fish.cpp FishingManager.cpp CraftingManager.cpp QuestManager.cpp 
+NetworkMessages_Heldenian.cpp NetworkMessages_Items.cpp NetworkMessages_Map.cpp NetworkMessages_Party.cpp 
+NetworkMessages_Player.cpp NetworkMessages_Quest.cpp NetworkMessages_Skills.cpp NetworkMessages_Slates.cpp 
+NetworkMessages_Stats.cpp NetworkMessages_System.cpp MapData.cpp Wmain.cpp ChatCommandManager.cpp CombatSystem.cpp 
+InventoryManager.cpp MagicCastingSystem.cpp BuildItemManager.cpp ShopManager.cpp TeleportManager.cpp 
+EventListManager.cpp WeatherManager.cpp FloatingTextManager.cpp PlayerController.cpp DialogBox_GameMaster.cpp 
+DialogBox_NpcCreator.cpp
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+393:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(48,98): error C2039: 
+"UIGrey": no es un miembro de "GameColors" [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+397:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(48,98): error C2065: 
+'UIGrey': identificador no declarado [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+398:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(57,93): error C2039: 
+"UIGrey": no es un miembro de "GameColors" [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+402:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(57,93): error C2065: 
+'UIGrey': identificador no declarado [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+403:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(63,89): error C2039: 
+"UIGrey": no es un miembro de "GameColors" [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+407:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(63,89): error C2065: 
+'UIGrey': identificador no declarado [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+408:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(69,50): error C2039: 
+"player": no es un miembro de "CGame" [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+412:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(69,34): error C2530: 
+'entry': se deben inicializar las referencias [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+413:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(69,34): error C3531: 
+'entry': un símbolo cuyo tipo contiene 'auto' debe tener un inicializador [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+414:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(69,40): error C2143: 
+error de sintaxis: falta ';' delante de ':' [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+415:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(69,74): error C2143: 
+error de sintaxis: falta ';' delante de ')' [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+422:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(80,40): error C2039: 
+"player": no es un miembro de "CGame" [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+426:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(81,54): error C2039: 
+"player": no es un miembro de "CGame" [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+430:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(83,86): error C3083: 
+'item_atlas': el símbolo situado a la izquierda de '::' debe ser un tipo [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+431:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(83,98): error C2039: 
+"pack": no es un miembro de "hb::client::sprite_id" [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+435:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(83,98): error C2065: 
+'pack': identificador no declarado [D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+436:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(84,13): error C3536: 
+'d': no se puede usar antes de inicializarse [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+437:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(85,61): error C2039: 
+"m_item_name": no es un miembro de "CItem" [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+441:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(85,13): error C2664: 
+'void IDialogBox::put_aligned_string(int,int,int,const char *,const hb::shared::render::Color &)': el argumento 4 no 
+puede convertirse de 'const hb::shared::render::Color' a 'const char *' [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+449:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(101,38): error C2039: 
+"player": no es un miembro de "CGame" [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+453:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(101,22): error C2530: 
+'entry': se deben inicializar las referencias [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+454:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(101,22): error C3531: 
+'entry': un símbolo cuyo tipo contiene 'auto' debe tener un inicializador [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+455:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(101,28): error C2143: 
+error de sintaxis: falta ';' delante de ':' [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+456:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(101,60): error C2143: 
+error de sintaxis: falta ';' delante de ')' [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+463:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(126,17): error C3083: 
+'audio': el símbolo situado a la izquierda de '::' debe ser un tipo [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+464:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(126,24): error C2039: 
+"play_sound": no es un miembro de "hb" [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+468:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(126,24): error C3861: 
+'play_sound': no se encontró el identificador [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+469:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(136,17): error C3083: 
+'audio': el símbolo situado a la izquierda de '::' debe ser un tipo [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+470:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(136,24): error C2039: 
+"play_sound": no es un miembro de "hb" [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+474:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(136,24): error C3861: 
+'play_sound': no se encontró el identificador [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+475:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(147,44): error C3083: 
+'Request': el símbolo situado a la izquierda de '::' debe ser un tipo [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+476:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(147,53): error C2039: 
+"ReqDepositMaterials": no es un miembro de "hb::net" [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+480:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(147,53): error C2065: 
+'ReqDepositMaterials': identificador no declarado [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+481:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(157,48): error C3083: 
+'Request': el símbolo situado a la izquierda de '::' debe ser un tipo [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+482:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(157,57): error C2039: 
+"EnchantItem": no es un miembro de "hb::net" [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+486:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(157,57): error C2065: 
+'EnchantItem': identificador no declarado [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+487:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(171,48): error C3083: 
+'Request': el símbolo situado a la izquierda de '::' debe ser un tipo [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+488:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(171,57): error C2039: 
+"DisenchantItem": no es un miembro de "hb::net" [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+492:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(171,57): error C2065: 
+'DisenchantItem': identificador no declarado [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+493:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(184,44): error C3083: 
+'Request': el símbolo situado a la izquierda de '::' debe ser un tipo [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+494:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(184,53): error C2039: 
+"ReqRecoverItem": no es un miembro de "hb::net" [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+498:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(184,53): error C2065: 
+'ReqRecoverItem': identificador no declarado [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+499:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(210,23): error C2039: 
+"player": no es un miembro de "CGame" [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+503:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(210,13): error C2530: 
+'p': se deben inicializar las referencias [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+504:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(211,10): error C3536: 
+'p': no se puede usar antes de inicializarse [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+505:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(217,13): error C3083: 
+'audio': el símbolo situado a la izquierda de '::' debe ser un tipo [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+506:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(217,20): error C2039: 
+"play_sound": no es un miembro de "hb" [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+C:\Users\suare\.gemini\antigravity-ide\brain\67a6dcee-8eba-470a-a657-4b89eb6a934d\.system_generated\tasks\task-718.log:
+510:D:\HB Server\Helbreath-Heldenian-Project-Development\Sources\Client\DialogBox_Enchanting.cpp(217,20): error C3861: 
+'play_sound': no se encontró el identificador [D:\HB 
+Server\Helbreath-Heldenian-Project-Development\Sources\Client\Client.vcxproj]
+
+
