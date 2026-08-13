@@ -1,3 +1,73 @@
+[2026-08-13 10:52:13] Settings updated:
+  primary-drop-rate: 1.0 -> 1
+  secondary-drop-rate: 0.5 -> 0.5
+
+[2026-08-13 10:52:09] Settings updated:
+  primary-drop-rate: 1.0 -> 1
+  secondary-drop-rate: 0.5 -> 0.5
+
+[2026-08-13 10:51:59] Settings updated:
+  primary-drop-rate: 1.8 -> 1
+  secondary-drop-rate: 0.5 -> 0.5
+
+[2026-08-13 10:47:05] Settings updated:
+  primary-drop-rate: 1.5 -> 1.8
+  secondary-drop-rate: 0.5 -> 0.5
+
+[2026-08-13 10:47:00] Settings updated:
+  primary-drop-rate: 2.0 -> 1.5
+  secondary-drop-rate: 0.5 -> 0.5
+
+[2026-08-13 10:46:50] Settings updated:
+  primary-drop-rate: 2.5 -> 2
+  secondary-drop-rate: 0.5 -> 0.5
+
+[2026-08-13 10:44:13] Settings updated:
+  primary-drop-rate: 5.0 -> 2.5
+  secondary-drop-rate: 0.5 -> 0.5
+
+[2026-08-13 10:35:20] Settings updated:
+  primary-drop-rate: 5.0 -> 5
+  secondary-drop-rate: 0.5 -> 0.5
+
+[2026-08-13 10:35:17] Settings updated:
+  primary-drop-rate: 5.0 -> 5
+  secondary-drop-rate: 1.0 -> 0.5
+
+[2026-08-13 10:32:20] Added [Nothing] to Zombie (Tier 2, weight 100)
+[2026-08-13 10:32:05] Settings updated:
+  primary-drop-rate: 5.0 -> 5
+  secondary-drop-rate: 0.0 -> 1
+
+[2026-08-13 10:31:17] Settings updated:
+  primary-drop-rate: 5.0 -> 5
+  secondary-drop-rate: 0.0 -> 0
+
+[2026-08-13 10:31:08] Settings updated:
+  primary-drop-rate: 5.0 -> 5
+  secondary-drop-rate: 1.0 -> 0
+
+[2026-08-13 10:19:06] Removed [Nothing] from Zombie (Tier 2)
+[2026-08-13 10:06:47] Settings updated:
+  primary-drop-rate: 5.0 -> 5
+  secondary-drop-rate: 1.0 -> 1
+
+[2026-08-13 10:06:00] Settings updated:
+  primary-drop-rate: 1.0 -> 5
+  secondary-drop-rate: 1.0 -> 1
+
+[2026-08-13 09:56:17] Settings updated:
+  primary-drop-rate: 1.0 -> 1
+  secondary-drop-rate: 1.0 -> 1
+
+[2026-08-13 09:54:38] Removed [Nothing] from Slime (Tier 1)
+[2026-08-13 09:54:17] Added [Nothing] to Slime (Tier 1, weight 100)
+[2026-08-13 09:53:43] Removed [Nothing] from Slime (Tier 1)
+[2026-08-13 09:53:13] Added [Nothing] to Slime (Tier 1, weight 100)
+[2026-08-13 09:47:51] Settings updated:
+  primary-drop-rate: 1.0 -> 1
+  secondary-drop-rate: 1.0 -> 1
+
 [2026-08-12 21:16:11] Added [Magic Wand (MS0)] to Slime (Tier 1, weight 100)
 [2026-08-12 21:16:06] Added [Magic Wand (MS0)] to Orc (Tier 1, weight 100)
 [2026-08-12 21:16:04] Added [Magic Wand (MS0)] to Giant-Ant (Tier 1, weight 100)

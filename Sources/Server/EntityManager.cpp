@@ -2763,7 +2763,7 @@ void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char a
     // Funciona de 1 a 10000 (Ejemplo: 10000 = 100%, 5000 = 50%, 100 = 1%).
     // Lo dejamos al 10000 (100%) para que te salga todo el rato y puedas probarlo.
     // Cuando vayas a abrir el servidor, cambialo por algo como 50 (0.5%) o 100 (1%).
-    int extra_loot_chance = 75; 
+    int extra_loot_chance = 10; 
 
     if (table != nullptr && attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[attacker_h] != nullptr) {
         if ((int)m_game->dice(1, 10000) <= extra_loot_chance) {
@@ -2847,6 +2847,20 @@ void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char a
                     CItem* extra_loot_item = new CItem;
                     if (m_game->m_item_manager->init_item_attr(extra_loot_item, chosen_item_id)) {
                         m_game->m_item_manager->generate_item_attributes(extra_loot_item);
+                        
+                        // === SISTEMA DE ROPA DE COLORES (EXTRA LOOT) ===
+                        if (extra_loot_item->m_id_num == 450 || extra_loot_item->m_id_num == 451 || extra_loot_item->m_id_num == 453 || 
+                            extra_loot_item->m_id_num == 459 || extra_loot_item->m_id_num == 460 || extra_loot_item->m_id_num == 470 || 
+                            extra_loot_item->m_id_num == 471 || extra_loot_item->m_id_num == 473 || extra_loot_item->m_id_num == 474 || 
+                            extra_loot_item->m_id_num == 479 || extra_loot_item->m_id_num == 480 || extra_loot_item->m_id_num == 481 || 
+                            extra_loot_item->m_id_num == 484 || extra_loot_item->m_id_num == 590 || extra_loot_item->m_id_num == 591 || 
+                            extra_loot_item->m_id_num == 7041 || extra_loot_item->m_id_num == 7042) 
+                        {
+                            // Asignamos un color al azar entre 1 y 14 (12 suele ser negro, 14 blanco, resto colores)
+                            extra_loot_item->m_instance.item_color = static_cast<char>(m_game->dice(1, 14));
+                        }
+                        // ===============================================
+
                         m_game->add_extra_loot(winner_h, extra_loot_item);
                     }
                     delete extra_loot_item;
@@ -3077,13 +3091,26 @@ bool CEntityManager::spawn_npc_drop_item(int npc_h, int item_id, int min_count, 
 	// =======================================================
 
 	item->m_instance.count = count;
-	m_game->m_item_manager->generate_item_attributes(item);
-	item->set_touch_effect_type(TouchEffectType::ID);
-	item->m_instance.touch_effect_value1 = static_cast<short>(m_game->dice(1, 100000));
-	item->m_instance.touch_effect_value2 = static_cast<short>(m_game->dice(1, 100000));
-	item->m_instance.touch_effect_value3 = (short)GameClock::GetTimeMS();
+    m_game->m_item_manager->generate_item_attributes(item);
+    item->set_touch_effect_type(TouchEffectType::ID);
+    item->m_instance.touch_effect_value1 = static_cast<short>(m_game->dice(1, 100000));
+    item->m_instance.touch_effect_value2 = static_cast<short>(m_game->dice(1, 100000));
+    item->m_instance.touch_effect_value3 = (short)GameClock::GetTimeMS();
 
-	int drop_x = m_npc_list[npc_h]->m_x;
+    // === SISTEMA DE ROPA DE COLORES (LOOT SUELO) ===
+    if (item->m_id_num == 450 || item->m_id_num == 451 || item->m_id_num == 453 || 
+        item->m_id_num == 459 || item->m_id_num == 460 || item->m_id_num == 470 || 
+        item->m_id_num == 471 || item->m_id_num == 473 || item->m_id_num == 474 || 
+        item->m_id_num == 479 || item->m_id_num == 480 || item->m_id_num == 481 || 
+        item->m_id_num == 484 || item->m_id_num == 590 || item->m_id_num == 591 || 
+        item->m_id_num == 7041 || item->m_id_num == 7042) 
+    {
+        // Asignamos un color al azar entre 1 y 14
+        item->m_instance.item_color = static_cast<char>(m_game->dice(1, 14));
+    }
+    // ===============================================
+
+    int drop_x = m_npc_list[npc_h]->m_x;
 	int drop_y = m_npc_list[npc_h]->m_y;
 	int map_idx = m_npc_list[npc_h]->m_map_index;
 

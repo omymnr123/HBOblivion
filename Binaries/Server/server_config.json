@@ -1,9 +1,9 @@
 {
 	"drop_rates": {
-		"primary": 1.5,
-		"gold": 1.5,
-		"base_gold": 900,
-		"secondary": 1.5,
+		"primary": 1.0,
+		"gold": 1.0,
+		"base_gold": 100,
+		"secondary": 0.5,
 		"rep_modifier": 5
 	},
 	"exp_rates": {

@@ -6,7 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Drop Manager - Helbreath</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             font-family: 'Segoe UI', Tahoma, sans-serif;
@@ -53,10 +57,20 @@
             font-size: 14px;
         }
 
-        .navbar-search input:focus { outline: none; border-color: #c8a850; }
-        .navbar-search input::placeholder { color: #686058; }
+        .navbar-search input:focus {
+            outline: none;
+            border-color: #c8a850;
+        }
 
-        .navbar-actions { display: flex; gap: 8px; align-items: center; }
+        .navbar-search input::placeholder {
+            color: #686058;
+        }
+
+        .navbar-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
 
         .btn {
             padding: 8px 16px;
@@ -67,8 +81,15 @@
             font-weight: 600;
             transition: background 0.2s;
         }
-        .btn-snapshot { background: #3a3468; color: #fff; }
-        .btn-snapshot:hover { background: #2e2a56; }
+
+        .btn-snapshot {
+            background: #3a3468;
+            color: #fff;
+        }
+
+        .btn-snapshot:hover {
+            background: #2e2a56;
+        }
 
         .app {
             display: grid;
@@ -100,7 +121,10 @@
             font-size: 14px;
         }
 
-        .npc-search input:focus { outline: none; border-color: #c8a850; }
+        .npc-search input:focus {
+            outline: none;
+            border-color: #c8a850;
+        }
 
         .npc-list {
             flex: 1;
@@ -117,16 +141,28 @@
             transition: background 0.15s;
         }
 
-        .npc-item:hover { background: #181620; }
+        .npc-item:hover {
+            background: #181620;
+        }
 
         .npc-item.active {
             background: #181620;
             border-left-color: #c8a850;
         }
 
-        .npc-item .name { font-weight: 600; font-size: 14px; }
-        .npc-item .id { font-size: 12px; color: #887868; }
-        .npc-item.active .id { color: #a89888; }
+        .npc-item .name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .npc-item .id {
+            font-size: 12px;
+            color: #887868;
+        }
+
+        .npc-item.active .id {
+            color: #a89888;
+        }
 
         /* Main Content */
         .main {
@@ -134,7 +170,9 @@
             overflow-y: auto;
         }
 
-        .main-header { margin-bottom: 20px; }
+        .main-header {
+            margin-bottom: 20px;
+        }
 
         .main-header h2 {
             font-size: 20px;
@@ -179,7 +217,9 @@
             transition: border-color 0.15s;
         }
 
-        .drop-card:hover { border-color: #c8a850; }
+        .drop-card:hover {
+            border-color: #c8a850;
+        }
 
         .drop-name {
             font-weight: 600;
@@ -204,7 +244,10 @@
             text-align: center;
         }
 
-        .drop-weight input:focus { outline: none; border-color: #c8a850; }
+        .drop-weight input:focus {
+            outline: none;
+            border-color: #c8a850;
+        }
 
         .drop-percent {
             color: #c8a850;
@@ -228,8 +271,13 @@
             transition: opacity 0.15s;
         }
 
-        .drop-card:hover .drop-remove { opacity: 1; }
-        .drop-remove:hover { background: #8b2828; }
+        .drop-card:hover .drop-remove {
+            opacity: 1;
+        }
+
+        .drop-remove:hover {
+            background: #8b2828;
+        }
 
         /* Item Picker Panel */
         .picker {
@@ -260,7 +308,10 @@
             font-size: 14px;
         }
 
-        .picker-search input:focus { outline: none; border-color: #c8a850; }
+        .picker-search input:focus {
+            outline: none;
+            border-color: #c8a850;
+        }
 
         .picker-tier-select {
             margin-top: 8px;
@@ -281,7 +332,9 @@
             transition: background 0.15s;
         }
 
-        .picker-tier-select button:hover { background: #22202c; }
+        .picker-tier-select button:hover {
+            background: #22202c;
+        }
 
         .picker-tier-select button.active {
             background: #c8a850;
@@ -306,8 +359,14 @@
             transition: background 0.15s;
         }
 
-        .picker-item:hover { background: #181620; }
-        .picker-item .id { color: #887868; font-size: 12px; }
+        .picker-item:hover {
+            background: #181620;
+        }
+
+        .picker-item .id {
+            color: #887868;
+            font-size: 12px;
+        }
 
         .picker-item .add-btn {
             background: #6e5530;
@@ -322,8 +381,13 @@
             transition: opacity 0.15s;
         }
 
-        .picker-item:hover .add-btn { opacity: 1; }
-        .picker-item .add-btn:hover { background: #7e6538; }
+        .picker-item:hover .add-btn {
+            opacity: 1;
+        }
+
+        .picker-item .add-btn:hover {
+            background: #7e6538;
+        }
 
         /* Status bar */
         .status {
@@ -342,7 +406,9 @@
             pointer-events: none;
         }
 
-        .status.show { opacity: 1; }
+        .status.show {
+            opacity: 1;
+        }
 
         /* Empty state */
         .empty {
@@ -362,16 +428,29 @@
             transition: background 0.15s;
         }
 
-        .gate-card:hover { background: #1e2a4a; }
+        .gate-card:hover {
+            background: #1e2a4a;
+        }
 
-        .gate-card.gold { border-left: 3px solid #6e5530; }
-        .gate-card.items { border-left: 3px solid #c8a850; }
-        .gate-card.rare { border-left: 3px solid #3a3468; }
+        .gate-card.gold {
+            border-left: 3px solid #6e5530;
+        }
+
+        .gate-card.items {
+            border-left: 3px solid #c8a850;
+        }
+
+        .gate-card.rare {
+            border-left: 3px solid #3a3468;
+        }
 
         /* Modal */
         .modal-overlay {
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background: rgba(0, 0, 0, 0.6);
             display: none;
             align-items: center;
@@ -379,7 +458,9 @@
             z-index: 1000;
         }
 
-        .modal-overlay.show { display: flex; }
+        .modal-overlay.show {
+            display: flex;
+        }
 
         .modal {
             background: #22202c;
@@ -395,7 +476,9 @@
             color: #c8a850;
         }
 
-        .modal-field { margin-bottom: 12px; }
+        .modal-field {
+            margin-bottom: 12px;
+        }
 
         .modal-field label {
             display: block;
@@ -414,7 +497,10 @@
             font-size: 14px;
         }
 
-        .modal-field input:focus { outline: none; border-color: #c8a850; }
+        .modal-field input:focus {
+            outline: none;
+            border-color: #c8a850;
+        }
 
         .modal-buttons {
             display: flex;
@@ -432,10 +518,24 @@
             font-weight: 600;
         }
 
-        .btn-save { background: #6e5530; color: #fff; }
-        .btn-save:hover { background: #7e6538; }
-        .btn-cancel { background: transparent; border: 1px solid #3a3248; color: #ddd8d0; }
-        .btn-cancel:hover { background: #3a3248; }
+        .btn-save {
+            background: #6e5530;
+            color: #fff;
+        }
+
+        .btn-save:hover {
+            background: #7e6538;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            border: 1px solid #3a3248;
+            color: #ddd8d0;
+        }
+
+        .btn-cancel:hover {
+            background: #3a3248;
+        }
 
         /* Changelog panel */
         .changelog-section {
@@ -455,7 +555,11 @@
             margin-bottom: 8px;
         }
 
-        .changelog-header h4 { font-size: 12px; color: #887868; text-transform: uppercase; }
+        .changelog-header h4 {
+            font-size: 12px;
+            color: #887868;
+            text-transform: uppercase;
+        }
 
         .changelog-content {
             flex: 1;
@@ -471,7 +575,11 @@
             min-height: 100px;
         }
 
-        .changelog-content:focus { outline: none; border-color: #c8a850; color: #ddd8d0; }
+        .changelog-content:focus {
+            outline: none;
+            border-color: #c8a850;
+            color: #ddd8d0;
+        }
 
         .btn-small {
             padding: 4px 10px;
@@ -484,8 +592,11 @@
             color: #ddd8d0;
         }
 
-        .btn-small:hover { background: #c8a850; color: #181620; }
-        
+        .btn-small:hover {
+            background: #c8a850;
+            color: #181620;
+        }
+
         /* Dropdown Menu para añadir items */
         .add-menu {
             position: fixed;
@@ -495,10 +606,14 @@
             padding: 4px 0;
             z-index: 2000;
             display: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
             min-width: 180px;
         }
-        .add-menu.show { display: block; }
+
+        .add-menu.show {
+            display: block;
+        }
+
         .add-menu button {
             display: block;
             width: 100%;
@@ -510,7 +625,11 @@
             cursor: pointer;
             font-size: 13px;
         }
-        .add-menu button:hover { background: #3a3248; color: #fff; }
+
+        .add-menu button:hover {
+            background: #3a3248;
+            color: #fff;
+        }
     </style>
 </head>
 
@@ -566,7 +685,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Menú desplegable para Añadir Items -->
     <div id="addMenu" class="add-menu">
         <button onclick="addDropToSelected()">Añadir al NPC actual</button>
@@ -579,7 +698,8 @@
         <div class="modal" onclick="event.stopPropagation()">
             <h3>Edit Drop Rates</h3>
 
-            <div style="background: #181620; padding: 10px 12px; border-radius: 4px; margin-bottom: 12px; border: 1px solid #332e3a;">
+            <div
+                style="background: #181620; padding: 10px 12px; border-radius: 4px; margin-bottom: 12px; border: 1px solid #332e3a;">
                 <div style="font-size: 12px; color: #887868; margin-bottom: 4px;">Global Base Rates</div>
                 <div style="display: flex; gap: 20px; font-size: 13px;">
                     <div><strong>Base Primary:</strong> 10%</div>
@@ -643,7 +763,7 @@
         let selectedNpc = null;
         let pickerTier = 1;
         let config = { settings: {}, global_drops: [] };
-        
+
         let pendingAddItem = null;
 
         // Mostrar el menú flotante en la posición del ratón
@@ -651,10 +771,10 @@
             event.stopPropagation(); // Evitar que se cierre al instante
             pendingAddItem = { id: itemId, name: itemName };
             const menu = document.getElementById('addMenu');
-            
+
             // Posicionarlo a la izquierda del botón "Add"
             const rect = event.target.getBoundingClientRect();
-            menu.style.left = (rect.left - 180) + 'px'; 
+            menu.style.left = (rect.left - 180) + 'px';
             menu.style.top = rect.bottom + 'px';
             menu.classList.add('show');
         }
@@ -674,7 +794,7 @@
         // Opción 2: Añadir a TODOS los NPCs
         async function addDropToAll() {
             if (!pendingAddItem) return;
-            
+
             if (!confirm(`¿Estás seguro de que quieres añadir "${pendingAddItem.name}" a TODOS los NPCs del servidor?`)) return;
 
             const result = await fetch('/api/drops/add_all', {
@@ -692,15 +812,15 @@
             if (result.success) {
                 // Guardar qué NPC teníamos abierto
                 const currentNpcId = selectedNpc ? selectedNpc.id : null;
-                
+
                 // Recargar toda la base de datos
                 await loadData();
-                
+
                 // Si teníamos un NPC seleccionado, recargar su vista para ver el nuevo drop
                 if (currentNpcId) {
                     selectNpc(currentNpcId);
                 }
-                
+
                 showStatus('¡Añadido a TODOS los NPCs!');
                 loadChangelog();
             } else {
@@ -985,8 +1105,8 @@
         }
 
         async function saveSettings() {
-            const primaryRate = parseInt(document.getElementById('primaryDropRate').value);
-            const secondaryRate = parseInt(document.getElementById('secondaryDropRate').value);
+            const primaryRate = parseFloat(document.getElementById('primaryDropRate').value);
+            const secondaryRate = parseFloat(document.getElementById('secondaryDropRate').value);
 
             const result = await fetch('/api/settings/update', {
                 method: 'POST',
