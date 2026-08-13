@@ -2,12 +2,12 @@
     "version": {
         "major": 0,
         "minor": 2,
-        "patch": 7
+        "patch": 8
     },
     "files": [
         {
             "path": "Game_x64_win.exe",
-            "sha256": "164414a5c58046635016663f49b1ca84232b04f801cd6679576902c2d66f8798",
+            "sha256": "d415002367b8342df6a8a3ae5894cca8d7e64226b9b9901a88c5aef36cb46bbb",
             "size": 3831808,
             "executable": true,
             "platform": "windows"

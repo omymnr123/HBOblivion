@@ -13,6 +13,8 @@
 #include "CmdKickPlayer.h"
 #include "CmdBanPlayer.h"
 #include "CmdUnbanPlayer.h"
+#include "CmdStartCrusade.h"
+#include "CmdEndCrusade.h"
 #include "Game.h"
 #include <cstring>
 #include <cstdio>
@@ -95,4 +97,6 @@ void ServerCommandManager::register_built_in_commands()
 	register_command(std::make_unique<CmdKickPlayer>());
 	register_command(std::make_unique<CmdBanPlayer>());
 	register_command(std::make_unique<CmdUnbanPlayer>());
+	register_command(std::make_unique<CmdStartCrusade>());
+	register_command(std::make_unique<CmdEndCrusade>());
 }

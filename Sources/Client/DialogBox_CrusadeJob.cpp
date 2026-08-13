@@ -11,10 +11,11 @@
 
 using namespace hb::shared::net;
 using namespace hb::client::sprite_id;
+
 DialogBox_CrusadeJob::DialogBox_CrusadeJob(CGame* game)
 	: IDialogBox(DialogBoxId::CrusadeJob, game)
 {
-	set_default_rect(520 , 65 , 258, 339);
+	set_default_rect(520, 65, 258, 339);
 }
 
 void DialogBox_CrusadeJob::draw_mode_select_job(short sX, short sY)
@@ -26,11 +27,26 @@ void DialogBox_CrusadeJob::draw_mode_select_job(short sX, short sY)
 
 	if (player().m_citizen)
 	{
-		// Soldier option
+		// Creamos el area del 3er boton al vuelo, ya que no estaba en tu .h original
+		ui_rect link_job_3{25, 201, 220, 13};
+
+		// 1. Opcion: Comandante
 		if (mouse_in(link_job_1))
-			put_aligned_string(sX + 24, sX + 246, sY + 150, DRAWDIALOGBOX_CRUSADEJOB7, GameColors::UIWhite);
+			put_aligned_string(sX + 24, sX + 246, sY + 150, DRAWDIALOGBOX_CRUSADEJOB5, GameColors::UIWhite);
 		else
-			put_aligned_string(sX + 24, sX + 246, sY + 150, DRAWDIALOGBOX_CRUSADEJOB7, GameColors::UIMagicBlue);
+			put_aligned_string(sX + 24, sX + 246, sY + 150, DRAWDIALOGBOX_CRUSADEJOB5, GameColors::UIMagicBlue);
+
+		// 2. Opcion: Constructor
+		if (mouse_in(link_job_2))
+			put_aligned_string(sX + 24, sX + 246, sY + 175, DRAWDIALOGBOX_CRUSADEJOB9, GameColors::UIWhite);
+		else
+			put_aligned_string(sX + 24, sX + 246, sY + 175, DRAWDIALOGBOX_CRUSADEJOB9, GameColors::UIMagicBlue);
+
+		// 3. Opcion: Soldado
+		if (mouse_in(link_job_3))
+			put_aligned_string(sX + 24, sX + 246, sY + 200, DRAWDIALOGBOX_CRUSADEJOB7, GameColors::UIWhite);
+		else
+			put_aligned_string(sX + 24, sX + 246, sY + 200, DRAWDIALOGBOX_CRUSADEJOB7, GameColors::UIMagicBlue);
 	}
 
 	put_aligned_string(sX + 24, sX + 246, sY + 290 - 40, DRAWDIALOGBOX_CRUSADEJOB10);
@@ -95,6 +111,7 @@ bool DialogBox_CrusadeJob::on_click()
 	switch (m_mode)
 	{
 	case mode::select_job:
+	{
 		if (!player().m_citizen)
 		{
 			disable_dialog_box(DialogBoxId::CrusadeJob);
@@ -102,14 +119,39 @@ bool DialogBox_CrusadeJob::on_click()
 			return true;
 		}
 
-		// Soldier option
+		ui_rect link_job_3{25, 201, 220, 13};
+
+		// 1. Commander
 		if (mouse_in(link_job_1))
 		{
-			{
-				auto pkt = hb::net::make_common_command(CommonType::RequestSelectCrusadeDuty, m_game->m_player->m_player_x, m_game->m_player->m_player_y);
-				pkt.v1 = 1;
-				m_game->send_game_packet(pkt);
-			}
+			auto pkt = hb::net::make_common_command(CommonType::RequestSelectCrusadeDuty, m_game->m_player->m_player_x, m_game->m_player->m_player_y);
+			pkt.v1 = 3; 
+			m_game->send_game_packet(pkt);
+			
+			disable_dialog_box(DialogBoxId::CrusadeJob);
+			audio_manager::get().play_game_sound(sound_type::effect, 14, 5);
+			return true;
+		}
+
+		// 2. Constructor
+		if (mouse_in(link_job_2))
+		{
+			auto pkt = hb::net::make_common_command(CommonType::RequestSelectCrusadeDuty, m_game->m_player->m_player_x, m_game->m_player->m_player_y);
+			pkt.v1 = 2; 
+			m_game->send_game_packet(pkt);
+			
+			disable_dialog_box(DialogBoxId::CrusadeJob);
+			audio_manager::get().play_game_sound(sound_type::effect, 14, 5);
+			return true;
+		}
+
+		// 3. Soldier
+		if (mouse_in(link_job_3))
+		{
+			auto pkt = hb::net::make_common_command(CommonType::RequestSelectCrusadeDuty, m_game->m_player->m_player_x, m_game->m_player->m_player_y);
+			pkt.v1 = 1; 
+			m_game->send_game_packet(pkt);
+			
 			disable_dialog_box(DialogBoxId::CrusadeJob);
 			audio_manager::get().play_game_sound(sound_type::effect, 14, 5);
 			return true;
@@ -124,6 +166,7 @@ bool DialogBox_CrusadeJob::on_click()
 			return true;
 		}
 		break;
+	}
 
 	case mode::confirm:
 		// View details link

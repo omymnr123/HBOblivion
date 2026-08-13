@@ -215,6 +215,8 @@
     <ClInclude Include="CmdKickPlayer.h" />
     <ClInclude Include="CmdBanPlayer.h" />
     <ClInclude Include="CmdUnbanPlayer.h" />
+    <ClInclude Include="CmdStartCrusade.h" />
+    <ClInclude Include="CmdEndCrusade.h" />
     <ClInclude Include="GameChatCommand.h" />
     <ClInclude Include="GameCmdWhisper.h" />
     <ClInclude Include="GameCmdBlock.h" />
@@ -368,6 +370,8 @@
     <ClCompile Include="CmdSaveAll.cpp" />
     <ClCompile Include="CmdShutdown.cpp" />
     <ClCompile Include="CmdRestart.cpp" />
+    <ClCompile Include="CmdStartCrusade.cpp" />
+    <ClCompile Include="CmdEndCrusade.cpp" />
     <ClCompile Include="GameCmdReroll.cpp" />
     <ClCompile Include="GameCmdTeleport.cpp" />
     <ClCompile Include="GameCmdSetLevel.cpp" />

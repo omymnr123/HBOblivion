@@ -310,16 +310,29 @@ void WarManager::sync_middleland_map_info()
 
 void WarManager::select_crusade_duty_handler(int client_h, int duty)
 {
+	CClient* client = m_game->m_client_list[client_h];
+	if (!client) return;
 
-	if (m_game->m_client_list[client_h] == 0) return;
-
-	if (m_game->m_last_crusade_winner == m_game->m_client_list[client_h]->m_side &&
-		m_game->m_client_list[client_h]->m_crusade_guid == 0 && duty == 3) {
-		m_game->m_client_list[client_h]->m_construction_point = 3000;
+	// --- VALIDACIÓN DEL NUEVO SISTEMA DE CLANES ---
+	// Duty 3 = Commander. Solo el Guild Master (Rango 1) puede serlo.
+	if (duty == 3 && client->m_guild_rank != 1) { 
+		m_game->send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "Solo el Guild Master puede ser Comandante.");
+		return;
 	}
-	m_game->m_client_list[client_h]->m_crusade_duty = duty;
+	// Duty 2 = Constructor. Debes estar en un clan.
+	if (duty == 2 && client->m_guild_guid == 0) {
+		m_game->send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "Debes pertenecer a un clan para ser Constructor.");
+		return;
+	}
+	// ----------------------------------------------
 
-	m_game->send_notify_msg(0, client_h, Notify::Crusade, (uint32_t)m_game->m_is_crusade_mode, m_game->m_client_list[client_h]->m_crusade_duty, 0, 0);
+	if (m_game->m_last_crusade_winner == client->m_side &&
+		client->m_crusade_guid == 0 && duty == 3) {
+		client->m_construction_point = 3000;
+	}
+	client->m_crusade_duty = duty;
+
+	m_game->send_notify_msg(0, client_h, Notify::Crusade, (uint32_t)m_game->m_is_crusade_mode, client->m_crusade_duty, 0, 0);
 }
 
 void WarManager::check_crusade_result_calculation(int client_h)
