@@ -3103,7 +3103,7 @@ bool CEntityManager::spawn_npc_drop_item(int npc_h, int item_id, int min_count, 
         item->m_id_num == 471 || item->m_id_num == 473 || item->m_id_num == 474 || 
         item->m_id_num == 479 || item->m_id_num == 480 || item->m_id_num == 481 || 
         item->m_id_num == 484 || item->m_id_num == 590 || item->m_id_num == 591 || 
-        item->m_id_num == 7041 || item->m_id_num == 7042) 
+        item->m_id_num == 2994 || item->m_id_num == 2995) 
     {
         // Asignamos un color al azar entre 1 y 14
         item->m_instance.item_color = static_cast<char>(m_game->dice(1, 14));

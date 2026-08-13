@@ -1565,27 +1565,36 @@ void CGame::game_recv_msg_handler(uint32_t msg_size, char* data)
 		break;
 
 	case MsgId::GuildSystem:
-	{
-		auto* header = hb::net::PacketCast<hb::net::PacketHeader>(data, sizeof(hb::net::PacketHeader));
-		if (header && header->msg_type == hb::shared::net::GuildSystemType::ResponseMembers) {
-			auto* pkt = reinterpret_cast<hb::shared::net::PacketGuildMemberList*>(data);
-			size_t expected_size = offsetof(hb::shared::net::PacketGuildMemberList, members) + (pkt->member_count * sizeof(hb::shared::net::GuildMemberInfo));
-			if (pkt && pkt->msg_size == expected_size) {
-				auto* dlg = static_cast<DialogBox_Guild*>(get_dialog_box_manager().get_dialog_box(DialogBoxId::Guild));
-				if (dlg) {
-					dlg->update_members(*pkt);
-				}
-			}
-		}
-		else if (header && header->msg_type == hb::shared::net::GuildSystemType::NotifyInvite) {
-			auto* pkt = reinterpret_cast<hb::shared::net::PacketGuildNotifyInvite*>(data);
-			if (pkt && pkt->msg_size == sizeof(hb::shared::net::PacketGuildNotifyInvite)) {
-				std::string invite_info = std::string(pkt->inviter_name) + ":" + std::string(pkt->guild_name);
-				get_dialog_box_manager().enable_dialog_box(DialogBoxId::GuildInvite, 0, 0LL, 0, invite_info.c_str());
-			}
-		}
-		break;
-	}
+    {
+        auto* header = hb::net::PacketCast<hb::net::PacketHeader>(data, sizeof(hb::net::PacketHeader));
+        if (header && header->msg_type == hb::shared::net::GuildSystemType::ResponseMembers) {
+            auto* pkt = reinterpret_cast<hb::shared::net::PacketGuildMemberList*>(data);
+            size_t expected_size = offsetof(hb::shared::net::PacketGuildMemberList, members) + (pkt->member_count * sizeof(hb::shared::net::GuildMemberInfo));
+            
+            if (pkt && pkt->msg_size == expected_size) {
+                auto* dlg = static_cast<DialogBox_Guild*>(get_dialog_box_manager().get_dialog_box(DialogBoxId::Guild));
+                
+                // --- PARCHE DOBLE ANTI-CRASHEO ---
+                // 1. Escudo de puntero: Verificamos que 'dlg' no sea nulo Y que su memoria sea válida (no basura como 0x2)
+                if (dlg && reinterpret_cast<uintptr_t>(dlg) > 0x1000) {
+                    
+                    // 2. Escudo de paquete: Copiamos los bytes justos
+                    hb::shared::net::PacketGuildMemberList safe_pkt{};
+                    std::memcpy(&safe_pkt, data, expected_size);
+                    
+                    dlg->update_members(safe_pkt);
+                }
+            }
+        }
+        else if (header && header->msg_type == hb::shared::net::GuildSystemType::NotifyInvite) {
+            auto* pkt = reinterpret_cast<hb::shared::net::PacketGuildNotifyInvite*>(data);
+            if (pkt && pkt->msg_size == sizeof(hb::shared::net::PacketGuildNotifyInvite)) {
+                std::string invite_info = std::string(pkt->inviter_name) + ":" + std::string(pkt->guild_name);
+                get_dialog_box_manager().enable_dialog_box(DialogBoxId::GuildInvite, 0, 0LL, 0, invite_info.c_str());
+            }
+        }
+        break;
+    }
 
 	case MsgId::CommandCheckConnection:
 	{

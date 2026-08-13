@@ -300,7 +300,7 @@ void GuildManager::add_guild_gxp(uint32_t guild_guid, int amount)
 		UpdateGuildProgression(m_db, guild_guid, level, gxp);
 		
 		if (level_up) {
-			// Notify all members of level up[cite: 14]
+			// Notify all members of level up
 			for (int i = 0; i < hb::server::config::MaxClients; ++i) {
 				if (m_game->m_client_list[i] && m_game->m_client_list[i]->m_guild_guid == guild_guid) {
 					std::string msg = std::format("Your Guild has reached Level {}!", level);
@@ -763,8 +763,8 @@ void GuildManager::send_guild_info_to_client(int client_h)
 	pkt.member_count = 0;
 
 	if (client->m_guild_guid == 0) {
-		pkt.msg_size = offsetof(PacketGuildMemberList, members);
-		client->m_socket->send_msg(reinterpret_cast<char*>(&pkt), pkt.msg_size);
+		pkt.msg_size = sizeof(PacketGuildMemberList);
+		client->m_socket->send_msg(reinterpret_cast<char*>(&pkt), sizeof(PacketGuildMemberList));
 		return;
 	}
 
@@ -837,8 +837,8 @@ void GuildManager::send_guild_info_to_client(int client_h)
 		sqlite3_finalize(stmt);
 	}
 
-	pkt.msg_size = offsetof(PacketGuildMemberList, members) + (sizeof(GuildMemberInfo) * pkt.member_count);
-	m_game->m_client_list[client_h]->m_socket->send_msg(reinterpret_cast<char*>(&pkt), pkt.msg_size);
+	pkt.msg_size = sizeof(PacketGuildMemberList);
+	m_game->m_client_list[client_h]->m_socket->send_msg(reinterpret_cast<char*>(&pkt), sizeof(PacketGuildMemberList));
 }
 
 void GuildManager::load_guild_skills_cache()

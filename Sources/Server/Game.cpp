@@ -9845,6 +9845,11 @@ bool CGame::check_level_up(int client_h)
             send_notify_msg(0, client_h, Notify::LevelUp, 0, 0, 0, 0);
             send_notify_msg(0, client_h, Notify::LevelUpPoints, 0, 0, 0, 0);
 
+            // --- PARCHE DE ACTUALIZACIÓN VISUAL DEL NIVEL ---
+            m_client_list[client_h]->m_status.level = m_client_list[client_h]->m_level;
+            send_event_to_near_client_type_a(client_h, hb::shared::owner_class::Player, hb::shared::net::MsgId::EventMotion, hb::shared::action::Type::NullAction, 0, 0, 0);
+            // ------------------------------------------------
+
             // --- PRESTIGE: MODIFICADOR DE EXPERIENCIA AL SUBIR DE NIVEL ---
             uint32_t base_exp_lu = m_level_exp_table[m_client_list[client_h]->m_level + 1];
             double prestige_mult_lu = 1.0 + (m_client_list[client_h]->m_prestige_level * 0.15);

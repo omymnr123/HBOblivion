@@ -5,16 +5,16 @@
 #define VER_CLIENT_MAJOR         0
 #define VER_CLIENT_MINOR         2
 #define VER_CLIENT_PATCH         52
-#define VER_CLIENT_BUILD         796
-#define VER_CLIENT_FILEVERSION   0,2,52,796
+#define VER_CLIENT_BUILD         808
+#define VER_CLIENT_FILEVERSION   0,2,52,808
 #define VER_CLIENT_DISPLAY       "0.2.52-alpha"
-#define VER_CLIENT_FULL          "0.2.52-alpha+build.796"
+#define VER_CLIENT_FULL          "0.2.52-alpha+build.808"
 
 // Server version
 #define VER_SERVER_MAJOR         0
 #define VER_SERVER_MINOR         1
 #define VER_SERVER_PATCH         24
-#define VER_SERVER_BUILD         741
-#define VER_SERVER_FILEVERSION   0,1,24,741
+#define VER_SERVER_BUILD         748
+#define VER_SERVER_FILEVERSION   0,1,24,748
 #define VER_SERVER_DISPLAY       "0.1.24-alpha"
-#define VER_SERVER_FULL          "0.1.24-alpha+build.741"
+#define VER_SERVER_FULL          "0.1.24-alpha+build.748"

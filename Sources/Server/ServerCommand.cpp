@@ -9,6 +9,7 @@
 #include "CmdSetCmdLevel.h"
 #include "CmdSaveAll.h"
 #include "CmdShutdown.h"
+#include "CmdRestart.h"
 #include "CmdKickPlayer.h"
 #include "CmdBanPlayer.h"
 #include "CmdUnbanPlayer.h"
@@ -90,6 +91,7 @@ void ServerCommandManager::register_built_in_commands()
 	register_command(std::make_unique<CmdSetCmdLevel>());
 	register_command(std::make_unique<CmdSaveAll>());
 	register_command(std::make_unique<CmdShutdown>());
+	register_command(std::make_unique<CmdRestart>());
 	register_command(std::make_unique<CmdKickPlayer>());
 	register_command(std::make_unique<CmdBanPlayer>());
 	register_command(std::make_unique<CmdUnbanPlayer>());

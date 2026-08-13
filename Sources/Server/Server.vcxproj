@@ -233,6 +233,7 @@
     <ClInclude Include="CmdSetCmdLevel.h" />
     <ClInclude Include="CmdSaveAll.h" />
     <ClInclude Include="CmdShutdown.h" />
+    <ClInclude Include="CmdRestart.h" />
     <ClInclude Include="PasswordHash.h" />
     <ClInclude Include="StringCompat.h" />
     <ClInclude Include="TimeUtils.h" />
@@ -366,6 +367,7 @@
     <ClCompile Include="CmdSetCmdLevel.cpp" />
     <ClCompile Include="CmdSaveAll.cpp" />
     <ClCompile Include="CmdShutdown.cpp" />
+    <ClCompile Include="CmdRestart.cpp" />
     <ClCompile Include="GameCmdReroll.cpp" />
     <ClCompile Include="GameCmdTeleport.cpp" />
     <ClCompile Include="GameCmdSetLevel.cpp" />
