@@ -1,3 +1,4 @@
+[2026-08-13 14:24:13] Removed [Nothing] from Abaddon (Tier 2)
 [2026-08-13 12:39:02] Added [Nothing] to Skeleton (Tier 1, weight 100)
 [2026-08-13 12:38:55] Removed [Nothing] from Skeleton (Tier 1)
 [2026-08-13 12:36:45] Added [Apprentice Cap (W)] to Skeleton (Tier 1, weight 100)

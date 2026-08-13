@@ -1694,135 +1694,147 @@ int CGame::client_motion_move_handler(int client_h, short sX, short sY, directio
 
 void CGame::request_init_player_handler(int client_h, char* data, char key)
 {
-	
-	char char_name[hb::shared::limits::CharNameLen], account_name[hb::shared::limits::AccountNameLen], account_password[hb::shared::limits::AccountPassLen], txt[120];
-	bool is_observer_mode;
+    char char_name[hb::shared::limits::CharNameLen], account_name[hb::shared::limits::AccountNameLen], account_password[hb::shared::limits::AccountPassLen], txt[120];
+    bool is_observer_mode;
 
-	if (m_client_list[client_h] == 0) return;
-	if (m_client_list[client_h]->m_is_init_complete) return;
+    if (m_client_list[client_h] == 0) return;
+    if (m_client_list[client_h]->m_is_init_complete) return;
 
-	std::memset(char_name, 0, sizeof(char_name));
-	std::memset(account_name, 0, sizeof(account_name));
-	std::memset(account_password, 0, sizeof(account_password));
+    std::memset(char_name, 0, sizeof(char_name));
+    std::memset(account_name, 0, sizeof(account_name));
+    std::memset(account_password, 0, sizeof(account_password));
 
-	std::memset(m_client_list[client_h]->m_char_name, 0, sizeof(m_client_list[client_h]->m_char_name));
-	std::memset(m_client_list[client_h]->m_account_name, 0, sizeof(m_client_list[client_h]->m_account_name));
-	std::memset(m_client_list[client_h]->m_account_password, 0, sizeof(m_client_list[client_h]->m_account_password));
+    std::memset(m_client_list[client_h]->m_char_name, 0, sizeof(m_client_list[client_h]->m_char_name));
+    std::memset(m_client_list[client_h]->m_account_name, 0, sizeof(m_client_list[client_h]->m_account_name));
+    std::memset(m_client_list[client_h]->m_account_password, 0, sizeof(m_client_list[client_h]->m_account_password));
 
-	const auto* req = hb::net::PacketCast<hb::net::PacketRequestInitPlayer>(
-		data, sizeof(hb::net::PacketRequestInitPlayer));
-	if (!req) return;
+    const auto* req = hb::net::PacketCast<hb::net::PacketRequestInitPlayer>(
+        data, sizeof(hb::net::PacketRequestInitPlayer));
+    if (!req) return;
 
-	memcpy(char_name, req->player, hb::shared::limits::CharNameLen - 1);
+    memcpy(char_name, req->player, hb::shared::limits::CharNameLen - 1);
 
-	std::memset(txt, 0, sizeof(txt)); // v1.4
-	memcpy(txt, char_name, hb::shared::limits::CharNameLen - 1);
-	std::memset(char_name, 0, sizeof(char_name));
-	memcpy(char_name, txt, hb::shared::limits::CharNameLen - 1);
+    std::memset(txt, 0, sizeof(txt)); // v1.4
+    memcpy(txt, char_name, hb::shared::limits::CharNameLen - 1);
+    std::memset(char_name, 0, sizeof(char_name));
+    memcpy(char_name, txt, hb::shared::limits::CharNameLen - 1);
 
-	//testcode
-	if (strlen(txt) == 0) hb::logger::warn("request_init_player_handler: empty character name after copy");
+    //testcode
+    if (strlen(txt) == 0) hb::logger::warn("request_init_player_handler: empty character name after copy");
 
-	memcpy(account_name, req->account, hb::shared::limits::AccountNameLen - 1);
+    memcpy(account_name, req->account, hb::shared::limits::AccountNameLen - 1);
 
-	std::memset(txt, 0, sizeof(txt)); // v1.4
-	memcpy(txt, account_name, hb::shared::limits::AccountNameLen - 1);
-	std::memset(account_name, 0, sizeof(account_name));
-	memcpy(account_name, txt, hb::shared::limits::AccountNameLen - 1);
+    std::memset(txt, 0, sizeof(txt)); // v1.4
+    memcpy(txt, account_name, hb::shared::limits::AccountNameLen - 1);
+    std::memset(account_name, 0, sizeof(account_name));
+    memcpy(account_name, txt, hb::shared::limits::AccountNameLen - 1);
 
-	// Lowercase account name to match how it was stored during account creation
-	for (int ci = 0; ci < 10 && account_name[ci] != '\0'; ci++)
-		account_name[ci] = static_cast<char>(::tolower(static_cast<unsigned char>(account_name[ci])));
+    // Lowercase account name to match how it was stored during account creation
+    for (int ci = 0; ci < 10 && account_name[ci] != '\0'; ci++)
+        account_name[ci] = static_cast<char>(::tolower(static_cast<unsigned char>(account_name[ci])));
 
-	memcpy(account_password, req->password, hb::shared::limits::AccountPassLen - 1);
+    memcpy(account_password, req->password, hb::shared::limits::AccountPassLen - 1);
 
-	std::memset(txt, 0, sizeof(txt)); // v1.4
-	memcpy(txt, account_password, hb::shared::limits::AccountPassLen - 1);
-	std::memset(account_password, 0, sizeof(account_password));
-	memcpy(account_password, txt, hb::shared::limits::AccountPassLen - 1);
+    std::memset(txt, 0, sizeof(txt)); // v1.4
+    memcpy(txt, account_password, hb::shared::limits::AccountPassLen - 1);
+    std::memset(account_password, 0, sizeof(account_password));
+    memcpy(account_password, txt, hb::shared::limits::AccountPassLen - 1);
 
-	is_observer_mode = (req->is_observer != 0);
+    is_observer_mode = (req->is_observer != 0);
 
-	for(int i = 1; i < MaxClients; i++)
-		if ((m_client_list[i] != 0) && (client_h != i) && (hb_strnicmp(m_client_list[i]->m_account_name, account_name, hb::shared::limits::AccountNameLen - 1) == 0)) {
-			if (memcmp(m_client_list[i]->m_account_password, account_password, 10) == 0) {
-				sprintf(G_cTxt, "<%d> Duplicate account player! Deleted with data save : CharName(%s) AccntName(%s) IP(%s)", i, m_client_list[i]->m_char_name, m_client_list[i]->m_account_name, m_client_list[i]->m_ip_address);
-				hb::logger::log("{}", G_cTxt);
-				//PutLogFileList(G_cTxt);
-				delete_client(i, true, true, false);
-			}
-			else {
-				memcpy(m_client_list[client_h]->m_char_name, char_name, hb::shared::limits::CharNameLen - 1);
-				memcpy(m_client_list[client_h]->m_account_name, account_name, hb::shared::limits::AccountNameLen - 1);
-				memcpy(m_client_list[client_h]->m_account_password, account_password, hb::shared::limits::AccountPassLen - 1);
+    for(int i = 1; i < MaxClients; i++)
+        if ((m_client_list[i] != 0) && (client_h != i) && (hb_strnicmp(m_client_list[i]->m_account_name, account_name, hb::shared::limits::AccountNameLen - 1) == 0)) {
+            if (memcmp(m_client_list[i]->m_account_password, account_password, 10) == 0) {
+                sprintf(G_cTxt, "<%d> Duplicate account player! Deleted with data save : CharName(%s) AccntName(%s) IP(%s)", i, m_client_list[i]->m_char_name, m_client_list[i]->m_account_name, m_client_list[i]->m_ip_address);
+                hb::logger::log("{}", G_cTxt);
+                //PutLogFileList(G_cTxt);
+                delete_client(i, true, true, false);
+            }
+            else {
+                memcpy(m_client_list[client_h]->m_char_name, char_name, hb::shared::limits::CharNameLen - 1);
+                memcpy(m_client_list[client_h]->m_account_name, account_name, hb::shared::limits::AccountNameLen - 1);
+                memcpy(m_client_list[client_h]->m_account_password, account_password, hb::shared::limits::AccountPassLen - 1);
 
-				delete_client(client_h, false, false, false);
-				return;
-			}
-		}
+                delete_client(client_h, false, false, false);
+                return;
+            }
+        }
 
-	for(int i = 1; i < MaxClients; i++)
-		if ((m_client_list[i] != 0) && (client_h != i) && (hb_strnicmp(m_client_list[i]->m_char_name, char_name, hb::shared::limits::CharNameLen - 1) == 0)) {
-			if (memcmp(m_client_list[i]->m_account_password, account_password, 10) == 0) {
-				sprintf(G_cTxt, "<%d> Duplicate player! Deleted with data save : CharName(%s) IP(%s)", i, m_client_list[i]->m_char_name, m_client_list[i]->m_ip_address);
-				hb::logger::log("{}", G_cTxt);
-				//PutLogFileList(G_cTxt);
-				delete_client(i, true, true, false);
-			}
-			else {
-				memcpy(m_client_list[client_h]->m_char_name, char_name, hb::shared::limits::CharNameLen - 1);
-				memcpy(m_client_list[client_h]->m_account_name, account_name, hb::shared::limits::AccountNameLen - 1);
-				memcpy(m_client_list[client_h]->m_account_password, account_password, hb::shared::limits::AccountPassLen - 1);
+    for(int i = 1; i < MaxClients; i++)
+        if ((m_client_list[i] != 0) && (client_h != i) && (hb_strnicmp(m_client_list[i]->m_char_name, char_name, hb::shared::limits::CharNameLen - 1) == 0)) {
+            if (memcmp(m_client_list[i]->m_account_password, account_password, 10) == 0) {
+                sprintf(G_cTxt, "<%d> Duplicate player! Deleted with data save : CharName(%s) IP(%s)", i, m_client_list[i]->m_char_name, m_client_list[i]->m_ip_address);
+                hb::logger::log("{}", G_cTxt);
+                //PutLogFileList(G_cTxt);
+                delete_client(i, true, true, false);
+            }
+            else {
+                memcpy(m_client_list[client_h]->m_char_name, char_name, hb::shared::limits::CharNameLen - 1);
+                memcpy(m_client_list[client_h]->m_account_name, account_name, hb::shared::limits::AccountNameLen - 1);
+                memcpy(m_client_list[client_h]->m_account_password, account_password, hb::shared::limits::AccountPassLen - 1);
 
-				delete_client(client_h, false, false);
-				return;
-			}
-		}
+                delete_client(client_h, false, false);
+                return;
+            }
+        }
 
-	memcpy(m_client_list[client_h]->m_char_name, char_name, hb::shared::limits::CharNameLen - 1);
-	memcpy(m_client_list[client_h]->m_account_name, account_name, hb::shared::limits::AccountNameLen - 1);
-	memcpy(m_client_list[client_h]->m_account_password, account_password, hb::shared::limits::AccountPassLen - 1);
+    memcpy(m_client_list[client_h]->m_char_name, char_name, hb::shared::limits::CharNameLen - 1);
+    memcpy(m_client_list[client_h]->m_account_name, account_name, hb::shared::limits::AccountNameLen - 1);
+    memcpy(m_client_list[client_h]->m_account_password, account_password, hb::shared::limits::AccountPassLen - 1);
 
-	m_client_list[client_h]->m_is_observer_mode = is_observer_mode;
+    m_client_list[client_h]->m_is_observer_mode = is_observer_mode;
 
-	// Admin validation
-	m_client_list[client_h]->m_admin_index = -1;
-	m_client_list[client_h]->m_admin_level = 0;
-	m_client_list[client_h]->m_is_gm_mode = false;
-	int admin_idx = find_admin_by_account(account_name);
-	if (admin_idx != -1 && hb_stricmp(m_admin_list[admin_idx].m_char_name, char_name) == 0)
-	{
-		if (strcmp(m_admin_list[admin_idx].approved_ip, "0.0.0.0") == 0)
-		{
-			strncpy(m_admin_list[admin_idx].approved_ip, m_client_list[client_h]->m_ip_address, 20);
-			m_admin_list[admin_idx].approved_ip[20] = '\0';
-			hb::logger::log("Admin IP auto-set: account={} ip={}", account_name, m_client_list[client_h]->m_ip_address);
+    // Admin validation
+    m_client_list[client_h]->m_admin_index = -1;
+    m_client_list[client_h]->m_admin_level = 0;
+    m_client_list[client_h]->m_is_gm_mode = false;
+    int admin_idx = find_admin_by_account(account_name);
+    if (admin_idx != -1 && hb_stricmp(m_admin_list[admin_idx].m_char_name, char_name) == 0)
+    {
+        if (strcmp(m_admin_list[admin_idx].approved_ip, "0.0.0.0") == 0)
+        {
+            strncpy(m_admin_list[admin_idx].approved_ip, m_client_list[client_h]->m_ip_address, 20);
+            m_admin_list[admin_idx].approved_ip[20] = '\0';
+            hb::logger::log("Admin IP auto-set: account={} ip={}", account_name, m_client_list[client_h]->m_ip_address);
 
-			sqlite3* configDb = nullptr;
-			std::string dbPath;
-			if (EnsureGameConfigDatabase(&configDb, dbPath, nullptr))
-			{
-				SaveAdminConfig(configDb, this);
-				CloseGameConfigDatabase(configDb);
-			}
+            sqlite3* configDb = nullptr;
+            std::string dbPath;
+            if (EnsureGameConfigDatabase(&configDb, dbPath, nullptr))
+            {
+                SaveAdminConfig(configDb, this);
+                CloseGameConfigDatabase(configDb);
+            }
 
-			m_client_list[client_h]->m_admin_index = admin_idx;
-			m_client_list[client_h]->m_admin_level = m_admin_list[admin_idx].m_admin_level;
-		}
-		else if (strcmp(m_admin_list[admin_idx].approved_ip, m_client_list[client_h]->m_ip_address) == 0)
-		{
-			m_client_list[client_h]->m_admin_index = admin_idx;
-			m_client_list[client_h]->m_admin_level = m_admin_list[admin_idx].m_admin_level;
-		}
-		else
-		{
-			hb::logger::error("Admin IP mismatch for account {} (expected {}, got {})", account_name, m_admin_list[admin_idx].approved_ip, m_client_list[client_h]->m_ip_address);
-			delete_client(client_h, false, false, false);
-			return;
-		}
-	}
+            m_client_list[client_h]->m_admin_index = admin_idx;
+            m_client_list[client_h]->m_admin_level = m_admin_list[admin_idx].m_admin_level;
+        }
+        else if (strcmp(m_admin_list[admin_idx].approved_ip, m_client_list[client_h]->m_ip_address) == 0)
+        {
+            m_client_list[client_h]->m_admin_index = admin_idx;
+            m_client_list[client_h]->m_admin_level = m_admin_list[admin_idx].m_admin_level;
+        }
+        else
+        {
+            hb::logger::error("Admin IP mismatch for account {} (expected {}, got {})", account_name, m_admin_list[admin_idx].approved_ip, m_client_list[client_h]->m_ip_address);
+            delete_client(client_h, false, false, false);
+            return;
+        }
+    }
 
-	init_player_data(client_h, 0, 0); //send_msg_to_ls(ServerMsgId::RequestPlayerData, client_h);
+    // --- AUTO-INVISIBILIDAD PARA GMs AL CONECTAR ---
+    if (m_client_list[client_h]->m_admin_level > 0) {
+        // 1. Te oculta a nivel de servidor (los jugadores normales no reciben tus paquetes de movimiento)
+        m_client_list[client_h]->m_is_admin_invisible = true; 
+        
+        // 2. Le dice a tu propio cliente que te dibuje medio transparente
+        m_client_list[client_h]->m_status.invisibility = true; 
+        
+        // 3. Activa el comando /gm para que los monstruos no te peguen nada más entrar
+        m_client_list[client_h]->m_is_gm_mode = true; 
+    }
+    // -----------------------------------------------
+
+    init_player_data(client_h, 0, 0); //send_msg_to_ls(ServerMsgId::RequestPlayerData, client_h);
 }
 
 // 05/22/2004 - Hypnotoad - sends client to proper location after dieing
