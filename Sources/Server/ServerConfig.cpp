@@ -71,6 +71,7 @@ bool load_server_config(const std::string& path, server_config& cfg)
 		auto& dr = root["drop_rates"];
 		read_value(dr, "primary", cfg.drop_rates.primary);
 		read_value(dr, "gold", cfg.drop_rates.gold);
+		read_value(dr, "base_gold", cfg.drop_rates.base_gold);
 		read_value(dr, "secondary", cfg.drop_rates.secondary);
 		read_value(dr, "rep_modifier", cfg.drop_rates.rep_modifier);
 	}

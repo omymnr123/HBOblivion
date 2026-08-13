@@ -2737,7 +2737,6 @@ static uint32_t ApplyDropMultiplier(uint32_t baseChance, float multiplier)
 
 // Base drop chances (out of 10000 = 100%)
 static constexpr uint32_t BASE_PRIMARY_DROP_CHANCE = 1000;   // 10% base primary item drop chance
-static constexpr uint32_t BASE_GOLD_DROP_CHANCE = 3000;      // 30% base gold drop chance
 static constexpr uint32_t BASE_SECONDARY_DROP_CHANCE = 500;  // 5% base secondary/bonus drop chance
 
 void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char attacker_type)
@@ -2790,13 +2789,15 @@ void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char a
         if (max_drops < 1) max_drops = 1;
 
         // Collect valid items from the drop table
-        std::vector<int> valid_items;
+        std::vector<DropEntry> valid_items;
+        int total_valid_weight = 0;
+
         for (int tier = 1; tier <= 2; tier++) {
             for (const auto& entry : table->tierEntries[tier]) {
                 // Check for duplicates
                 bool exists = false;
-                for (int vid : valid_items) {
-                    if (vid == entry.item_id) { exists = true; break; }
+                for (const auto& vi : valid_items) {
+                    if (vi.item_id == entry.item_id) { exists = true; break; }
                 }
                 if (exists) continue;
 
@@ -2809,39 +2810,47 @@ void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char a
                         temp_config.m_id_num == 656 || // XelimaStone
                         temp_config.m_id_num == 657)   // MerienStone
                     {
-                        valid_items.push_back(entry.item_id);
+                        valid_items.push_back(entry);
+                        total_valid_weight += entry.weight;
                     }
                 }
             }
         }
 
-        if (!valid_items.empty()) {
+        if (!valid_items.empty() && total_valid_weight > 0) {
             // Shuffle eligible members to distribute loot randomly
             for (size_t i = 0; i < eligible_members.size(); ++i) {
                 size_t j = static_cast<size_t>(m_game->dice(1, static_cast<int>(eligible_members.size()))) - 1;
                 std::swap(eligible_members[i], eligible_members[j]);
             }
             
-            // Limit max drops to available unique items and available members
+            // Limit max drops to available members
             if (max_drops > static_cast<int>(eligible_members.size())) max_drops = static_cast<int>(eligible_members.size());
-            if (max_drops > static_cast<int>(valid_items.size())) max_drops = static_cast<int>(valid_items.size());
-
-            // Shuffle valid items
-            for (size_t i = 0; i < valid_items.size(); ++i) {
-                size_t j = static_cast<size_t>(m_game->dice(1, static_cast<int>(valid_items.size()))) - 1;
-                std::swap(valid_items[i], valid_items[j]);
-            }
 
             for (int i = 0; i < max_drops; i++) {
                 int winner_h = eligible_members[i];
-                int chosen_item_id = valid_items[i];
                 
-                CItem* extra_loot_item = new CItem;
-                if (m_game->m_item_manager->init_item_attr(extra_loot_item, chosen_item_id)) {
-                    m_game->m_item_manager->generate_item_attributes(extra_loot_item);
-                    m_game->add_extra_loot(winner_h, extra_loot_item);
+                // Roll for item based on real weights
+                int roll = m_game->dice(1, total_valid_weight);
+                int cumulative = 0;
+                int chosen_item_id = 0;
+                
+                for (const auto& vi : valid_items) {
+                    cumulative += vi.weight;
+                    if (roll <= cumulative) {
+                        chosen_item_id = vi.item_id;
+                        break;
+                    }
                 }
-                delete extra_loot_item;
+                
+                if (chosen_item_id != 0) {
+                    CItem* extra_loot_item = new CItem;
+                    if (m_game->m_item_manager->init_item_attr(extra_loot_item, chosen_item_id)) {
+                        m_game->m_item_manager->generate_item_attributes(extra_loot_item);
+                        m_game->add_extra_loot(winner_h, extra_loot_item);
+                    }
+                    delete extra_loot_item;
+                }
             }
         }
     }
@@ -2851,7 +2860,7 @@ void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char a
     // Apply drop rate multipliers to base chances
     // At 1.0: normal, at 1.5: 150% more likely, at 2.0: 200%, etc.
     uint32_t primaryChance = ApplyDropMultiplier(BASE_PRIMARY_DROP_CHANCE, m_game->m_primary_drop_rate);
-    uint32_t goldChance = ApplyDropMultiplier(BASE_GOLD_DROP_CHANCE, m_game->m_gold_drop_rate);
+    uint32_t goldChance = ApplyDropMultiplier(m_game->m_base_gold_drop_chance, m_game->m_gold_drop_rate);
 
     float cazador_bonus = 1.0f;
     if (attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[attacker_h] != nullptr) {

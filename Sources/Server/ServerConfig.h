@@ -9,6 +9,7 @@ struct server_config
 	{
 		float primary = 1.0f;
 		float gold = 1.0f;
+		int base_gold = 3000;
 		float secondary = 1.0f;
 		int rep_modifier = 5;
 	} drop_rates;

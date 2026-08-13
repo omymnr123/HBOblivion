@@ -383,6 +383,7 @@ CGame::CGame()
 	m_force_recall_time = 0;
 	m_primary_drop_rate = 1.0f;    // 1.0 = normal (10% base), 1.5 = 150%, etc.
 	m_gold_drop_rate = 1.0f;       // 1.0 = normal (30% base), 1.5 = 150%, etc.
+	m_base_gold_drop_chance = 3000;
 	m_secondary_drop_rate = 1.0f;  // 1.0 = normal (5% base), 1.5 = 150%, etc.
 
 	//Show Debug hb::shared::render::Window
@@ -14726,6 +14727,7 @@ void CGame::apply_server_config(const server_config& cfg)
 	// Drop rates
 	m_primary_drop_rate = cfg.drop_rates.primary;
 	m_gold_drop_rate = cfg.drop_rates.gold;
+	m_base_gold_drop_chance = cfg.drop_rates.base_gold;
 	m_secondary_drop_rate = cfg.drop_rates.secondary;
 	m_rep_drop_modifier = static_cast<char>(cfg.drop_rates.rep_modifier);
 

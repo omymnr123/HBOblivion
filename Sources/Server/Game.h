@@ -748,9 +748,11 @@ public:
 	short m_force_recall_time;
 
 	// 22/05/2004 - Drop rate multipliers (1.0 = normal, 1.5 = 150%, 0.5 = 50%)
-	float m_primary_drop_rate;    // Primary item drops (base 10%)
+	float m_primary_drop_rate;     // Primary items (base 10%)
 	float m_gold_drop_rate;       // Gold drops (base 30%)
-	float m_secondary_drop_rate;  // Bonus/secondary drops (base 5%)
+	uint32_t m_base_gold_drop_chance; // Base gold drop chance out of 10000
+	float m_secondary_drop_rate;   // Secondary items (base 5%)
+	char m_rep_drop_modifier;       // Reputation impact on secondary drops
 
 	// 25/05/2004
 	int m_final_shutdown_count;
@@ -783,7 +785,6 @@ public:
 
 	// Limit Checks
 	bool m_allow_100_all_skill;
-	char m_rep_drop_modifier;
 
 	// ============================================================================
 	// Configurable Settings (loaded from server_config.json)
