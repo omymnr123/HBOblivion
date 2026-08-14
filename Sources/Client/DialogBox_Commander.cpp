@@ -499,11 +499,14 @@ bool DialogBox_Commander::on_click()
 			if (tX > 494) tX = 494;
 			if (tY > 494) tY = 494;
 			{
-				// Guild teleport location removed with guild system
+				auto pkt = hb::net::make_common_command(CommonType::SetGuildTeleportLoc, m_game->m_player->m_player_x, m_game->m_player->m_player_y);
+				pkt.v1 = tX;
+				pkt.v2 = tY;
+				m_game->send_game_packet(pkt);
+				m_mode = mode::main;
+				audio_manager::get().play_game_sound(sound_type::effect, 14, 5);
+				m_game->request_map_status("middleland", 1);
 			}
-			m_mode = mode::main;
-			audio_manager::get().play_game_sound(sound_type::effect, 14, 5);
-			m_game->request_map_status("middleland", 1);
 		}
 		if (mouse_in(btn_back))
 		{
@@ -521,7 +524,8 @@ bool DialogBox_Commander::on_click()
 	case mode::use_tp:
 		if (mouse_in(btn_use_tp))
 		{
-			// Guild teleport removed with guild system
+			auto pkt = hb::net::make_common_command(CommonType::GuildTeleport, m_game->m_player->m_player_x, m_game->m_player->m_player_y);
+			m_game->send_game_packet(pkt);
 			disable_dialog_box(DialogBoxId::CrusadeCommander);
 			audio_manager::get().play_game_sound(sound_type::effect, 14, 5);
 		}

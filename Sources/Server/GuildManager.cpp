@@ -963,3 +963,29 @@ void GuildManager::update(uint32_t current_time)
 		}
 	}
 }
+
+void GuildManager::set_guild_teleport(uint32_t guild_guid, const char* map_name, short x, short y)
+{
+	if (!m_db || !map_name) return;
+
+	GuildTeleportLoc& loc = m_guild_teleports[guild_guid];
+	strncpy(loc.map_name, map_name, 10);
+	loc.map_name[10] = '\0';
+	loc.x = x;
+	loc.y = y;
+	loc.active = true;
+
+	char sql[256];
+	snprintf(sql, sizeof(sql), "INSERT OR REPLACE INTO guild_teleports (guild_guid, map_name, x, y, active) VALUES (%u, '%s', %d, %d, 1);", 
+		guild_guid, map_name, x, y);
+	sqlite3_exec(m_db, sql, nullptr, nullptr, nullptr);
+}
+
+GuildManager::GuildTeleportLoc GuildManager::get_guild_teleport(uint32_t guild_guid)
+{
+	if (m_guild_teleports.count(guild_guid)) {
+		return m_guild_teleports[guild_guid];
+	}
+	GuildTeleportLoc empty = {0};
+	return empty;
+}

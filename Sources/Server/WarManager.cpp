@@ -10,6 +10,7 @@
 #include "ItemManager.h"
 #include "MagicManager.h"
 #include "SkillManager.h"
+#include "GuildManager.h"
 #include "QuestManager.h"
 #include "LootManager.h"
 #include "Packet/SharedPackets.h"
@@ -949,13 +950,17 @@ void WarManager::send_map_status(int client_h)
 
 void WarManager::map_status_handler(int client_h, int mode, const char* map_name)
 {
-	
-
 	if (m_game->m_client_list[client_h] == 0) return;
 
 	switch (mode) {
 	case 1:
-		// Guild teleport locations removed
+		// Restaurado: Enviar la localizacion del teletransporte al cliente que lo solicita
+		if (m_game->m_client_list[client_h]->m_guild_guid != 0) {
+			auto tp = m_game->m_guild_manager->get_guild_teleport(m_game->m_client_list[client_h]->m_guild_guid);
+			if (tp.active) {
+				m_game->send_notify_msg(0, client_h, Notify::TcLoc, tp.x, tp.y, 0, tp.map_name);
+			}
+		}
 		break;
 
 	case 3:

@@ -96,6 +96,16 @@ public:
 	// --- NUEVO: Funcion para actualizar cada minuto ---
 	void update(uint32_t current_time);
 
+	// --- SISTEMA DE TELETRANSPORTE CRUSADE ---
+	struct GuildTeleportLoc {
+		char map_name[11] = {0};
+		short x = 0;
+		short y = 0;
+		bool active = false;
+	};
+	void set_guild_teleport(uint32_t guild_guid, const char* map_name, short x, short y);
+	GuildTeleportLoc get_guild_teleport(uint32_t guild_guid);
+
 private:
 	CGame* m_game = nullptr;
 	sqlite3* m_db = nullptr;
@@ -107,6 +117,7 @@ private:
 
 	// Cache of guild skills: guild_guid -> (skill_id -> level)
 	std::map<uint32_t, std::map<int, int>> m_guild_skills_cache;
+	std::map<uint32_t, GuildTeleportLoc> m_guild_teleports;
 	void load_guild_skills_cache();
 
 	// Helper: broadcast NullAction to update guild name visually for nearby players

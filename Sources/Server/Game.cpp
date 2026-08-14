@@ -6608,6 +6608,32 @@ void CGame::client_common_handler(int client_h, char* data)
 		m_war_manager->request_summon_war_unit_handler(client_h, sX, sY, v1, v2, v3);
 		break;
 
+	case CommonType::SetGuildTeleportLoc:
+		// Verificamos que sea de un clan, Rango 1 (Master) y Duty 3 (Comandante)
+		if (m_client_list[client_h]->m_guild_guid != 0 && m_client_list[client_h]->m_crusade_duty == 3 && m_client_list[client_h]->m_guild_rank == 1) {
+			m_guild_manager->set_guild_teleport(m_client_list[client_h]->m_guild_guid, "middleland", v1, v2);
+			send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "Punto de teletransporte tactico establecido.");
+
+			// Enviar la senal a todos los miembros del clan online para que dibujen el triangulo
+			for (int i = 1; i < MaxClients; i++) {
+				if (m_client_list[i] != nullptr && m_client_list[i]->m_guild_guid == m_client_list[client_h]->m_guild_guid) {
+					send_notify_msg(0, i, Notify::TcLoc, v1, v2, 0, "middleland");
+				}
+			}
+		}
+		break;
+
+	case CommonType::GuildTeleport:
+		if (m_client_list[client_h]->m_guild_guid != 0) {
+			auto tp = m_guild_manager->get_guild_teleport(m_client_list[client_h]->m_guild_guid);
+			if (tp.active) {
+				request_teleport_handler(client_h, "2   ", tp.map_name, tp.x, tp.y);
+			} else {
+				send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "Your guild does not have an active teleport point.");
+			}
+		}
+		break;
+
 	case CommonType::RequestHelp:
 		//DbgWnd->AddEventMsg("RECV -> Source::Client -> MsgId::CommandCommon -> CommonType::RequestHelp");
 		request_help_handler(client_h);
