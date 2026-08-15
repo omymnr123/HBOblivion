@@ -6612,7 +6612,7 @@ void CGame::client_common_handler(int client_h, char* data)
 		// Verificamos que sea de un clan, Rango 1 (Master) y Duty 3 (Comandante)
 		if (m_client_list[client_h]->m_guild_guid != 0 && m_client_list[client_h]->m_crusade_duty == 3 && m_client_list[client_h]->m_guild_rank == 1) {
 			m_guild_manager->set_guild_teleport(m_client_list[client_h]->m_guild_guid, "middleland", v1, v2);
-			send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "Punto de teletransporte tactico establecido.");
+			send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "Tactical teleport point established.");
 
 			// Enviar la senal a todos los miembros del clan online para que dibujen el triangulo
 			for (int i = 1; i < MaxClients; i++) {

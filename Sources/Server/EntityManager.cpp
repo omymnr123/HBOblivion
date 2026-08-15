@@ -1066,6 +1066,151 @@ void CEntityManager::delete_entity(int entity_handle)
     if (m_game == nullptr)
         return;
 
+    // === RESTAURACIÓN DEL SISTEMA DE ELITES (40 KILLS) ===
+    if (m_npc_list[entity_handle] != nullptr) {
+        int map_idx = m_npc_list[entity_handle]->m_map_index;
+        int spot_idx = m_npc_list[entity_handle]->m_spot_mob_index;
+
+        // Si el NPC pertenece a un Spot Generador válido
+        if (spot_idx > 0 && spot_idx < hb::server::map::MaxSpotMobGenerator) {
+            
+            // Huella de los Elites de Tumbas (Sarcofagos)
+            bool is_tomb_elite = (m_npc_list[entity_handle]->m_status.hero == true && 
+                                  m_npc_list[entity_handle]->m_follow_owner_type == hb::shared::owner_class::Npc);
+            
+            // Huella de un Elite de spot 
+            bool is_spot_elite = (m_npc_list[entity_handle]->m_status.hero == true && !is_tomb_elite);
+
+            // Solo contamos si es un NPC normal de ese spot
+            if (!is_tomb_elite && !is_spot_elite) {
+                m_game->m_map_list[map_idx]->m_spot_mob_generator[spot_idx].elite_kill_counter++;
+
+                // Si hemos matado al número 40...
+                if (m_game->m_map_list[map_idx]->m_spot_mob_generator[spot_idx].elite_kill_counter >= 40) {
+                    
+                    // 1. Reseteamos el contador a 0
+                    m_game->m_map_list[map_idx]->m_spot_mob_generator[spot_idx].elite_kill_counter = 0;
+                    
+                    // 2. Bloqueamos el spawn de mobs normales en este spot por 30 SEGUNDOS
+                    m_game->m_map_list[map_idx]->m_spot_mob_generator[spot_idx].elite_block_until_time = GameClock::GetTimeMS() + 30000;
+
+                    // 3. Hacemos DESAPARECER a todos los NPC normales de este spot que sigan vivos
+                    for (int i = 0; i < hb::server::config::MaxNpcs; i++) {
+                        if (m_npc_list[i] != nullptr && i != entity_handle &&
+                            m_npc_list[i]->m_map_index == map_idx && 
+                            m_npc_list[i]->m_spot_mob_index == spot_idx &&
+                            !m_npc_list[i]->m_status.hero) 
+                        {
+                            // Limpiamos la colisión
+                            m_game->m_map_list[map_idx]->clear_owner(14, i, hb::shared::owner_class::Npc, m_npc_list[i]->m_x, m_npc_list[i]->m_y);
+                            
+                            m_npc_list[i]->m_hp = 0;
+                            m_npc_list[i]->m_is_killed = true;
+                            
+                            // Restamos la población libre
+                            m_game->m_map_list[map_idx]->m_spot_mob_generator[spot_idx].cur_mobs--;
+                            m_npc_list[i]->m_spot_mob_index = -1;
+                            
+                            // Ordenamos al cliente que lo DESAPAREZCA
+                            m_game->send_event_to_near_client_type_a(i, hb::shared::owner_class::Npc, hb::shared::net::MsgId::EventLog, hb::shared::net::MsgType::Reject, 0, 0, 0);
+                        }
+                    }
+
+                    // ¡CLAVE! Liberamos físicamente la baldosa del mob 40 (el cadáver) justo antes del spawn
+                    // para que quede como un "espacio vacío" válido para los Élites[cite: 2].
+                    m_game->m_map_list[map_idx]->clear_owner(14, entity_handle, hb::shared::owner_class::Npc, m_npc_list[entity_handle]->m_x, m_npc_list[entity_handle]->m_y);
+
+                    // ¡CLAVE! Aumentamos temporalmente el límite máximo del spot para que create_entity no bloquee a los Élites
+                    int original_max_mobs = m_game->m_map_list[map_idx]->m_spot_mob_generator[spot_idx].max_mobs;
+                    m_game->m_map_list[map_idx]->m_spot_mob_generator[spot_idx].max_mobs += 3;
+
+                    // 4. Invocamos a los 3 Élites buffados
+                    for (int e = 0; e < 3; e++) {
+                        int naming_value = m_game->m_map_list[map_idx]->get_empty_naming_value();
+                        if (naming_value == -1) continue;
+                        
+                        char uniqueName[21];
+                        std::snprintf(uniqueName, sizeof(uniqueName), "XX%d", naming_value);
+                        uniqueName[0] = '_';
+                        uniqueName[1] = map_idx + 65;
+                        
+                        int pX = 0, pY = 0; 
+                        
+                        int npc_config_id = m_game->m_map_list[map_idx]->m_spot_mob_generator[spot_idx].npc_config_id;
+                        
+                        char move_type = MoveType::RandomArea;
+                        char waypoint[11] = {0}; 
+                        
+                        hb::shared::geometry::GameRectangle* pRect = &m_game->m_map_list[map_idx]->m_spot_mob_generator[spot_idx].rcRect;
+                        
+                        if (m_game->m_map_list[map_idx]->m_spot_mob_generator[spot_idx].type == 2) {
+                            move_type = MoveType::RandomWaypoint;
+                            pRect = nullptr; 
+                            for (int k = 0; k < 10; k++) {
+                                waypoint[k] = (char)m_game->m_map_list[map_idx]->m_spot_mob_generator[spot_idx].waypoints[k];
+                            }
+                        }
+
+                        // CREACIÓN NATIVA: Pasamos los parámetros de bypass de mapa que funcionaron en el Intento 2
+                        int eliteHandle = create_entity(
+                            npc_config_id, uniqueName, m_game->m_map_list[map_idx]->m_name,
+                            (rand() % 3), 0, move_type,
+                            &pX, &pY, waypoint, 
+                            pRect, 
+                            spot_idx, -1, false, false, true, false, true
+                        );
+
+                        if (eliteHandle > 0 && m_npc_list[eliteHandle] != nullptr) {
+                            CNpc* eliteMob = m_npc_list[eliteHandle];
+                            
+                            // === LA MAGIA DEL REPOSICIONAMIENTO ===
+                            // En vez de forzar las coordenadas en la creación y crashear, dejamos que 
+                            // nazca de forma segura e inmediatamente lo reubicamos.
+                            
+                            short finalX = m_npc_list[entity_handle]->m_x;
+                            short finalY = m_npc_list[entity_handle]->m_y;
+                            
+                            // Buscamos una baldosa libre alrededor del cadáver
+                            m_game->get_empty_position(&finalX, &finalY, (char)map_idx);
+                            
+                            // 1. Limpiamos la colisión original del élite
+                            m_game->m_map_list[map_idx]->clear_owner(14, eliteHandle, hb::shared::owner_class::Npc, eliteMob->m_x, eliteMob->m_y);
+                            
+                            // 2. Lo teletransportamos a las coordenadas alrededor del cadáver
+                            eliteMob->m_x = finalX;
+                            eliteMob->m_y = finalY;
+                            
+                            // 3. Le asignamos la nueva colisión[cite: 2]
+                            m_game->m_map_list[map_idx]->set_owner(eliteHandle, hb::shared::owner_class::Npc, finalX, finalY);
+                            // =======================================
+
+                            eliteMob->m_hp_min *= 4;
+                            eliteMob->m_hp_max *= 4;
+                            eliteMob->m_hp = eliteMob->m_hp_max;
+                            eliteMob->m_max_hp = eliteMob->m_hp_max;
+                            eliteMob->m_min_damage *= 4;
+                            eliteMob->m_max_damage *= 4;
+                            
+                            eliteMob->m_status.hero = true; 
+                            eliteMob->m_summoned_time = GameClock::GetTimeMS();
+                            
+                            // Reasignamos al spot manualmente
+                            eliteMob->m_spot_mob_index = spot_idx;
+                            m_game->m_map_list[map_idx]->m_spot_mob_generator[spot_idx].cur_mobs++;
+                            
+                        } else {
+                            m_game->m_map_list[map_idx]->set_naming_value_empty(naming_value);
+                        }
+                    }
+
+                    // Restauramos el límite original para no dejar el spot modificado
+                    m_game->m_map_list[map_idx]->m_spot_mob_generator[spot_idx].max_mobs = original_max_mobs;
+                }
+            }
+        }
+    }
+    // =====================================================
+
     delete_npc_internal(entity_handle);
 
     remove_from_active_list(entity_handle);

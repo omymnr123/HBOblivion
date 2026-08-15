@@ -17,12 +17,12 @@ bool GameCmdTeleport::execute(CGame* game, int client_h, const char* args)
     if (parsed >= 1)
     {
         if (game->gm_teleport_to(client_h, mapName, x, y)) {
-            game->send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "Teletransportado con exito.");
+            game->send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "Successfully teleported.");
         } else {
-            game->send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "Fallo (mapa invalido).");
+            game->send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "Failed (Invalid Map).");
         }
     } else {
-        game->send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "Uso: /tp <mapa> [x] [y]");
+        game->send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "Usage: /tp <map> [x] [y]");
     }
     return true;
 }
