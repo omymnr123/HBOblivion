@@ -791,6 +791,24 @@ void Screen_OnGame::on_render()
         m_game->m_effect_sprites[101]->draw(m_gate_posit_x * 32 - m_game->m_Camera.get_x() - 96, m_gate_posit_y * 32 - m_game->m_Camera.get_y() - 69, m_game->m_entity_state.m_effect_frame % 30, hb::shared::sprite::DrawParams::alpha_blend(0.5f));
     }
 
+    // === EVENTO MOBA: DIBUJAR TEMPORIZADOR CON CHRONO ===
+    if (m_game->m_bIsRegisteredForMiddleland)
+    {
+        auto now = std::chrono::steady_clock::now();
+        if (m_game->m_middleland_end_time > now)
+        {
+            long long remaining_seconds = std::chrono::duration_cast<std::chrono::seconds>(m_game->m_middleland_end_time - now).count();
+            long minutes = static_cast<long>(remaining_seconds / 60);
+            long seconds = static_cast<long>(remaining_seconds % 60);
+            
+            char timer_text[50];
+            snprintf(timer_text, sizeof(timer_text), "Middleland Siege: %02ld:%02ld", minutes, seconds);
+            
+            hb::shared::text::draw_text_aligned(GameFont::Default, 0, 525, 800, 20, timer_text, hb::shared::text::TextStyle::from_color(GameColors::UIBuildRed), hb::shared::text::Align::TopCenter);
+        }
+    }
+    // ====================================================
+
     // UI rendering
     FrameTiming::begin_profile(ProfileStage::DrawDialogs);
     m_game->get_dialog_box_manager().draw_all();

@@ -138,6 +138,20 @@ void DialogBox_CityHallMenu::DrawMode0_MainMenu(short sX, short sY, short size_x
 	else
 		hb::shared::text::draw_text_aligned(GameFont::Default, sX, sY + 220, (sX + size_x) - (sX), 15, DRAW_DIALOGBOX_CITYHALL_MENU14, hb::shared::text::TextStyle::from_color(GameColors::UIDisabled), hb::shared::text::Align::TopCenter);
 
+	// === EVENTO MOBA: DIBUJO DEL BOTÓN DE ASEDIO ===
+	if (m_game->m_bMiddlelandSiegeRegistrationOpen && player().m_citizen)
+	{
+		if (mouse_in(link_middleland_siege))
+			hb::shared::text::draw_text_aligned(GameFont::Default, sX, sY + 245, (sX + size_x) - (sX), 15, "Middleland Siege", hb::shared::text::TextStyle::from_color(GameColors::UIWhite), hb::shared::text::Align::TopCenter);
+		else
+			hb::shared::text::draw_text_aligned(GameFont::Default, sX, sY + 245, (sX + size_x) - (sX), 15, "Middleland Siege", hb::shared::text::TextStyle::from_color(GameColors::UIMagicBlue), hb::shared::text::Align::TopCenter);
+	}
+	else
+	{
+		hb::shared::text::draw_text_aligned(GameFont::Default, sX, sY + 245, (sX + size_x) - (sX), 15, "Middleland Siege", hb::shared::text::TextStyle::from_color(GameColors::UIDisabled), hb::shared::text::Align::TopCenter);
+	}
+	// ===============================================
+
 	hb::shared::text::draw_text_aligned(GameFont::Default, sX, sY + 270, (sX + size_x) - (sX), 15, DRAW_DIALOGBOX_CITYHALL_MENU17, hb::shared::text::TextStyle::from_color(GameColors::UIBlack), hb::shared::text::Align::TopCenter);
 }
 
@@ -507,7 +521,22 @@ bool DialogBox_CityHallMenu::on_click_mode0(short sX, short sY)
 		return true;
 	}
 
-	return false;
+	// === EVENTO MOBA: ASEDIO EN MIDDLELAND ===
+	if (mouse_in(link_middleland_siege))
+	{
+		if (!m_game->m_bMiddlelandSiegeRegistrationOpen) return false;
+		if (!player().m_citizen) return false;
+
+		m_game->m_bIsRegisteredForMiddleland = true;
+		m_game->send_game_packet(hb::net::make_common_command(CommonType::ReqJoinMiddlelandSiege, m_game->m_player->m_player_x, m_game->m_player->m_player_y));
+
+		m_game->get_dialog_box_manager().disable_dialog_box(DialogBoxId::CityHallMenu);
+		audio_manager::get().play_game_sound(sound_type::effect, 14, 5);
+		return true;
+	}
+	// =========================================
+
+    return false;
 }
 
 bool DialogBox_CityHallMenu::on_click_mode1(short sX, short sY)

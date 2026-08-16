@@ -217,6 +217,7 @@ char _tmp_cTmpDirY[9] = { 0,-1,-1,0,1,1,1,0,-1 };
 
 CGame::CGame()
 {
+	
 	int x;
 
 	BuildMoveLocTables();
@@ -236,7 +237,7 @@ CGame::CGame()
 	m_summon_creature_duration = SummonTime;
 	m_autosave_interval = AutoSaveTime;
 	m_lag_protection_interval = RagProtectionTime;
-
+    
 	// Character/Leveling Settings
 	m_base_stat_value = 10;
 	m_max_creation_stat_value = 4;
@@ -385,7 +386,8 @@ CGame::CGame()
 	m_gold_drop_rate = 1.0f;       // 1.0 = normal (30% base), 1.5 = 150%, etc.
 	m_base_gold_drop_chance = 3000;
 	m_secondary_drop_rate = 1.0f;  // 1.0 = normal (5% base), 1.5 = 150%, etc.
-
+	m_middleland_siege_state = 0;
+	m_middleland_siege_timer = 0;
 	//Show Debug hb::shared::render::Window
 	//DbgWnd = new CDebugWindow();
 	//DbgWnd->Startup();
@@ -5108,6 +5110,9 @@ void CGame::game_process()
 		}
 	}
 
+	// EVENTO MOBA: ASEDIO EN MIDDLELAND
+	middleland_siege_process();
+
 	// MODERNIZED: Socket polling moved to EventLoop (wmain.cpp) for continuous responsiveness
 	// This function now handles only game logic processing
 	npc_process();
@@ -5286,286 +5291,314 @@ bool CGame::is_blocked_by(int sender_h, int receiver_h) const
 // 05/29/2004 - Hypnotoad - GM chat tweak
 void CGame::chat_msg_handler(int client_h, char* data, size_t msg_size)
 {
-	int ret = sock::Event::CriticalError;
-	char* cp = 0;
-	uint8_t send_mode = 0;
+    int ret = sock::Event::CriticalError;
+    char* cp = 0;
+    uint8_t send_mode = 0;
 
-	if (m_client_list[client_h] == 0) return;
-	if (m_client_list[client_h]->m_is_init_complete == false) return;
-	if (msg_size > 83 + 30) {
-		hb::logger::debug<log_channel::chat>("[ChatMsg] Rejected from client {} — size {} exceeds max", client_h, msg_size);
-		return;
-	}
+    if (m_client_list[client_h] == 0) return;
+    if (m_client_list[client_h]->m_is_init_complete == false) return;
+    if (msg_size > 83 + 30) {
+        hb::logger::debug<log_channel::chat>("[ChatMsg] Rejected from client {} — size {} exceeds max", client_h, msg_size);
+        return;
+    }
 
-	auto* header = hb::net::PacketCast<hb::net::PacketHeader>(data, sizeof(hb::net::PacketHeader));
-	if (!header) return;
-	const auto* pkt = hb::net::PacketCast<hb::net::PacketCommandChatMsgHeader>(data, sizeof(hb::net::PacketCommandChatMsgHeader));
-	if (!pkt) return;
-	char* message = data + sizeof(hb::net::PacketCommandChatMsgHeader);
+    auto* header = hb::net::PacketCast<hb::net::PacketHeader>(data, sizeof(hb::net::PacketHeader));
+    if (!header) return;
+    const auto* pkt = hb::net::PacketCast<hb::net::PacketCommandChatMsgHeader>(data, sizeof(hb::net::PacketCommandChatMsgHeader));
+    if (!pkt) return;
+    char* message = data + sizeof(hb::net::PacketCommandChatMsgHeader);
 
-	hb::logger::debug<log_channel::chat>("[ChatMsg] client={} pkt->name='{}' expected='{}' msgSize={}",
-		client_h, pkt->name, m_client_list[client_h]->m_char_name, msg_size);
+    hb::logger::debug<log_channel::chat>("[ChatMsg] client={} pkt->name='{}' expected='{}' msgSize={}",
+        client_h, pkt->name, m_client_list[client_h]->m_char_name, msg_size);
 
-	if (hb_strnicmp(pkt->name, m_client_list[client_h]->m_char_name, strlen(m_client_list[client_h]->m_char_name)) != 0) {
-		hb::logger::debug<log_channel::chat>("[ChatMsg] Name mismatch — possible struct packing issue. PacketCommandChatMsgHeader size={}", sizeof(hb::net::PacketCommandChatMsgHeader));
-		return;
-	}
+    if (hb_strnicmp(pkt->name, m_client_list[client_h]->m_char_name, strlen(m_client_list[client_h]->m_char_name)) != 0) {
+        hb::logger::debug<log_channel::chat>("[ChatMsg] Name mismatch — possible struct packing issue. PacketCommandChatMsgHeader size={}", sizeof(hb::net::PacketCommandChatMsgHeader));
+        return;
+    }
 
-	if (m_client_list[client_h]->m_is_observer_mode) return;
+    if (m_client_list[client_h]->m_is_observer_mode) return;
 
-	// v1.432-2
-	int st_x, st_y;
-	if (m_map_list[m_client_list[client_h]->m_map_index] != 0) {
-		st_x = m_client_list[client_h]->m_x / 20;
-		st_y = m_client_list[client_h]->m_y / 20;
-		m_map_list[m_client_list[client_h]->m_map_index]->m_temp_sector_info[st_x][st_y].player_activity++;
+    // v1.432-2
+    int st_x, st_y;
+    if (m_map_list[m_client_list[client_h]->m_map_index] != 0) {
+        st_x = m_client_list[client_h]->m_x / 20;
+        st_y = m_client_list[client_h]->m_y / 20;
+        m_map_list[m_client_list[client_h]->m_map_index]->m_temp_sector_info[st_x][st_y].player_activity++;
 
-		switch (m_client_list[client_h]->m_side) {
-		case 0: m_map_list[m_client_list[client_h]->m_map_index]->m_temp_sector_info[st_x][st_y].neutral_activity++; break;
-		case 1: m_map_list[m_client_list[client_h]->m_map_index]->m_temp_sector_info[st_x][st_y].aresden_activity++; break;
-		case 2: m_map_list[m_client_list[client_h]->m_map_index]->m_temp_sector_info[st_x][st_y].elvine_activity++;  break;
-		}
-	}
-	cp = message;
+        switch (m_client_list[client_h]->m_side) {
+        case 0: m_map_list[m_client_list[client_h]->m_map_index]->m_temp_sector_info[st_x][st_y].neutral_activity++; break;
+        case 1: m_map_list[m_client_list[client_h]->m_map_index]->m_temp_sector_info[st_x][st_y].aresden_activity++; break;
+        case 2: m_map_list[m_client_list[client_h]->m_map_index]->m_temp_sector_info[st_x][st_y].elvine_activity++;  break;
+        }
+    }
+    cp = message;
 
-	switch (*cp) {
-	case '@':
-		*cp = 32;
+    // === EVENTO MOBA: ASEDIO EN MIDDLELAND (COMANDO GM) ===
+    if (strncmp(cp, "/startsiege", 11) == 0)
+    {
+        // Comprobamos que el jugador sea un GM
+        if (m_client_list[client_h]->m_is_gm_mode)
+        {
+            if (m_middleland_siege_state == 0)
+            {
+                // Iniciamos la fase 1 (Registro) y guardamos la marca de tiempo exacta
+                m_middleland_siege_state = 1;
+                m_middleland_siege_timer = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now().time_since_epoch()).count());
+                
+                // Encendemos el botón de Cityhall para todos los conectados
+                notify_middleland_siege_state(true);
+                
+                // Avisamos a todo el servidor
+                broadcast_server_message((char*)"Siege registration is open! (5 min)");
+            }
+            else
+            {
+                show_client_msg(client_h, (char*)"The Siege of Middleland is already in progress.");
+            }
+        }
+        return; // Detenemos el proceso para que el comando no se lea en el chat normal ni intente procesarse por otros sistemas
+    }
+    // ======================================================
 
-		if (m_client_list[client_h]->m_guild_guid != 0) {
-			send_mode = 5;
-		} else {
-			send_mode = 0;
-			send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "You are not in a guild.");
-		}
-		
-		// v1.4334
-		if (m_client_list[client_h]->m_hp <= 0) send_mode = 0;
-		break;
+    switch (*cp) {
+    case '@':
+        *cp = 32;
 
-		// New 08/05/2004
-		// Party chat
-	case '$':
-		*cp = 32;
+        if (m_client_list[client_h]->m_guild_guid != 0) {
+            send_mode = 5;
+        } else {
+            send_mode = 0;
+            send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "You are not in a guild.");
+        }
+        
+        // v1.4334
+        if (m_client_list[client_h]->m_hp <= 0) send_mode = 0;
+        break;
 
-		if (m_client_list[client_h]->m_sp >= 3) {
-			if (m_client_list[client_h]->m_time_left_firm_stamina == 0) {
-				m_client_list[client_h]->m_sp -= 3;
-				send_notify_msg(0, client_h, Notify::Sp, 0, 0, 0, 0);
-			}
-			send_mode = 4;
-		}
-		else {
-			send_mode = 0;
-		}
-		break;
+        // New 08/05/2004
+        // Party chat
+    case '$':
+        *cp = 32;
 
-	case '^':
-		*cp = 32;
+        if (m_client_list[client_h]->m_sp >= 3) {
+            if (m_client_list[client_h]->m_time_left_firm_stamina == 0) {
+                m_client_list[client_h]->m_sp -= 3;
+                send_notify_msg(0, client_h, Notify::Sp, 0, 0, 0, 0);
+            }
+            send_mode = 4;
+        }
+        else {
+            send_mode = 0;
+        }
+        break;
 
-		if (m_client_list[client_h]->m_guild_guid != 0) {
-			send_mode = 5;
-		} else {
-			send_mode = 0;
-			send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "You are not in a guild.");
-		}
+    case '^':
+        *cp = 32;
 
-		// v1.4334
-		if (m_client_list[client_h]->m_hp < 0) send_mode = 0;
+        if (m_client_list[client_h]->m_guild_guid != 0) {
+            send_mode = 5;
+        } else {
+            send_mode = 0;
+            send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "You are not in a guild.");
+        }
 
-		break;
+        // v1.4334
+        if (m_client_list[client_h]->m_hp < 0) send_mode = 0;
 
-	case '!':
-		*cp = 32;
+        break;
 
-		if ((m_client_list[client_h]->m_level > 10) &&
-			(m_client_list[client_h]->m_sp >= 5)) {
-			if (m_client_list[client_h]->m_time_left_firm_stamina == 0) {
-				m_client_list[client_h]->m_sp -= 5;
-				send_notify_msg(0, client_h, Notify::Sp, 0, 0, 0, 0);
-			}
-			send_mode = 2;
-		}
-		else send_mode = 0;
+    case '!':
+        *cp = 32;
 
-		// v1.4334
-		if (m_client_list[client_h]->m_hp <= 0) send_mode = 0;
+        if ((m_client_list[client_h]->m_level > 10) &&
+            (m_client_list[client_h]->m_sp >= 5)) {
+            if (m_client_list[client_h]->m_time_left_firm_stamina == 0) {
+                m_client_list[client_h]->m_sp -= 5;
+                send_notify_msg(0, client_h, Notify::Sp, 0, 0, 0, 0);
+            }
+            send_mode = 2;
+        }
+        else send_mode = 0;
 
-		break;
+        // v1.4334
+        if (m_client_list[client_h]->m_hp <= 0) send_mode = 0;
 
-	case '~':
-		*cp = 32;
-		if ((m_client_list[client_h]->m_level > 1) &&
-			(m_client_list[client_h]->m_sp >= 3)) {
-			if (m_client_list[client_h]->m_time_left_firm_stamina == 0) {
-				m_client_list[client_h]->m_sp -= 3;
-				send_notify_msg(0, client_h, Notify::Sp, 0, 0, 0, 0);
-			}
-			send_mode = 3;
-		}
-		else send_mode = 0;
-		// v1.4334
-		if (m_client_list[client_h]->m_hp <= 0) send_mode = 0;
-		break;
+        break;
 
-	case '/':
-		if (GameChatCommandManager::get().process_command(client_h, cp, msg_size - sizeof(hb::net::PacketCommandChatMsgHeader)))
-			return;
-		// Not a recognized command - fall through as normal chat
-		break;
-	}
+    case '~':
+        *cp = 32;
+        if ((m_client_list[client_h]->m_level > 1) &&
+            (m_client_list[client_h]->m_sp >= 3)) {
+            if (m_client_list[client_h]->m_time_left_firm_stamina == 0) {
+                m_client_list[client_h]->m_sp -= 3;
+                send_notify_msg(0, client_h, Notify::Sp, 0, 0, 0, 0);
+            }
+            send_mode = 3;
+        }
+        else send_mode = 0;
+        // v1.4334
+        if (m_client_list[client_h]->m_hp <= 0) send_mode = 0;
+        break;
 
-	data[msg_size - 1] = 0;
+    case '/':
+        if (GameChatCommandManager::get().process_command(client_h, cp, msg_size - sizeof(hb::net::PacketCommandChatMsgHeader)))
+            return;
+        // Not a recognized command - fall through as normal chat
+        break;
+    }
 
-	if ((m_client_list[client_h]->m_magic_effect_status[hb::shared::magic::Confuse] == 1) && (dice(1, 3) != 2)) {
-		// Confuse Language
-		cp = message;
+    data[msg_size - 1] = 0;
 
-		while (*cp != 0) {
-			if ((cp[0] != 0) && (cp[0] != ' ') && (cp[1] != 0) && (cp[1] != ' ')) {
-				switch (dice(1, 3)) {
-				case 1:	memcpy(cp, "¿ö", 2); break;
-				case 2:	memcpy(cp, "¿ì", 2); break;
-				case 3:	memcpy(cp, "¿ù", 2); break;
-				}
-				cp += 2;
-			}
-			else cp++;
-		}
-	}
+    if ((m_client_list[client_h]->m_magic_effect_status[hb::shared::magic::Confuse] == 1) && (dice(1, 3) != 2)) {
+        // Confuse Language
+        cp = message;
 
-	cp = message;
+        while (*cp != 0) {
+            if ((cp[0] != 0) && (cp[0] != ' ') && (cp[1] != 0) && (cp[1] != ' ')) {
+                switch (dice(1, 3)) {
+                case 1: memcpy(cp, "¿ö", 2); break;
+                case 2: memcpy(cp, "¿ì", 2); break;
+                case 3: memcpy(cp, "¿ù", 2); break;
+                }
+                cp += 2;
+            }
+            else cp++;
+        }
+    }
 
-	if ((send_mode == 0) && (m_client_list[client_h]->m_whisper_player_index != -1)) {
-		send_mode = 20;
+    cp = message;
 
-		if (*cp == '#') send_mode = 0;
-	}
+    if ((send_mode == 0) && (m_client_list[client_h]->m_whisper_player_index != -1)) {
+        send_mode = 20;
 
-	// Refresh AFK timer for non-whisper chat (whispers don't break AFK)
-	if (send_mode != 20) {
-		m_client_list[client_h]->m_afk_activity_time = GameClock::GetTimeMS();
-	}
+        if (*cp == '#') send_mode = 0;
+    }
 
-	std::string chat_type = "Local";
-	std::string player_name = m_client_list[client_h]->m_char_name;
+    // Refresh AFK timer for non-whisper chat (whispers don't break AFK)
+    if (send_mode != 20) {
+        m_client_list[client_h]->m_afk_activity_time = GameClock::GetTimeMS();
+    }
 
-	switch (send_mode)
-	{
-	case 0:  chat_type = "[Local]"; break;
-	case 1:  chat_type = "[Local]"; break; // Guild chat removed, fall through to local
-	case 2:  chat_type = "[Shout]"; break;
-	case 3:  chat_type = "[Faction]"; break;
-	case 4:  chat_type = "[Party]"; break;
-	case 5:  chat_type = "[Guild]"; break;
-	case 10: chat_type = "[GMBroadcast]"; break;
-	case 20: chat_type = "[Whisper]"; break;
-	}
-	if (send_mode == 20)
-	{
-		std::string whispered_player = m_client_list[client_h]->m_whisper_player_name;
-		hb::logger::log<log_channel::chat>("{} {}->{}:{}", chat_type, player_name, whispered_player, message);
-	}
-	else {
-		hb::logger::log<log_channel::chat>("{} {}:{}", chat_type, player_name, message);
-	}
+    std::string chat_type = "Local";
+    std::string player_name = m_client_list[client_h]->m_char_name;
 
-	header->msg_type = (uint16_t)client_h;
-	// Write chat send mode into the packet's chat_type field before relaying to clients
-	data[offsetof(hb::net::PacketCommandChatMsgHeader, chat_type)] = send_mode;
+    switch (send_mode)
+    {
+    case 0:  chat_type = "[Local]"; break;
+    case 1:  chat_type = "[Local]"; break; // Guild chat removed, fall through to local
+    case 2:  chat_type = "[Shout]"; break;
+    case 3:  chat_type = "[Faction]"; break;
+    case 4:  chat_type = "[Party]"; break;
+    case 5:  chat_type = "[Guild]"; break;
+    case 10: chat_type = "[GMBroadcast]"; break;
+    case 20: chat_type = "[Whisper]"; break;
+    }
+    if (send_mode == 20)
+    {
+        std::string whispered_player = m_client_list[client_h]->m_whisper_player_name;
+        hb::logger::log<log_channel::chat>("{} {}->{}:{}", chat_type, player_name, whispered_player, message);
+    }
+    else {
+        hb::logger::log<log_channel::chat>("{} {}:{}", chat_type, player_name, message);
+    }
 
-	if (send_mode != 20) {
-		for(int i = 1; i < MaxClients; i++)
-			if (m_client_list[i] != 0) {
-				if (is_blocked_by(client_h, i)) continue;
-				switch (send_mode) {
-				case 0:
-					if (m_client_list[i]->m_is_init_complete == false) break;
+    header->msg_type = (uint16_t)client_h;
+    // Write chat send mode into the packet's chat_type field before relaying to clients
+    data[offsetof(hb::net::PacketCommandChatMsgHeader, chat_type)] = send_mode;
 
-					if ((m_client_list[i]->m_map_index == m_client_list[client_h]->m_map_index) &&
-						(m_client_list[i]->m_x > m_client_list[client_h]->m_x - hb::shared::view::CenterX) &&
-						(m_client_list[i]->m_x < m_client_list[client_h]->m_x + hb::shared::view::CenterX) &&
-						(m_client_list[i]->m_y > m_client_list[client_h]->m_y - hb::shared::view::CenterY) &&
-						(m_client_list[i]->m_y < m_client_list[client_h]->m_y + hb::shared::view::CenterY)) {
+    if (send_mode != 20) {
+        for(int i = 1; i < MaxClients; i++)
+            if (m_client_list[i] != 0) {
+                if (is_blocked_by(client_h, i)) continue;
+                switch (send_mode) {
+                case 0:
+                    if (m_client_list[i]->m_is_init_complete == false) break;
 
-						// Crusade
-						if (m_is_crusade_mode) {
-							if ((m_client_list[client_h]->m_side != 0) && (m_client_list[i]->m_side != 0) &&
-								(m_client_list[i]->m_side != m_client_list[client_h]->m_side)) {
-							}
-							else ret = m_client_list[i]->m_socket->send_msg(data, msg_size);
-						}
-						else ret = m_client_list[i]->m_socket->send_msg(data, msg_size);
-					}
-					break;
+                    if ((m_client_list[i]->m_map_index == m_client_list[client_h]->m_map_index) &&
+                        (m_client_list[i]->m_x > m_client_list[client_h]->m_x - hb::shared::view::CenterX) &&
+                        (m_client_list[i]->m_x < m_client_list[client_h]->m_x + hb::shared::view::CenterX) &&
+                        (m_client_list[i]->m_y > m_client_list[client_h]->m_y - hb::shared::view::CenterY) &&
+                        (m_client_list[i]->m_y < m_client_list[client_h]->m_y + hb::shared::view::CenterY)) {
 
-				case 1:
-					// Guild chat removed
-					break;
+                        // Crusade
+                        if (m_is_crusade_mode) {
+                            if ((m_client_list[client_h]->m_side != 0) && (m_client_list[i]->m_side != 0) &&
+                                (m_client_list[i]->m_side != m_client_list[client_h]->m_side)) {
+                            }
+                            else ret = m_client_list[i]->m_socket->send_msg(data, msg_size);
+                        }
+                        else ret = m_client_list[i]->m_socket->send_msg(data, msg_size);
+                    }
+                    break;
 
-				case 2:
-				case 10:
-					// Crusade
-					if (m_is_crusade_mode) {
-						if ((m_client_list[client_h]->m_side != 0) && (m_client_list[i]->m_side != 0) &&
-							(m_client_list[i]->m_side != m_client_list[client_h]->m_side)) {
-						}
-						else ret = m_client_list[i]->m_socket->send_msg(data, msg_size);
-					}
-					else ret = m_client_list[i]->m_socket->send_msg(data, msg_size);
-					break;
+                case 1:
+                    // Guild chat removed
+                    break;
 
-				case 3:
-					if (m_client_list[i]->m_is_init_complete == false) break;
+                case 2:
+                case 10:
+                    // Crusade
+                    if (m_is_crusade_mode) {
+                        if ((m_client_list[client_h]->m_side != 0) && (m_client_list[i]->m_side != 0) &&
+                            (m_client_list[i]->m_side != m_client_list[client_h]->m_side)) {
+                        }
+                        else ret = m_client_list[i]->m_socket->send_msg(data, msg_size);
+                    }
+                    else ret = m_client_list[i]->m_socket->send_msg(data, msg_size);
+                    break;
 
-					if ((m_client_list[i]->m_side == m_client_list[client_h]->m_side))
-						ret = m_client_list[i]->m_socket->send_msg(data, msg_size);
-					break;
+                case 3:
+                    if (m_client_list[i]->m_is_init_complete == false) break;
 
-				case 4:
-					if (m_client_list[i]->m_is_init_complete == false) break;
-					if ((m_client_list[i]->m_party_id != 0) && (m_client_list[i]->m_party_id == m_client_list[client_h]->m_party_id))
-						ret = m_client_list[i]->m_socket->send_msg(data, msg_size);
-					break;
-				case 5:
-					if (m_client_list[i]->m_is_init_complete == false) break;
-					if ((m_client_list[i]->m_guild_guid != 0) && (m_client_list[i]->m_guild_guid == m_client_list[client_h]->m_guild_guid))
-						ret = m_client_list[i]->m_socket->send_msg(data, msg_size);
-					break;
-				}
+                    if ((m_client_list[i]->m_side == m_client_list[client_h]->m_side))
+                        ret = m_client_list[i]->m_socket->send_msg(data, msg_size);
+                    break;
 
-				switch (ret) {
-				case sock::Event::QueueFull:
-				case sock::Event::SocketError:
-				case sock::Event::CriticalError:
-				case sock::Event::SocketClosed:
-					//delete_client(i, true, true);
-					break;
-				}
-			}
-	}
-	else {
-		// New 16/05/2004
-		ret = m_client_list[client_h]->m_socket->send_msg(data, msg_size);
-		{
-			int whisperTarget = m_client_list[client_h]->m_whisper_player_index;
-			if (m_client_list[whisperTarget] != 0 &&
-				hb_stricmp(m_client_list[client_h]->m_whisper_player_name, m_client_list[whisperTarget]->m_char_name) == 0) {
-				if (!is_blocked_by(client_h, whisperTarget)) {
-					ret = m_client_list[whisperTarget]->m_socket->send_msg(data, msg_size);
-				}
-			}
-		}
+                case 4:
+                    if (m_client_list[i]->m_is_init_complete == false) break;
+                    if ((m_client_list[i]->m_party_id != 0) && (m_client_list[i]->m_party_id == m_client_list[client_h]->m_party_id))
+                        ret = m_client_list[i]->m_socket->send_msg(data, msg_size);
+                    break;
+                case 5:
+                    if (m_client_list[i]->m_is_init_complete == false) break;
+                    if ((m_client_list[i]->m_guild_guid != 0) && (m_client_list[i]->m_guild_guid == m_client_list[client_h]->m_guild_guid))
+                        ret = m_client_list[i]->m_socket->send_msg(data, msg_size);
+                    break;
+                }
 
-		switch (ret) {
-		case sock::Event::QueueFull:
-		case sock::Event::SocketError:
-		case sock::Event::CriticalError:
-		case sock::Event::SocketClosed:
-			//delete_client(i, true, true);
-			break;
-		}
-	}
+                switch (ret) {
+                case sock::Event::QueueFull:
+                case sock::Event::SocketError:
+                case sock::Event::CriticalError:
+                case sock::Event::SocketClosed:
+                    //delete_client(i, true, true);
+                    break;
+                }
+            }
+    }
+    else {
+        // New 16/05/2004
+        ret = m_client_list[client_h]->m_socket->send_msg(data, msg_size);
+        {
+            int whisperTarget = m_client_list[client_h]->m_whisper_player_index;
+            if (m_client_list[whisperTarget] != 0 &&
+                hb_stricmp(m_client_list[client_h]->m_whisper_player_name, m_client_list[whisperTarget]->m_char_name) == 0) {
+                if (!is_blocked_by(client_h, whisperTarget)) {
+                    ret = m_client_list[whisperTarget]->m_socket->send_msg(data, msg_size);
+                }
+            }
+        }
+
+        switch (ret) {
+        case sock::Event::QueueFull:
+        case sock::Event::SocketError:
+        case sock::Event::CriticalError:
+        case sock::Event::SocketClosed:
+            //delete_client(i, true, true);
+            break;
+        }
+    }
 }
 
 void CGame::chat_msg_handler_gsm(int msg_type, int v1, char* name, char* data, size_t msg_size)
@@ -6653,6 +6686,12 @@ void CGame::client_common_handler(int client_h, char* data)
 		//DbgWnd->AddEventMsg("RECV -> Source::Client -> MsgId::CommandCommon -> CommonType::RequestCancelQuest");
 		m_quest_manager->cancel_quest_handler(client_h);
 		break;
+
+	// === EVENTO MOBA: ASEDIO EN MIDDLELAND ===
+	case CommonType::ReqJoinMiddlelandSiege:
+		middleland_siege_join_handler(client_h);
+		break;
+	// =========================================
 
 	case CommonType::RequestActivateSpecAbility:
 		//DbgWnd->AddEventMsg("RECV -> Source::Client -> MsgId::CommandCommon -> CommonType::RequestActivateSpecAbility");
@@ -9225,18 +9264,19 @@ void CGame::toggle_combat_mode_handler(int client_h)
 
 void CGame::request_teleport_handler(int client_h, const char* data, const char* map_name, int dX, int dY)
 {
-	char temp_map_name[21];
-	char dest_map_name[11], map_index, quest_remain;
-	direction dir;
-	short sX, sY, summon_points;
-	int ret, size, dest_x, dest_y, ex_h, map_side;
-	bool    ret_ok, is_locked_map_notify;
-	hb::time::local_time SysTime{};
+    char temp_map_name[21];
+    char dest_map_name[11], map_index, quest_remain;
+    direction dir;
+    short sX, sY, summon_points;
+    int ret, size, dest_x, dest_y, ex_h, map_side;
+    bool    ret_ok, is_locked_map_notify;
+    hb::time::local_time SysTime{};
 
-	if (m_client_list[client_h] == 0) return;
-	if (m_client_list[client_h]->m_is_init_complete == false) return;
-	if (m_client_list[client_h]->m_is_killed) return;
-	if (m_client_list[client_h]->m_is_on_waiting_process) return;
+    if (m_client_list[client_h] == 0) return;
+    if (m_client_list[client_h]->m_is_init_complete == false) return;
+    if (m_client_list[client_h]->m_is_killed) return;
+    if (m_client_list[client_h]->m_is_on_waiting_process) return;
+
 	if ((m_map_list[m_client_list[client_h]->m_map_index]->m_is_recall_impossible) &&
 		(m_client_list[client_h]->m_is_killed == false) && (m_is_apocalypse_mode) && (m_client_list[client_h]->m_hp > 0)) {
 		send_notify_msg(0, client_h, Notify::NoRecall, 0, 0, 0, 0);
@@ -10043,37 +10083,51 @@ void CGame::request_teleport_auth_handler(int client_h, const char* data)
 	}
 
 	// Check teleport tile exists at current position
-	short sX = m_client_list[client_h]->m_x;
-	short sY = m_client_list[client_h]->m_y;
-	char dest_map_name[11]{};
-	int dest_x, dest_y;
-	direction dir;
-	bool ret_ok = m_map_list[m_client_list[client_h]->m_map_index]->search_teleport_dest(sX, sY, dest_map_name, &dest_x, &dest_y, &dir);
-	// 1-tile margin: if the player walked through a teleport tile, check adjacent tiles
-	if (!ret_ok) {
-		static const short adj_dx[] = { 1, 1, 0, -1, -1, -1, 0, 1 };
-		static const short adj_dy[] = { 0, 1, 1, 1, 0, -1, -1, -1 };
-		for (int adj = 0; adj < 8; adj++) {
-			std::memset(dest_map_name, 0, sizeof(dest_map_name));
-			ret_ok = m_map_list[m_client_list[client_h]->m_map_index]->search_teleport_dest(
-				sX + adj_dx[adj], sY + adj_dy[adj], dest_map_name, &dest_x, &dest_y, &dir);
-			if (ret_ok) break;
-		}
-	}
-	if (!ret_ok) {
-		send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "No teleport at this location");
-		return;
-	}
+    short sX = m_client_list[client_h]->m_x;
+    short sY = m_client_list[client_h]->m_y;
+    char dest_map_name[11]{};
+    int dest_x, dest_y;
+    direction dir;
+    bool ret_ok = m_map_list[m_client_list[client_h]->m_map_index]->search_teleport_dest(sX, sY, dest_map_name, &dest_x, &dest_y, &dir);
+    
+    // 1-tile margin: if the player walked through a teleport tile, check adjacent tiles
+    if (!ret_ok) {
+        static const short adj_dx[] = { 1, 1, 0, -1, -1, -1, 0, 1 };
+        static const short adj_dy[] = { 0, 1, 1, 1, 0, -1, -1, -1 };
+        for (int adj = 0; adj < 8; adj++) {
+            std::memset(dest_map_name, 0, sizeof(dest_map_name));
+            ret_ok = m_map_list[m_client_list[client_h]->m_map_index]->search_teleport_dest(
+                sX + adj_dx[adj], sY + adj_dy[adj], dest_map_name, &dest_x, &dest_y, &dir);
+            if (ret_ok) break;
+        }
+    }
 
-	// Crusade locked-map override — redirect destination
-	if ((strcmp(m_client_list[client_h]->m_locked_map_name, "NONE") != 0) && (m_client_list[client_h]->m_locked_map_time > 0)) {
-		int map_side = get_map_location_side(dest_map_name);
-		if (map_side > 3) map_side -= 2;
-		if (!((map_side != 0) && (m_client_list[client_h]->m_side == map_side))) {
-			std::memset(dest_map_name, 0, sizeof(dest_map_name));
-			strcpy(dest_map_name, m_client_list[client_h]->m_locked_map_name);
-		}
-	}
+    if (!ret_ok) {
+        send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "No teleport at this location");
+        return;
+    }
+
+    // === EVENTO MOBA: BLOQUEO DE AUTORIZACIÓN PARA PORTALES FÍSICOS ===
+    if (strstr(dest_map_name, "middleland") != nullptr || strstr(dest_map_name, "MIDDLELAND") != nullptr) 
+    {
+        // Si el evento está activo y el jugador NO es GM
+        if (m_middleland_siege_state != 0 && m_client_list[client_h]->m_is_gm_mode == false) 
+        {
+            send_notify_msg(0, client_h, Notify::NoticeMsg, 0, 0, 0, "Middleland is closed during the Siege.");
+            return; // Abortamos la autorización, el jugador no viaja ni la pantalla se funde a negro.
+        }
+    }
+    // ===================================================================
+
+    // Crusade locked-map override — redirect destination
+    if ((strcmp(m_client_list[client_h]->m_locked_map_name, "NONE") != 0) && (m_client_list[client_h]->m_locked_map_time > 0)) {
+        int map_side = get_map_location_side(dest_map_name);
+        if (map_side > 3) map_side -= 2;
+        if (!((map_side != 0) && (m_client_list[client_h]->m_side == map_side))) {
+            std::memset(dest_map_name, 0, sizeof(dest_map_name));
+            strcpy(dest_map_name, m_client_list[client_h]->m_locked_map_name);
+        }
+    }
 
 	// Look up destination map on this server
 	int dest_map_index = -1;
@@ -15743,3 +15797,119 @@ void CGame::broadcast_sarcofago_spawn(int map_index, int target_client_h) {
     }
 }
 
+#include <chrono>
+
+// ==========================================
+// EVENTO MOBA: ASEDIO EN MIDDLELAND (Lógica del Servidor)
+// ==========================================
+
+static std::vector<int> g_middleland_aresden_team;
+static std::vector<int> g_middleland_elvine_team;
+static bool g_is_middleland_registration_open = false;
+
+void CGame::middleland_siege_join_handler(int client_h)
+{
+    // 1. Validar que el cliente exista y esté conectado
+    if (client_h < 0 || client_h >= hb::server::config::MaxClients || m_client_list[client_h] == nullptr)
+        return;
+
+    auto* client = m_client_list[client_h];
+
+    // 2. Comprobar si el registro está abierto por el temporizador del servidor
+    if (!g_is_middleland_registration_open)
+    {
+        show_client_msg(client_h, (char*)"Registration for the Siege of Middleland is not open..");
+        return;
+    }
+
+    // 3. Comprobar si el jugador es ciudadano (m_is_neutral = false y m_side != 0)
+    if (client->m_is_neutral || client->m_side == 0)
+    {
+        show_client_msg(client_h, (char*)"You must be a citizen of a nation to join the Siege.");
+        return;
+    }
+
+    // 4. Verificar si ya está inscrito en alguna lista
+    auto it_ares = std::find(g_middleland_aresden_team.begin(), g_middleland_aresden_team.end(), client_h);
+    auto it_elv = std::find(g_middleland_elvine_team.begin(), g_middleland_elvine_team.end(), client_h);
+
+    if (it_ares != g_middleland_aresden_team.end() || it_elv != g_middleland_elvine_team.end())
+    {
+        show_client_msg(client_h, (char*)"You are already registered in the Middleland Siege queue.");
+        return;
+    }
+
+    // 5. Clasificar por bando de forma precisa
+    if (client->m_side == 1) // Bando Aresden
+    {
+        g_middleland_aresden_team.push_back(client_h);
+        show_client_msg(client_h, (char*)"You registered for the Aresden team.");
+    }
+    else if (client->m_side == 2) // Bando Elvine
+    {
+        g_middleland_elvine_team.push_back(client_h);
+        show_client_msg(client_h, (char*)"You registered for the Elvine team.");
+    }
+}
+
+void CGame::notify_middleland_siege_state(bool bOpen)
+{
+    g_is_middleland_registration_open = bOpen;
+
+    // Si se abre el registro, limpiamos los equipos anteriores
+    if (bOpen)
+    {
+        g_middleland_aresden_team.clear();
+        g_middleland_elvine_team.clear();
+    }
+
+    // Preparamos el paquete de red
+    hb::net::PacketHeader pkt{};
+    pkt.msg_id = MsgId::NotifyMiddlelandSiegeState;
+    pkt.msg_type = bOpen ? 1 : 0;
+
+    // Notificamos a todos los clientes usando la variable real m_socket del Client.h
+    for (int i = 0; i < hb::server::config::MaxClients; i++)
+    {
+        if (m_client_list[i] != nullptr && m_client_list[i]->m_socket != nullptr)
+        {
+            m_client_list[i]->m_socket->send_msg(reinterpret_cast<char*>(&pkt), sizeof(pkt), 0);
+        }
+    }
+}
+
+void CGame::middleland_siege_process()
+{
+    // Si el evento está inactivo, no hacemos nada para ahorrar recursos
+    if (m_middleland_siege_state == 0)
+        return;
+
+    // FASE 1: REGISTRO (Esperando 5 minutos)
+    if (m_middleland_siege_state == 1)
+    {
+        // Obtenemos el tiempo actual en milisegundos usando steady_clock (seguro y multiplataforma)
+        uint32_t current_time = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now().time_since_epoch()).count());
+
+        // Si han pasado 5 minutos (300,000 milisegundos)
+        if (current_time - m_middleland_siege_timer >= 300000) 
+        {
+            // 1. Apagamos el botón del Cityhall para todos
+            notify_middleland_siege_state(false);
+
+            // 2. Avisamos por el chat global
+            broadcast_server_message((char*)"Siege registration closed! Battle begins!");
+
+            // 3. Cambiamos el estado a Batalla
+            m_middleland_siege_state = 2;
+
+            // TODO: Aquí pondremos el código para teletransportar a los jugadores de las listas al mapa del MOBA
+        }
+    }
+    
+    // FASE 2: BATALLA EN CURSO
+    else if (m_middleland_siege_state == 2)
+    {
+        // Lógica de batalla y control del evento MOBA
+    }
+}

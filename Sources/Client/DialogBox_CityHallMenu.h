@@ -36,6 +36,7 @@ private:
 	static constexpr ui_rect link_change_playmode{36, 171, 184, 24};
 	static constexpr ui_rect link_teleport{36, 196, 184, 24};
 	static constexpr ui_rect link_crusade_role{36, 221, 184, 24};
+	static constexpr ui_rect link_middleland_siege{36, 246, 184, 24};
 	void DrawMode0_MainMenu(short sX, short sY, short size_x);
 	void DrawMode1_CitizenshipWarning(short sX, short sY, short size_x);
 	void DrawMode2_OfferingCitizenship(short sX, short sY, short size_x);

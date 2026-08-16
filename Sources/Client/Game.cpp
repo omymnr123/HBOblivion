@@ -691,6 +691,24 @@ void CGame::on_render()
 	// reset scroll delta now that dialogs have consumed it this frame
 	// (scroll accumulates across skip frames until a rendered frame processes it)
 	hb::shared::input::reset_mouse_wheel_delta();
+
+	// === EVENTO MOBA: DIBUJAR TEMPORIZADOR CON CHRONO ===
+    if (m_bIsRegisteredForMiddleland)
+    {
+        auto now = std::chrono::steady_clock::now();
+        if (m_middleland_end_time > now)
+        {
+            long long remaining_seconds = std::chrono::duration_cast<std::chrono::seconds>(m_middleland_end_time - now).count();
+            long minutes = static_cast<long>(remaining_seconds / 60);
+            long seconds = static_cast<long>(remaining_seconds % 60);
+            
+            char timer_text[50];
+            snprintf(timer_text, sizeof(timer_text), "Middleland Siege: %02ld:%02ld", minutes, seconds);
+            
+            hb::shared::text::draw_text_aligned(GameFont::Default, 0, 50, 800, 20, timer_text, hb::shared::text::TextStyle::from_color(GameColors::UIYellow), hb::shared::text::Align::TopCenter);
+        }
+    }
+    // ====================================================
 }
 
 
@@ -1595,6 +1613,23 @@ void CGame::game_recv_msg_handler(uint32_t msg_size, char* data)
         }
         break;
     }
+
+	// === EVENTO MOBA: ASEDIO EN MIDDLELAND ===
+    case MsgId::NotifyMiddlelandSiegeState:
+    {
+        if (header->msg_type == 1) {
+            m_bMiddlelandSiegeRegistrationOpen = true;
+            // Sumamos exactamente 5 minutos con chrono al momento actual
+            m_middleland_end_time = std::chrono::steady_clock::now() + std::chrono::minutes(5); 
+            add_event_list("Registration for the Siege of Middleland is open in the City Hall! You have 5 minutes.", 14);
+        } else {
+            m_bMiddlelandSiegeRegistrationOpen = false;
+            m_bIsRegisteredForMiddleland = false; // Apaga el reloj de la pantalla
+            add_event_list("Registration for the Siege of Middleland has closed.", 10);
+        }
+    }
+    break;
+    // =========================================
 
 	case MsgId::CommandCheckConnection:
 	{

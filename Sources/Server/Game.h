@@ -354,6 +354,14 @@ public:
     void request_delete_mail_handler(int client_h, char* data);
     void request_take_attachment_handler(int client_h, char* data);
 	void request_restart_handler(int client_h);
+	// === EVENTO MOBA: ASEDIO EN MIDDLELAND ===
+	void middleland_siege_join_handler(int client_h);
+	void notify_middleland_siege_state(bool bOpen); 
+	// Variables y funciones del temporizador
+	int m_middleland_siege_state;       // 0 = Inactivo, 1 = Registro (5 min), 2 = En Batalla
+	uint32_t m_middleland_siege_timer;  // Marca de tiempo para controlar los minutos
+	void middleland_siege_process();    // Función que el servidor llamará para vigilar el tiempo
+	// =========================================
 	int request_panning_map_data_request(int client_h, char * data);
 	void request_check_account_password_handler(char * data, size_t msg_size);
 	void request_noticement_handler(int client_h, char * data);

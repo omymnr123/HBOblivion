@@ -96,6 +96,9 @@ namespace MsgId
 		ResponseTakeAttachment                  = 0x0FA4000A,
 		NotifyNewMail                           = 0x0FA4000B,
 		RequestEnchantAction                    = 0x0FA4000C,
+		// === EVENTO MOBA: ASEDIO EN MIDDLELAND ===
+		NotifyMiddlelandSiegeState              = 0x0FA4000D,
+		// =========================================
 	};
 }
 
@@ -179,8 +182,11 @@ namespace CommonType
         // =============================================
         // === RESTAURADO: SISTEMA CRUSADA / CLANES ===
         SetGuildTeleportLoc             = 0x0F17,
-        GuildTeleport                   = 0x0F18
+        GuildTeleport                   = 0x0F18,
         // =============================================
+		// === EVENTO MOBA: ASEDIO EN MIDDLELAND ===
+        ReqJoinMiddlelandSiege          = 0x0F90
+        // =========================================
     };
 }
 
@@ -365,8 +371,7 @@ namespace Notify
 		RecoverQueueSync                        = 0x0C06,
         RepairAllPrices                         = 0x0F11,
         MobKills                                = 0x0A68,
-        Contribution                            = 0x0A69, // <-- ¡Fuera del Tester!
-
+        Contribution                            = 0x0A69,
 
 		// === NUEVO: EXTRA LOOT (SERVER -> CLIENTE) ===
 		NotifyExtraLootAvailable                = 0x0A6C,

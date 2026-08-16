@@ -19,6 +19,7 @@
 #include <array>
 #include <format>
 #include <unordered_map>
+#include <chrono>
 
 #include "GlobalDef.h"
 #include "GameGeometry.h"
@@ -60,6 +61,7 @@
 #include "Application.h"
 #include "GameEvents.h"
 #include "FormulaEngine.h"
+
 
 // Overlay types for popup screens that render over base screens
 enum class OverlayType {
@@ -319,6 +321,12 @@ public:
 std::array<bool, hb::shared::limits::MaxItems> m_is_item_equipped{};
 	bool m_is_first_conn;
 	bool m_is_server_changing = false;
+
+	// === EVENTO MOBA: ASEDIO EN MIDDLELAND ===
+	bool m_bMiddlelandSiegeRegistrationOpen = false;
+	bool m_bIsRegisteredForMiddleland = false;
+	std::chrono::steady_clock::time_point m_middleland_end_time;
+	// =========================================
 
 	bool m_hide_local_cursor;
 	bool m_mouse_initialized = false;
