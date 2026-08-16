@@ -275,6 +275,9 @@ public:
 	bool  m_quest_match_flag_loc;
 	bool  m_is_quest_completed;
 
+	bool m_is_middleland_siege_registered;
+	uint32_t m_middleland_siege_team;
+
 	int   m_custom_item_value_attack;
 	int   m_custom_item_value_defense;
 

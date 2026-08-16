@@ -5333,7 +5333,7 @@ void CGame::chat_msg_handler(int client_h, char* data, size_t msg_size)
     }
     cp = message;
 
-    // === EVENTO MOBA: ASEDIO EN MIDDLELAND (COMANDO GM) ===
+   // === EVENTO MOBA: ASEDIO EN MIDDLELAND (COMANDO GM) ===
     if (strncmp(cp, "/startsiege", 11) == 0)
     {
         // Comprobamos que el jugador sea un GM
@@ -5345,21 +5345,85 @@ void CGame::chat_msg_handler(int client_h, char* data, size_t msg_size)
                 m_middleland_siege_state = 1;
                 m_middleland_siege_timer = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
                     std::chrono::steady_clock::now().time_since_epoch()).count());
+
+				m_middleland_minion_timer = 0;
                 
+                // --- 1. BLOQUEO Y LIMPIEZA TOTAL DE MOBS EN MIDDLELAND ---
+                if (m_middleland_map_index != -1 && m_map_list[m_middleland_map_index] != nullptr)
+                {
+                    // A. Apagamos TODOS los generadores del mapa (Aleatorios y Spots fijos)
+                    m_map_list[m_middleland_map_index]->m_random_mob_generator = false;
+                    for (int s = 0; s < hb::server::map::MaxSpotMobGenerator; s++) {
+                        m_map_list[m_middleland_map_index]->m_spot_mob_generator[s].is_defined = false;
+                    }
+                    
+                    // B. Borrado quirúrgico de los NPCs actuales para no dejar "fantasmas"
+                    for (int n = 0; n < hb::server::config::MaxNpcs; n++)
+                    {
+                        if (m_npc_list[n] != nullptr && m_npc_list[n]->m_map_index == m_middleland_map_index)
+                        {
+                            // Liberamos la casilla física del mapa
+                            m_map_list[m_middleland_map_index]->clear_owner(14, n, hb::shared::owner_class::Npc, m_npc_list[n]->m_x, m_npc_list[n]->m_y);
+                            
+                            // Borramos el NPC de la memoria RAM del servidor
+                            delete m_npc_list[n];
+                            m_npc_list[n] = nullptr;
+                            
+                            // Ajustamos el contador del mapa
+                            m_map_list[m_middleland_map_index]->m_total_active_object--;
+                        }
+                    }
+                }
+                // ----------------------------------------------------
+
+                // --- 2. EVACUACIÓN DE JUGADORES DE MIDDLELAND ---
+                int max_clients = sizeof(m_client_list) / sizeof(m_client_list[0]);
+                for (int i = 1; i < max_clients; i++)
+                {
+                    if (m_client_list[i] != nullptr && m_client_list[i]->m_is_init_complete)
+                    {
+                        // Si el jugador está en Middleland al empezar el evento...
+                        if (strcmp(m_client_list[i]->m_map_name, "middleland") == 0)
+                        {
+                            short dest_x = -1, dest_y = -1;
+                            // Dependiendo de su bando, pedimos un punto inicial aleatorio (como al morir o hacer recall)
+                            if (m_client_list[i]->m_side == 1) // Aresden
+                            {
+                                get_map_initial_point(m_aresden_map_index, &dest_x, &dest_y, m_client_list[i]->m_location);
+                                request_teleport_handler(i, "2   ", "aresden", dest_x, dest_y);
+                            }
+                            else if (m_client_list[i]->m_side == 2) // Elvine
+                            {
+                                get_map_initial_point(m_elvine_map_index, &dest_x, &dest_y, m_client_list[i]->m_location);
+                                request_teleport_handler(i, "2   ", "elvine", dest_x, dest_y);
+                            }
+                            else // Neutral u otros, los mandamos al mapa de inicio por defecto
+                            {
+                                int default_map = get_map_index((char*)"default");
+                                get_map_initial_point(default_map, &dest_x, &dest_y, nullptr);
+                                request_teleport_handler(i, "2   ", "default", dest_x, dest_y);
+                            }
+                            
+                            show_client_msg(i, (char*)"Middleland is a warzone! Evacuated!.");
+                        }
+                        
+                        // Notificamos a todos los conectados que el registro está abierto
+                        show_client_msg(i, (char*)"Siege registration is open! (5 min)");
+                    }
+                }
+                // ----------------------------------------------------
+
                 // Encendemos el botón de Cityhall para todos los conectados
                 notify_middleland_siege_state(true);
-                
-                // Avisamos a todo el servidor
-                broadcast_server_message((char*)"Siege registration is open! (5 min)");
             }
             else
             {
                 show_client_msg(client_h, (char*)"The Siege of Middleland is already in progress.");
             }
         }
-        return; // Detenemos el proceso para que el comando no se lea en el chat normal ni intente procesarse por otros sistemas
+        return; 
     }
-    // ======================================================
+// ======================================================
 
     switch (*cp) {
     case '@':
@@ -13332,7 +13396,8 @@ void CGame::show_client_msg(int client_h, char* pMsg)
 	chatPkt.header.msg_type = 0;
 	chatPkt.reserved1 = 0;
 	chatPkt.reserved2 = 0;
-	std::memcpy(chatPkt.name, "HGServer", 8);
+	std::memset(chatPkt.name, 0, sizeof(chatPkt.name)); // 1. Limpiamos a fondo la basura de la memoria
+	std::strcpy(chatPkt.name, "HGServer");              // 2. Metemos "HGServer" con su terminador nulo (\0)
 	chatPkt.chat_type = 10;
 
 	size_t msg_size = strlen(pMsg);
@@ -15814,11 +15879,13 @@ void CGame::middleland_siege_join_handler(int client_h)
         return;
 
     auto* client = m_client_list[client_h];
+    if (!client->m_is_init_complete || client->m_is_killed) 
+        return;
 
-    // 2. Comprobar si el registro está abierto por el temporizador del servidor
-    if (!g_is_middleland_registration_open)
+    // 2. Comprobar si el registro está abierto usando la variable de estado nativa
+    if (m_middleland_siege_state != 1)
     {
-        show_client_msg(client_h, (char*)"Registration for the Siege of Middleland is not open..");
+        show_client_msg(client_h, (char*)"Registration for the Siege of Middleland is not open.");
         return;
     }
 
@@ -15829,55 +15896,62 @@ void CGame::middleland_siege_join_handler(int client_h)
         return;
     }
 
-    // 4. Verificar si ya está inscrito en alguna lista
-    auto it_ares = std::find(g_middleland_aresden_team.begin(), g_middleland_aresden_team.end(), client_h);
-    auto it_elv = std::find(g_middleland_elvine_team.begin(), g_middleland_elvine_team.end(), client_h);
-
-    if (it_ares != g_middleland_aresden_team.end() || it_elv != g_middleland_elvine_team.end())
+    // 4. Verificar si ya está inscrito
+    if (client->m_is_middleland_siege_registered)
     {
         show_client_msg(client_h, (char*)"You are already registered in the Middleland Siege queue.");
         return;
     }
 
-    // 5. Clasificar por bando de forma precisa
+    // 5. Clasificar por bando de forma precisa guardándolo en la memoria del propio cliente
     if (client->m_side == 1) // Bando Aresden
     {
-        g_middleland_aresden_team.push_back(client_h);
+        client->m_is_middleland_siege_registered = true;
+        client->m_middleland_siege_team = 1;
         show_client_msg(client_h, (char*)"You registered for the Aresden team.");
     }
     else if (client->m_side == 2) // Bando Elvine
     {
-        g_middleland_elvine_team.push_back(client_h);
+        client->m_is_middleland_siege_registered = true;
+        client->m_middleland_siege_team = 2;
         show_client_msg(client_h, (char*)"You registered for the Elvine team.");
     }
 }
 
 void CGame::notify_middleland_siege_state(bool bOpen)
 {
-    g_is_middleland_registration_open = bOpen;
+    // 1. Cambiamos el estado global del evento
+    m_middleland_siege_state = bOpen ? 1 : 0;
 
-    // Si se abre el registro, limpiamos los equipos anteriores
+    // 2. Si se abre el registro, reiniciamos el estado de inscripción de todos los jugadores
     if (bOpen)
     {
-        g_middleland_aresden_team.clear();
-        g_middleland_elvine_team.clear();
+        for (int i = 0; i < hb::server::config::MaxClients; i++)
+        {
+            if (m_client_list[i] != nullptr)
+            {
+                m_client_list[i]->m_is_middleland_siege_registered = false;
+                m_client_list[i]->m_middleland_siege_team = 0;
+            }
+        }
     }
 
-    // Preparamos el paquete de red
+    // 3. Preparamos el paquete de red para la interfaz gráfica del cliente
     hb::net::PacketHeader pkt{};
     pkt.msg_id = MsgId::NotifyMiddlelandSiegeState;
     pkt.msg_type = bOpen ? 1 : 0;
 
-    // Notificamos a todos los clientes usando la variable real m_socket del Client.h
+    // 4. Notificamos a todos los clientes válidos y totalmente inicializados del servidor
     for (int i = 0; i < hb::server::config::MaxClients; i++)
     {
-        if (m_client_list[i] != nullptr && m_client_list[i]->m_socket != nullptr)
+        if (m_client_list[i] != nullptr && m_client_list[i]->m_is_init_complete && m_client_list[i]->m_socket != nullptr)
         {
             m_client_list[i]->m_socket->send_msg(reinterpret_cast<char*>(&pkt), sizeof(pkt), 0);
         }
     }
 }
 
+	// Logica de evento Middleland Siege.
 void CGame::middleland_siege_process()
 {
     // Si el evento está inactivo, no hacemos nada para ahorrar recursos
@@ -15887,7 +15961,6 @@ void CGame::middleland_siege_process()
     // FASE 1: REGISTRO (Esperando 5 minutos)
     if (m_middleland_siege_state == 1)
     {
-        // Obtenemos el tiempo actual en milisegundos usando steady_clock (seguro y multiplataforma)
         uint32_t current_time = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now().time_since_epoch()).count());
 
@@ -15897,19 +15970,141 @@ void CGame::middleland_siege_process()
             // 1. Apagamos el botón del Cityhall para todos
             notify_middleland_siege_state(false);
 
-            // 2. Avisamos por el chat global
-            broadcast_server_message((char*)"Siege registration closed! Battle begins!");
+            // 2. Avisamos a todo el servidor
+            int max_clients = sizeof(m_client_list) / sizeof(m_client_list[0]);
+            for (int i = 1; i < max_clients; i++)
+            {
+                if (m_client_list[i] != nullptr && m_client_list[i]->m_is_init_complete)
+                {
+                    show_client_msg(i, (char*)"Siege registration closed! Teleporting combatants...");
+                }
+            }
 
-            // 3. Cambiamos el estado a Batalla
+            // Cambiamos el estado a Batalla y reiniciamos el contador de oleadas
             m_middleland_siege_state = 2;
+            m_middleland_siege_wave = 0; // REINICIAMOS LA OLEADA A 0
 
-            // TODO: Aquí pondremos el código para teletransportar a los jugadores de las listas al mapa del MOBA
+            // --- INVOCACIÓN DE ESTRUCTURAS DE ASEDIO ---
+            int tX, tY;
+
+            // BANDO ARESDEN (Side 1)
+            tX = 277; tY = 470;
+            create_new_npc(153, (char*)"Ares_Nexus", (char*)"middleland", 0, 0, hb::server::npc::MoveType::Random, &tX, &tY, nullptr, nullptr, 0, 1, false, false, false, false, true);
+            
+            tX = 272; tY = 466;
+            create_new_npc(74, (char*)"Ares_Tower", (char*)"middleland", 0, 0, hb::server::npc::MoveType::Random, &tX, &tY, nullptr, nullptr, 0, 1, false, false, false, false, true);
+            tX = 282; tY = 466;
+            create_new_npc(74, (char*)"Ares_Tower", (char*)"middleland", 0, 0, hb::server::npc::MoveType::Random, &tX, &tY, nullptr, nullptr, 0, 1, false, false, false, false, true);
+            tX = 282; tY = 475;
+            create_new_npc(74, (char*)"Ares_Tower", (char*)"middleland", 0, 0, hb::server::npc::MoveType::Random, &tX, &tY, nullptr, nullptr, 0, 1, false, false, false, false, true);
+            tX = 272; tY = 475;
+            create_new_npc(74, (char*)"Ares_Tower", (char*)"middleland", 0, 0, hb::server::npc::MoveType::Random, &tX, &tY, nullptr, nullptr, 0, 1, false, false, false, false, true);
+
+            // BANDO ELVINE (Side 2)
+            tX = 262; tY = 58;
+            create_new_npc(154, (char*)"Elv_Nexus", (char*)"middleland", 0, 0, hb::server::npc::MoveType::Random, &tX, &tY, nullptr, nullptr, 0, 2, false, false, false, false, true);
+            tX = 258; tY = 53;
+            create_new_npc(74, (char*)"Elv_Tower", (char*)"middleland", 0, 0, hb::server::npc::MoveType::Random, &tX, &tY, nullptr, nullptr, 0, 2, false, false, false, false, true);
+            tX = 258; tY = 63;
+            create_new_npc(74, (char*)"Elv_Tower", (char*)"middleland", 0, 0, hb::server::npc::MoveType::Random, &tX, &tY, nullptr, nullptr, 0, 2, false, false, false, false, true);
+            tX = 267; tY = 63;
+            create_new_npc(74, (char*)"Elv_Tower", (char*)"middleland", 0, 0, hb::server::npc::MoveType::Random, &tX, &tY, nullptr, nullptr, 0, 2, false, false, false, false, true);
+            tX = 267; tY = 53;
+            create_new_npc(74, (char*)"Elv_Tower", (char*)"middleland", 0, 0, hb::server::npc::MoveType::Random, &tX, &tY, nullptr, nullptr, 0, 2, false, false, false, false, true);
+
+            // 4. TELETRANSPORTE MASIVO SEGURO
+            char map_idx = get_map_index((char*)"middleland");
+            if (map_idx != -1) 
+            {
+                for (int i = 1; i < max_clients; i++)
+                {
+                    auto* client = m_client_list[i];
+                    if (client != nullptr && client->m_is_init_complete && client->m_is_middleland_siege_registered)
+                    {
+                        short dest_x = -1;
+                        short dest_y = -1;
+
+                        if (client->m_middleland_siege_team == 1) 
+                        {
+                            if (dice(1, 2) == 1) { dest_x = 353; dest_y = 500; }
+                            else                 { dest_x = 152; dest_y = 500; }
+                        }
+                        else if (client->m_middleland_siege_team == 2) 
+                        {
+                            if (dice(1, 2) == 1) { dest_x = 314; dest_y = 24; }
+                            else                 { dest_x = 103; dest_y = 23; }
+                        }
+
+                        if (dest_x != -1 && dest_y != -1)
+                        {
+                            get_empty_position(&dest_x, &dest_y, map_idx);
+                            request_teleport_handler(i, "2   ", "middleland", dest_x, dest_y);
+                        }
+                    }
+                }
+            }
         }
     }
-    
-    // FASE 2: BATALLA EN CURSO
+    // FASE 2: BATALLA EN CURSO (9 OLEADAS)
     else if (m_middleland_siege_state == 2)
     {
-        // Lógica de batalla y control del evento MOBA
+        // Solo continuamos si no hemos llegado a la oleada 9 (el límite)
+        if (m_middleland_siege_wave < 9)
+        {
+            uint32_t current_time = static_cast<uint32_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+                std::chrono::steady_clock::now().time_since_epoch()).count());
+
+            // 240000 ms = 4 Minutos. ¡Cámbialo a 300000 si prefieres 5 Minutos!
+            if (m_middleland_minion_timer == 0 || (current_time - m_middleland_minion_timer) >= 240000)
+            {
+                m_middleland_minion_timer = current_time; // Reiniciamos el reloj
+
+                int ares_id = 0, elv_id = 0;
+                char* ares_name = (char*)"Ares_Minion";
+                char* elv_name = (char*)"Elv_Minion";
+
+                // Escalada de dificultad según la oleada (del 0 al 8)
+                switch (m_middleland_siege_wave)
+                {
+                    case 0: ares_id = 159; ares_name = (char*)"Ares_DarkElf";    elv_id = 160; elv_name = (char*)"Elv_DarkElf";    break;
+                    case 1: ares_id = 161; ares_name = (char*)"Ares_MtGiant";    elv_id = 162; elv_name = (char*)"Elv_MtGiant";    break;
+                    case 2: ares_id = 163; ares_name = (char*)"Ares_Ogre";       elv_id = 164; elv_name = (char*)"Elv_Ogre";       break;
+                    case 3: ares_id = 165; ares_name = (char*)"Ares_Werewolf";   elv_id = 166; elv_name = (char*)"Elv_Werewolf";   break;
+                    case 4: ares_id = 167; ares_name = (char*)"Ares_Stalker";    elv_id = 168; elv_name = (char*)"Elv_Stalker";    break;
+                    case 5: ares_id = 169; ares_name = (char*)"Ares_Ettin";      elv_id = 170; elv_name = (char*)"Elv_Ettin";      break;
+                    case 6: ares_id = 171; ares_name = (char*)"Ares_ClawTurtle"; elv_id = 172; elv_name = (char*)"Elv_ClawTurtle"; break;
+                    case 7: ares_id = 173; ares_name = (char*)"Ares_Nizie";      elv_id = 174; elv_name = (char*)"Elv_Nizie";      break;
+                    case 8: ares_id = 175; ares_name = (char*)"Ares_Demon";      elv_id = 176; elv_name = (char*)"Elv_Demon";      break;
+                }
+
+                // Generamos 10 Minions de Aresden
+                int mX = 277, mY = 470;
+                for (int m = 0; m < 10; m++) {
+                    create_new_npc(ares_id, ares_name, (char*)"middleland", 0, 0, hb::server::npc::MoveType::Random, &mX, &mY, nullptr, nullptr, 0, 1, false, false, false, false, true);
+                }
+
+                // Generamos 10 Minions de Elvine
+                mX = 262; mY = 58;
+                for (int m = 0; m < 10; m++) {
+                    create_new_npc(elv_id, elv_name, (char*)"middleland", 0, 0, hb::server::npc::MoveType::Random, &mX, &mY, nullptr, nullptr, 0, 2, false, false, false, false, true);
+                }
+
+                // Anunciamos por chat la oleada actual dinámicamente
+                char szWaveMsg[100];
+                sprintf(szWaveMsg, "[Siege] Wave %d / 9: The %ss and %ss have arrived!", m_middleland_siege_wave + 1, ares_name, elv_name);
+                
+                int max_clients = sizeof(m_client_list) / sizeof(m_client_list[0]);
+                for (int i = 1; i < max_clients; i++) {
+                    if (m_client_list[i] != nullptr && m_client_list[i]->m_is_init_complete) {
+                        if (strcmp(m_client_list[i]->m_map_name, "middleland") == 0) {
+                            show_client_msg(i, szWaveMsg);
+                        }
+                    }
+                }
+
+                // Subimos de oleada para la próxima vez que toque el reloj
+                m_middleland_siege_wave++;
+            }
+        }
     }
 }
