@@ -1622,10 +1622,29 @@ void CGame::game_recv_msg_handler(uint32_t msg_size, char* data)
             // Sumamos exactamente 5 minutos con chrono al momento actual
             m_middleland_end_time = std::chrono::steady_clock::now() + std::chrono::minutes(5); 
             add_event_list("Registration for the Siege of Middleland is open in the City Hall! You have 5 minutes.", 14);
+        } else if (header->msg_type == 2) {
+            // Evento terminado
+            m_bIsRegisteredForMiddleland = false;
+            m_bMiddlelandSiegeRegistrationOpen = false;
+            m_middleland_score_aresden = 0;
+            m_middleland_score_elvine = 0;
+        } else if (header->msg_type == 3) {
+            // Prompt for teleport
+            get_dialog_box_manager().enable_dialog_box(DialogBoxId::MiddlelandSiegePrompt, 0, 0LL, 0, "");
         } else {
             m_bMiddlelandSiegeRegistrationOpen = false;
-            m_bIsRegisteredForMiddleland = false; // Apaga el reloj de la pantalla
+            m_middleland_end_time = std::chrono::steady_clock::now() + std::chrono::minutes(40);
             add_event_list("Registration for the Siege of Middleland has closed.", 10);
+        }
+    }
+    break;
+    case MsgId::NotifyMiddlelandSiegeScore:
+    {
+        if (msg_size >= sizeof(hb::net::PacketHeader) + 8) {
+            uint32_t aresden_score = *(uint32_t*)(data + sizeof(hb::net::PacketHeader));
+            uint32_t elvine_score = *(uint32_t*)(data + sizeof(hb::net::PacketHeader) + 4);
+            m_middleland_score_aresden = aresden_score;
+            m_middleland_score_elvine = elvine_score;
         }
     }
     break;

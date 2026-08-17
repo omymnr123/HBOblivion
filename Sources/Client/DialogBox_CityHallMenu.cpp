@@ -1,4 +1,4 @@
-﻿#include "DialogBox_CityHallMenu.h"
+#include "DialogBox_CityHallMenu.h"
 #include "Game.h"
 #include "TeleportManager.h"
 #include "lan_eng.h"
@@ -44,6 +44,7 @@ void DialogBox_CityHallMenu::on_draw()
 	case mode::change_play_mode:       DrawMode9_ChangePlayMode(sX, sY, size_x); break;
 	case mode::teleport_menu:          DrawMode10_TeleportMenu(sX, sY, size_x); break;
 	case mode::hero_item_confirm:      DrawMode11_HeroItemConfirm(sX, sY, size_x); break;
+	case mode::middleland_siege_warning: DrawMode_MiddlelandSiegeWarning(sX, sY, size_x); break;
 	}
 }
 
@@ -442,6 +443,7 @@ bool DialogBox_CityHallMenu::on_click()
 	case mode::change_play_mode:     return on_click_mode9(sX, sY);
 	case mode::teleport_menu:        return on_click_mode10(sX, sY);
 	case mode::hero_item_confirm:    return on_click_mode11(sX, sY);
+	case mode::middleland_siege_warning: return on_click_mode_middleland_siege_warning(sX, sY);
 	}
 	return false;
 }
@@ -527,10 +529,7 @@ bool DialogBox_CityHallMenu::on_click_mode0(short sX, short sY)
 		if (!m_game->m_bMiddlelandSiegeRegistrationOpen) return false;
 		if (!player().m_citizen) return false;
 
-		m_game->m_bIsRegisteredForMiddleland = true;
-		m_game->send_game_packet(hb::net::make_common_command(CommonType::ReqJoinMiddlelandSiege, m_game->m_player->m_player_x, m_game->m_player->m_player_y));
-
-		m_game->get_dialog_box_manager().disable_dialog_box(DialogBoxId::CityHallMenu);
+		m_mode = mode::middleland_siege_warning;
 		audio_manager::get().play_game_sound(sound_type::effect, 14, 5);
 		return true;
 	}
@@ -808,6 +807,58 @@ bool DialogBox_CityHallMenu::on_click_mode11(short sX, short sY)
 	if ((mouse_x >= sX + ui_layout::right_btn_x) && (mouse_x <= sX + ui_layout::right_btn_x + ui_layout::btn_size_x) && (mouse_y >= sY + ui_layout::btn_y) && (mouse_y <= sY + ui_layout::btn_y + ui_layout::btn_size_y))
 	{
 		m_mode = mode::hero_items;
+		audio_manager::get().play_game_sound(sound_type::effect, 14, 5);
+		return true;
+	}
+
+	return false;
+}
+
+void DialogBox_CityHallMenu::DrawMode_MiddlelandSiegeWarning(short sX, short sY, short size_x)
+{
+	short mouse_x = static_cast<short>(hb::shared::input::get_mouse_x());
+	short mouse_y = static_cast<short>(hb::shared::input::get_mouse_y());
+
+	hb::shared::text::draw_text_aligned(GameFont::Default, sX, sY + 80, (sX + size_x) - (sX), 15, "Are you sure you want to join the queue for", hb::shared::text::TextStyle::from_color(GameColors::UILabel), hb::shared::text::Align::TopCenter);
+	hb::shared::text::draw_text_aligned(GameFont::Default, sX, sY + 100, (sX + size_x) - (sX), 15, "Middleland Siege?", hb::shared::text::TextStyle::from_color(GameColors::UILabel), hb::shared::text::Align::TopCenter);
+	
+	hb::shared::text::draw_text_aligned(GameFont::Default, sX, sY + 140, (sX + size_x) - (sX), 15, "Rewards:", hb::shared::text::TextStyle::from_color(GameColors::UIYellow), hb::shared::text::Align::TopCenter);
+	hb::shared::text::draw_text_aligned(GameFont::Default, sX, sY + 160, (sX + size_x) - (sX), 15, "Win: 30% Gold, Exp and Hero points.", hb::shared::text::TextStyle::from_color(GameColors::UIWhite), hb::shared::text::Align::TopCenter);
+	hb::shared::text::draw_text_aligned(GameFont::Default, sX, sY + 180, (sX + size_x) - (sX), 15, "Loss: 10% Gold, Exp and Hero points.", hb::shared::text::TextStyle::from_color(GameColors::UIWhite), hb::shared::text::Align::TopCenter);
+
+	// Yes button
+	if ((mouse_x >= sX + ui_layout::left_btn_x) && (mouse_x <= sX + ui_layout::left_btn_x + ui_layout::btn_size_x) && (mouse_y >= sY + ui_layout::btn_y) && (mouse_y <= sY + ui_layout::btn_y + ui_layout::btn_size_y))
+		m_game->draw_new_dialog_box(InterfaceNdButton, sX + ui_layout::left_btn_x, sY + ui_layout::btn_y, 1);
+	else
+		m_game->draw_new_dialog_box(InterfaceNdButton, sX + ui_layout::left_btn_x, sY + ui_layout::btn_y, 0);
+	
+	// No button
+	if ((mouse_x >= sX + ui_layout::right_btn_x) && (mouse_x <= sX + ui_layout::right_btn_x + ui_layout::btn_size_x) && (mouse_y >= sY + ui_layout::btn_y) && (mouse_y <= sY + ui_layout::btn_y + ui_layout::btn_size_y))
+		m_game->draw_new_dialog_box(InterfaceNdButton, sX + ui_layout::right_btn_x, sY + ui_layout::btn_y, 3);
+	else
+		m_game->draw_new_dialog_box(InterfaceNdButton, sX + ui_layout::right_btn_x, sY + ui_layout::btn_y, 2);
+}
+
+bool DialogBox_CityHallMenu::on_click_mode_middleland_siege_warning(short sX, short sY)
+{
+	short mouse_x = static_cast<short>(hb::shared::input::get_mouse_x());
+	short mouse_y = static_cast<short>(hb::shared::input::get_mouse_y());
+
+	// Yes button
+	if ((mouse_x >= sX + ui_layout::left_btn_x) && (mouse_x <= sX + ui_layout::left_btn_x + ui_layout::btn_size_x) && (mouse_y >= sY + ui_layout::btn_y) && (mouse_y <= sY + ui_layout::btn_y + ui_layout::btn_size_y))
+	{
+		audio_manager::get().play_game_sound(sound_type::effect, 14, 5);
+		m_game->m_bIsRegisteredForMiddleland = true;
+		m_game->send_game_packet(hb::net::make_common_command(CommonType::ReqJoinMiddlelandSiege, m_game->m_player->m_player_x, m_game->m_player->m_player_y));
+		m_mode = mode::main_menu; // IMPORTANTE: Resetear al menú principal
+		m_game->get_dialog_box_manager().disable_dialog_box(DialogBoxId::CityHallMenu);
+		return true;
+	}
+
+	// No button
+	if ((mouse_x >= sX + ui_layout::right_btn_x) && (mouse_x <= sX + ui_layout::right_btn_x + ui_layout::btn_size_x) && (mouse_y >= sY + ui_layout::btn_y) && (mouse_y <= sY + ui_layout::btn_y + ui_layout::btn_size_y))
+	{
+		m_mode = mode::main_menu;
 		audio_manager::get().play_game_sound(sound_type::effect, 14, 5);
 		return true;
 	}

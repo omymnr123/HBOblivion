@@ -16,7 +16,7 @@ public:
 	void set_game(CGame* game) { m_game = game; }
 
 	// Core attack calculation
-	uint32_t calculate_attack_effect(short target_h, char target_type, short attacker_h, char attacker_type, int tdX, int tdY, int attack_mode, bool near_attack = false, bool is_dash = false, bool arrow_use = false);
+	unsigned int calculate_attack_effect(short target_h, char target_type, short attacker_h, char attacker_type, int tdX, int tdY, int attack_mode, bool near_attack = false, bool is_dash = false, bool arrow_use = false);
 	bool calculate_durability_decrement(short target_h, short attacker_h, char attacker_type, char target_type, int armor_type);
 
 	// Damage application
@@ -55,7 +55,7 @@ public:
 	int  get_danger_value(int npc_h, short dX, short dY);
 
 	// Combat validation
-	bool check_client_attack_frequency(int client_h, uint32_t client_time);
+	bool check_client_attack_frequency(int client_h, unsigned int client_time);
 
 	// Logging
 	bool pk_log(int action, int attacker_h, int victum_h, char * npc);

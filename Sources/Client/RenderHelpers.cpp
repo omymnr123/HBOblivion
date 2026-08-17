@@ -440,10 +440,35 @@ void draw_effect_auras(CGame& game, const CEntityRenderState& state, int sX, int
 void draw_berserk_glow(CGame& game, const EquipmentIndices& eq, const CEntityRenderState& state,
                      int sX, int sY)
 {
-	if (!state.m_status.berserk && !state.m_status.hero) return;
+    bool is_moba_boosted_aresden = false;
+    bool is_moba_boosted_elvine = false;
+
+    // Solo durante la Fase 2 (Batalla) y aplicable unicamente a jugadores
+    if (!game.m_bMiddlelandSiegeRegistrationOpen && state.is_player()) {
+        if (state.m_status.aresden && game.m_middleland_score_aresden >= 10000) {
+            is_moba_boosted_aresden = true;
+        } else if (!state.m_status.aresden && game.m_middleland_score_elvine >= 10000) {
+            // Si es jugador y no es Aresden, es Elvine
+            is_moba_boosted_elvine = true;
+        }
+    }
+
+	if (!state.m_status.berserk && !state.m_status.hero && !is_moba_boosted_aresden && !is_moba_boosted_elvine) return;
+
 	int bodyDirIndex = eq.m_body_index + (state.m_dir - 1);
+
+    uint8_t r = GameColors::BerserkGlow.r;
+    uint8_t g = GameColors::BerserkGlow.g;
+    uint8_t b = GameColors::BerserkGlow.b;
+
+    if (is_moba_boosted_aresden) {
+        r = 255; g = 100; b = 100; // Aura rojiza fuerte
+    } else if (is_moba_boosted_elvine) {
+        r = 100; g = 100; b = 255; // Aura azulada fuerte
+    }
+
 	game.m_sprite[bodyDirIndex]->draw(sX, sY, state.m_frame,
-		hb::shared::sprite::DrawParams::additive_colored(GameColors::BerserkGlow.r, GameColors::BerserkGlow.g, GameColors::BerserkGlow.b, 0.7f));
+		hb::shared::sprite::DrawParams::additive_colored(r, g, b, 0.7f));
 }
 
 // -----------------------------------------------------------------------

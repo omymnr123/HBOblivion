@@ -277,6 +277,8 @@ public:
 
 	bool m_is_middleland_siege_registered;
 	uint32_t m_middleland_siege_team;
+	uint32_t m_middleland_killstreak;
+	bool m_middleland_surrendered;
 
 	int   m_custom_item_value_attack;
 	int   m_custom_item_value_defense;

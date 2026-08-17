@@ -33,6 +33,7 @@
 #include "DialogBox_GuildOperation.h"
 #include "DialogBox_Guild.h"
 #include "DialogBox_GuildInvite.h"
+#include "DialogBox_MiddlelandSiegePrompt.h"
 #include "DialogBox_GuildDisbandConfirm.h"
 #include "DialogBox_Bank.h"
 #include "DialogBox_Exchange.h"
@@ -110,6 +111,7 @@ void DialogBoxManager::initialize_dialog_boxes()
 	register_dialog_box(std::make_unique<DialogBox_GuildDisbandConfirm>(&m_game));
 	register_dialog_box(std::make_unique<DialogBox_Guild>(&m_game));
 	register_dialog_box(std::make_unique<DialogBox_GuildInvite>(&m_game));
+	register_dialog_box(std::make_unique<DialogBox_MiddlelandSiegePrompt>(&m_game));
 	register_dialog_box(std::make_unique<DialogBox_Bank>(&m_game));
 	register_dialog_box(std::make_unique<DialogBox_Exchange>(&m_game));
 	register_dialog_box(std::make_unique<DialogBox_Party>(&m_game));

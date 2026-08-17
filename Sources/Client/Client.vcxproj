@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build" ToolsVersion="15.0">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -252,6 +252,7 @@
     <ClInclude Include="DialogBox_GuildMenu.h" />
     <ClInclude Include="DialogBox_Guild.h" />
     <ClInclude Include="DialogBox_GuildInvite.h" />
+    <ClInclude Include="DialogBox_MiddlelandSiegePrompt.h" />
     <ClInclude Include="DialogBox_GuildDisbandConfirm.h" />
     <ClInclude Include="DialogBox_GuildOperation.h" />
     <ClInclude Include="DialogBox_Bank.h" />
@@ -460,6 +461,7 @@
     <ClCompile Include="DialogBox_GuildMenu.cpp" />
     <ClCompile Include="DialogBox_Guild.cpp" />
     <ClCompile Include="DialogBox_GuildInvite.cpp" />
+    <ClCompile Include="DialogBox_MiddlelandSiegePrompt.cpp" />
     <ClCompile Include="DialogBox_GuildDisbandConfirm.cpp" />
     <ClCompile Include="DialogBox_GuildOperation.cpp" />
     <ClCompile Include="DialogBox_Bank.cpp" />

@@ -791,20 +791,46 @@ void Screen_OnGame::on_render()
         m_game->m_effect_sprites[101]->draw(m_gate_posit_x * 32 - m_game->m_Camera.get_x() - 96, m_gate_posit_y * 32 - m_game->m_Camera.get_y() - 69, m_game->m_entity_state.m_effect_frame % 30, hb::shared::sprite::DrawParams::alpha_blend(0.5f));
     }
 
-    // === EVENTO MOBA: DIBUJAR TEMPORIZADOR CON CHRONO ===
+    // === EVENTO MOBA: DIBUJAR TEMPORIZADOR O MARCADOR ===
     if (m_game->m_bIsRegisteredForMiddleland)
     {
-        auto now = std::chrono::steady_clock::now();
-        if (m_game->m_middleland_end_time > now)
-        {
-            long long remaining_seconds = std::chrono::duration_cast<std::chrono::seconds>(m_game->m_middleland_end_time - now).count();
-            long minutes = static_cast<long>(remaining_seconds / 60);
-            long seconds = static_cast<long>(remaining_seconds % 60);
-            
-            char timer_text[50];
-            snprintf(timer_text, sizeof(timer_text), "Middleland Siege: %02ld:%02ld", minutes, seconds);
-            
-            hb::shared::text::draw_text_aligned(GameFont::Default, 0, 525, 800, 20, timer_text, hb::shared::text::TextStyle::from_color(GameColors::UIBuildRed), hb::shared::text::Align::TopCenter);
+        if (m_game->m_bMiddlelandSiegeRegistrationOpen) {
+            // FASE 1: REGISTRO (Cola en la parte inferior)
+            auto now = std::chrono::steady_clock::now();
+            if (m_game->m_middleland_end_time > now)
+            {
+                long long remaining_seconds = std::chrono::duration_cast<std::chrono::seconds>(m_game->m_middleland_end_time - now).count();
+                long minutes = static_cast<long>(remaining_seconds / 60);
+                long seconds = static_cast<long>(remaining_seconds % 60);
+                
+                char timer_text[100];
+                snprintf(timer_text, sizeof(timer_text), "Middleland Siege: %02ld:%02ld", minutes, seconds);
+                hb::shared::text::draw_text_aligned(GameFont::Default, 0, 525, 800, 20, timer_text, hb::shared::text::TextStyle::from_color(GameColors::UIBuildRed), hb::shared::text::Align::TopCenter);
+            }
+        } else {
+            // FASE 2: BATALLA (Marcador arriba del todo)
+            auto now = std::chrono::steady_clock::now();
+            if (m_game->m_middleland_end_time > now)
+            {
+                long long remaining_seconds = std::chrono::duration_cast<std::chrono::seconds>(m_game->m_middleland_end_time - now).count();
+                long minutes = static_cast<long>(remaining_seconds / 60);
+                long seconds = static_cast<long>(remaining_seconds % 60);
+                
+                char timer_text[100];
+                snprintf(timer_text, sizeof(timer_text), "Time Remaining: %02ld:%02ld", minutes, seconds);
+                hb::shared::text::draw_text_aligned(GameFont::Default, 0, 5, 800, 20, timer_text, hb::shared::text::TextStyle::from_color(GameColors::UIBuildRed), hb::shared::text::Align::TopCenter);
+            }
+
+            char score_text[100];
+            snprintf(score_text, sizeof(score_text), "Aresden: %d  |  Elvine: %d", m_game->m_middleland_score_aresden, m_game->m_middleland_score_elvine);
+            hb::shared::text::draw_text_aligned(GameFont::Default, 0, 25, 800, 20, score_text, hb::shared::text::TextStyle::from_color(GameColors::UIWhite), hb::shared::text::Align::TopCenter);
+
+            if (m_game->m_middleland_score_aresden >= 10000) {
+                hb::shared::text::draw_text_aligned(GameFont::Default, 0, 45, 800, 20, "Aresden Damage Boost Active (+50%)!", hb::shared::text::TextStyle::from_color(GameColors::UIBuildRed), hb::shared::text::Align::TopCenter);
+            }
+            if (m_game->m_middleland_score_elvine >= 10000) {
+                hb::shared::text::draw_text_aligned(GameFont::Default, 0, 45, 800, 20, "Elvine Damage Boost Active (+50%)!", hb::shared::text::TextStyle::from_color(GameColors::UIBuildRed), hb::shared::text::Align::TopCenter);
+            }
         }
     }
     // ====================================================

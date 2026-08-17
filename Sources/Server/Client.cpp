@@ -35,6 +35,8 @@ CClient::CClient(asio::io_context& ctx)
 	m_is_client_connected = false;
 	m_is_middleland_siege_registered = false;
     m_middleland_siege_team = 0;
+	m_middleland_killstreak = 0;
+	m_middleland_surrendered = false;
 	m_last_msg_id = 0;
 	m_last_msg_time = 0;
 	m_last_msg_size = 0;

@@ -350,6 +350,13 @@ public:
     uint32_t m_middleland_minion_timer; // Marca de tiempo para controlar las oleadas de minions
     int m_middleland_siege_wave;        // NUEVO: Contador de la oleada actual (de 0 a 8)
     void middleland_siege_process();    // Función que el servidor llamará para vigilar el tiempo
+    
+    int m_middleland_score_aresden;
+    int m_middleland_score_elvine;
+    std::vector<int> m_middleland_surrender_aresden;
+    std::vector<int> m_middleland_surrender_elvine;
+    void middleland_siege_end(int winner_side);
+    void send_system_mail(const char* receiver_name, const char* subject, const char* body, int gold);
     // =========================================
     
     int request_panning_map_data_request(int client_h, char * data);

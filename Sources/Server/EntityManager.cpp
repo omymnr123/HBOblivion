@@ -3,6 +3,7 @@
 #include "CommonTypes.h"
 #include "EntityManager.h"
 #include "Game.h"
+#include "Packet/SharedPackets.h"
 #include "StatusEffectManager.h"
 #include "WarManager.h"
 #include "MagicManager.h"
@@ -1066,12 +1067,12 @@ void CEntityManager::delete_entity(int entity_handle)
     if (m_game == nullptr)
         return;
 
-    // === RESTAURACIÓN DEL SISTEMA DE ELITES (40 KILLS) ===
+    // === RESTAURACIÃ“N DEL SISTEMA DE ELITES (40 KILLS) ===
     if (m_npc_list[entity_handle] != nullptr) {
         int map_idx = m_npc_list[entity_handle]->m_map_index;
         int spot_idx = m_npc_list[entity_handle]->m_spot_mob_index;
 
-        // Si el NPC pertenece a un Spot Generador válido
+        // Si el NPC pertenece a un Spot Generador vÃ¡lido
         if (spot_idx > 0 && spot_idx < hb::server::map::MaxSpotMobGenerator) {
             
             // Huella de los Elites de Tumbas (Sarcofagos)
@@ -1085,7 +1086,7 @@ void CEntityManager::delete_entity(int entity_handle)
             if (!is_tomb_elite && !is_spot_elite) {
                 m_game->m_map_list[map_idx]->m_spot_mob_generator[spot_idx].elite_kill_counter++;
 
-                // Si hemos matado al número 40...
+                // Si hemos matado al nÃºmero 40...
                 if (m_game->m_map_list[map_idx]->m_spot_mob_generator[spot_idx].elite_kill_counter >= 40) {
                     
                     // 1. Reseteamos el contador a 0
@@ -1101,13 +1102,13 @@ void CEntityManager::delete_entity(int entity_handle)
                             m_npc_list[i]->m_spot_mob_index == spot_idx &&
                             !m_npc_list[i]->m_status.hero) 
                         {
-                            // Limpiamos la colisión
+                            // Limpiamos la colisiÃ³n
                             m_game->m_map_list[map_idx]->clear_owner(14, i, hb::shared::owner_class::Npc, m_npc_list[i]->m_x, m_npc_list[i]->m_y);
                             
                             m_npc_list[i]->m_hp = 0;
                             m_npc_list[i]->m_is_killed = true;
                             
-                            // Restamos la población libre
+                            // Restamos la poblaciÃ³n libre
                             m_game->m_map_list[map_idx]->m_spot_mob_generator[spot_idx].cur_mobs--;
                             m_npc_list[i]->m_spot_mob_index = -1;
                             
@@ -1116,15 +1117,15 @@ void CEntityManager::delete_entity(int entity_handle)
                         }
                     }
 
-                    // ¡CLAVE! Liberamos físicamente la baldosa del mob 40 (el cadáver) justo antes del spawn
-                    // para que quede como un "espacio vacío" válido para los Élites[cite: 2].
+                    // Â¡CLAVE! Liberamos fÃ­sicamente la baldosa del mob 40 (el cadÃ¡ver) justo antes del spawn
+                    // para que quede como un "espacio vacÃ­o" vÃ¡lido para los Ã‰lites[cite: 2].
                     m_game->m_map_list[map_idx]->clear_owner(14, entity_handle, hb::shared::owner_class::Npc, m_npc_list[entity_handle]->m_x, m_npc_list[entity_handle]->m_y);
 
-                    // ¡CLAVE! Aumentamos temporalmente el límite máximo del spot para que create_entity no bloquee a los Élites
+                    // Â¡CLAVE! Aumentamos temporalmente el lÃ­mite mÃ¡ximo del spot para que create_entity no bloquee a los Ã‰lites
                     int original_max_mobs = m_game->m_map_list[map_idx]->m_spot_mob_generator[spot_idx].max_mobs;
                     m_game->m_map_list[map_idx]->m_spot_mob_generator[spot_idx].max_mobs += 3;
 
-                    // 4. Invocamos a los 3 Élites buffados
+                    // 4. Invocamos a los 3 Ã‰lites buffados
                     for (int e = 0; e < 3; e++) {
                         int naming_value = m_game->m_map_list[map_idx]->get_empty_naming_value();
                         if (naming_value == -1) continue;
@@ -1151,7 +1152,7 @@ void CEntityManager::delete_entity(int entity_handle)
                             }
                         }
 
-                        // CREACIÓN NATIVA: Pasamos los parámetros de bypass de mapa que funcionaron en el Intento 2
+                        // CREACIÃ“N NATIVA: Pasamos los parÃ¡metros de bypass de mapa que funcionaron en el Intento 2
                         int eliteHandle = create_entity(
                             npc_config_id, uniqueName, m_game->m_map_list[map_idx]->m_name,
                             (rand() % 3), 0, move_type,
@@ -1164,23 +1165,23 @@ void CEntityManager::delete_entity(int entity_handle)
                             CNpc* eliteMob = m_npc_list[eliteHandle];
                             
                             // === LA MAGIA DEL REPOSICIONAMIENTO ===
-                            // En vez de forzar las coordenadas en la creación y crashear, dejamos que 
+                            // En vez de forzar las coordenadas en la creaciÃ³n y crashear, dejamos que 
                             // nazca de forma segura e inmediatamente lo reubicamos.
                             
                             short finalX = m_npc_list[entity_handle]->m_x;
                             short finalY = m_npc_list[entity_handle]->m_y;
                             
-                            // Buscamos una baldosa libre alrededor del cadáver
+                            // Buscamos una baldosa libre alrededor del cadÃ¡ver
                             m_game->get_empty_position(&finalX, &finalY, (char)map_idx);
                             
-                            // 1. Limpiamos la colisión original del élite
+                            // 1. Limpiamos la colisiÃ³n original del Ã©lite
                             m_game->m_map_list[map_idx]->clear_owner(14, eliteHandle, hb::shared::owner_class::Npc, eliteMob->m_x, eliteMob->m_y);
                             
-                            // 2. Lo teletransportamos a las coordenadas alrededor del cadáver
+                            // 2. Lo teletransportamos a las coordenadas alrededor del cadÃ¡ver
                             eliteMob->m_x = finalX;
                             eliteMob->m_y = finalY;
                             
-                            // 3. Le asignamos la nueva colisión[cite: 2]
+                            // 3. Le asignamos la nueva colisiÃ³n[cite: 2]
                             m_game->m_map_list[map_idx]->set_owner(eliteHandle, hb::shared::owner_class::Npc, finalX, finalY);
                             // =======================================
 
@@ -1203,7 +1204,7 @@ void CEntityManager::delete_entity(int entity_handle)
                         }
                     }
 
-                    // Restauramos el límite original para no dejar el spot modificado
+                    // Restauramos el lÃ­mite original para no dejar el spot modificado
                     m_game->m_map_list[map_idx]->m_spot_mob_generator[spot_idx].max_mobs = original_max_mobs;
                 }
             }
@@ -1349,6 +1350,53 @@ void CEntityManager::on_entity_killed(int entity_handle, short attacker_h, char 
         }
     }
 
+	// === EVENTO MOBA: MIDDLELAND SIEGE NPC KILLS ===
+	if (m_game->m_middleland_siege_state == 2 && map_index == m_game->m_middleland_map_index) {
+		int attacker_team = 0;
+		if (attacker_type == hb::shared::owner_class::Player && attacker_h >= 0 && attacker_h < hb::server::config::MaxClients && m_game->m_client_list[attacker_h] != nullptr) {
+			attacker_team = m_game->m_client_list[attacker_h]->m_middleland_siege_team;
+		} else if (attacker_type == hb::shared::owner_class::Npc && attacker_h >= 0 && attacker_h < hb::server::config::MaxNpcs && m_npc_list[attacker_h] != nullptr) {
+			attacker_team = m_npc_list[attacker_h]->m_side;
+		}
+
+		int victim_team = entity->m_side;
+
+		if (attacker_team > 0 && victim_team > 0 && attacker_team != victim_team) {
+			// Check if Nexus destroyed
+			if (strstr(entity->m_npc_name, "Magic Generator") != nullptr || strstr(entity->m_npc_name, "Nexus") != nullptr) {
+				m_game->middleland_siege_end(attacker_team);
+			} else {
+				int points_earned = 50; // Default for Minions/NPCs
+				if (strstr(entity->m_npc_name, "Shield Generator") != nullptr || strstr(entity->m_npc_name, "Shield") != nullptr) {
+					points_earned = 1000;
+				}
+
+				if (attacker_team == 1) {
+					m_game->m_middleland_score_aresden += points_earned;
+				} else if (attacker_team == 2) {
+					m_game->m_middleland_score_elvine += points_earned;
+				}
+
+				// Broadcast score
+				hb::net::PacketHeader pkt{};
+				pkt.msg_id = MsgId::NotifyMiddlelandSiegeScore;
+				pkt.msg_type = 0;
+				
+				char buffer[256];
+				std::memcpy(buffer, &pkt, sizeof(pkt));
+				std::memcpy(buffer + sizeof(pkt), &m_game->m_middleland_score_aresden, 4);
+				std::memcpy(buffer + sizeof(pkt) + 4, &m_game->m_middleland_score_elvine, 4);
+
+				for (int i = 1; i < hb::server::config::MaxClients; i++) {
+					if (m_game->m_client_list[i] && m_game->m_client_list[i]->m_is_init_complete && m_game->m_client_list[i]->m_is_middleland_siege_registered) {
+						if (m_game->m_client_list[i]->m_socket)
+							m_game->m_client_list[i]->m_socket->send_msg(buffer, sizeof(pkt) + 8, 0);
+					}
+				}
+			}
+		}
+	}
+	// ===============================================
 }
 
 // ========================================================================
@@ -1411,41 +1459,41 @@ void CEntityManager::process_entities()
 
 // INICIO TICK DE VENENO PARA NPCs (LETAL)
             if (m_npc_list[i]->m_status.poisoned && m_npc_list[i]->m_is_killed == false) {
-                // Comprobamos si ya pasó el tiempo configurado para el daño de veneno
+                // Comprobamos si ya pasÃ³ el tiempo configurado para el daÃ±o de veneno
                 if ((time - m_npc_list[i]->m_poison_time) > (uint32_t)m_game->m_poison_damage_interval) {
                     
                     // Reiniciamos el temporizador
                     m_npc_list[i]->m_poison_time = time;
                     
-                    // Calculamos y aplicamos el daño
+                    // Calculamos y aplicamos el daÃ±o
                     int poison_damage = m_game->dice(1, m_npc_list[i]->m_poison_level);
                     m_npc_list[i]->m_hp -= poison_damage;
                     
                     // Si el veneno reduce la vida por debajo de 0, desencadenamos la muerte oficial del NPC
                     if (m_npc_list[i]->m_hp < 0) {
                         if (m_game->m_entity_manager != NULL) {
-                            // Usamos Npc como clase propietaria estándar para que el motor procese la muerte
+                            // Usamos Npc como clase propietaria estÃ¡ndar para que el motor procese la muerte
                             m_game->m_entity_manager->on_entity_killed(i, -1, hb::shared::owner_class::Npc, poison_damage);
                         }
                     } else {
-                        // Enviar animación de daño visual para que parpadee mientras sigue vivo
+                        // Enviar animaciÃ³n de daÃ±o visual para que parpadee mientras sigue vivo
                         m_game->send_event_to_near_client_type_a(i, hb::shared::owner_class::Npc, MsgId::EventMotion, Type::Damage, poison_damage, 0, 0);
                     }
                 }
             }
             // FIN TICK DE VENENO PARA NPCs
 
-            // === NUEVO: Despawn de NPCs Élite por inactividad (1 minuto) ===
+            // === NUEVO: Despawn de NPCs Ã‰lite por inactividad (1 minuto) ===
             if (m_npc_list[i]->m_status.hero && m_npc_list[i]->m_is_killed == false) {
-                // EXCEPCIÓN: Los élites vinculados a un Sarcófago no desaparecen por tiempo.
+                // EXCEPCIÃ“N: Los Ã©lites vinculados a un SarcÃ³fago no desaparecen por tiempo.
                 bool is_sarcofago_guard = (m_npc_list[i]->m_follow_owner_type == hb::shared::owner_class::Npc && m_npc_list[i]->m_follow_owner_index > 0);
                 
                 if (!is_sarcofago_guard && (time - m_npc_list[i]->m_summoned_time) > 60000) { // 60,000 ms = 1 minuto
                     m_npc_list[i]->m_hp = 0;
                     m_npc_list[i]->m_is_killed = true;
                     
-                    delete_npc_internal(i); // Lo borramos instantáneamente y en silencio (sin drop)
-                    continue; // IMPORTANTÍSIMO: Saltar el bucle para evitar crasheos por puntero nulo
+                    delete_npc_internal(i); // Lo borramos instantÃ¡neamente y en silencio (sin drop)
+                    continue; // IMPORTANTÃSIMO: Saltar el bucle para evitar crasheos por puntero nulo
                 }
             }
             // ===============================================================
@@ -1636,7 +1684,7 @@ void CEntityManager::npc_behavior_move(int npc_h)
 			m_npc_list[npc_h]->m_map_index, m_npc_list[npc_h]->m_turn, &m_npc_list[npc_h]->m_tmp_error);
 
 		if (dir == 0) {
-			// === NUEVO: Los Élites buscan nueva ruta al instante (100%), los normales tienen 10% de chance ===
+			// === NUEVO: Los Ã‰lites buscan nueva ruta al instante (100%), los normales tienen 10% de chance ===
 			if (m_npc_list[npc_h]->m_status.hero || m_game->dice(1, 10) == 3) {
 				calc_next_waypoint_destination(npc_h);
 			}
@@ -1826,14 +1874,14 @@ void CEntityManager::npc_behavior_attack(int npc_h)
 		dY = m_npc_list[m_npc_list[npc_h]->m_target_index]->m_y;
 		break;
 	}
-	// === NUEVO: ANTI-KITING PARA ÉLITES ===
+	// === NUEVO: ANTI-KITING PARA Ã‰LITES ===
 	if (m_npc_list[npc_h]->m_status.hero && m_npc_list[npc_h]->m_move_type == MoveType::RandomArea) {
 		auto& rect = m_npc_list[npc_h]->m_random_area;
-		// Le damos un pequeño margen de gracia de 5 tiles fuera de su zona para que el movimiento sea fluido
+		// Le damos un pequeÃ±o margen de gracia de 5 tiles fuera de su zona para que el movimiento sea fluido
 		if (dX < rect.x - 5 || dX > rect.x + rect.width + 5 ||
 			dY < rect.y - 5 || dY > rect.y + rect.height + 5) {
 			
-			// Si el objetivo intenta sacarlo del spot, el Élite cancela el ataque y se da la vuelta
+			// Si el objetivo intenta sacarlo del spot, el Ã‰lite cancela el ataque y se da la vuelta
 			m_npc_list[npc_h]->m_behavior_turn_count = 0;
 			m_npc_list[npc_h]->m_behavior = Behavior::Move;
 			m_npc_list[npc_h]->m_target_index = 0;
@@ -2836,7 +2884,7 @@ void CEntityManager::delete_npc_internal(int npc_h)
 
 	// If NPC was never killed via on_entity_killed() (e.g. summoned NPC cleanup,
 	// crop harvest, energy sphere, crusade structure removal), the alive counter
-	// was never decremented — do it here to prevent m_total_alive_object drift.
+	// was never decremented â€” do it here to prevent m_total_alive_object drift.
 	if (!m_npc_list[npc_h]->m_is_killed) {
 		m_map_list[m_npc_list[npc_h]->m_map_index]->m_total_alive_object--;
 	}
@@ -3031,13 +3079,13 @@ void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char a
         }
     }
 
-    // === Multiplicador para NPCs Élite ===
+    // === Multiplicador para NPCs Ã‰lite ===
     if (m_npc_list[npc_h]->m_status.hero) {
         primaryChance = static_cast<uint32_t>(static_cast<float>(primaryChance) * 4.0f);
         goldChance = static_cast<uint32_t>(static_cast<float>(goldChance) * 4.0f);
     }
     
-    // === Boost para Nodos de Maná ===
+    // === Boost para Nodos de ManÃ¡ ===
     if (m_npc_list[npc_h]->m_type == 42) {
         primaryChance = 10000;
         goldChance = 10000;
@@ -3069,7 +3117,7 @@ void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char a
     }
 
     // Primary item drop (from drop table tier 1) - uses same primary chance
-    // Nodos de Maná (type 42) siempre dropean item y oro.
+    // Nodos de ManÃ¡ (type 42) siempre dropean item y oro.
     if ((!droppedGold || m_npc_list[npc_h]->m_type == 42) && table != nullptr) {
         if (m_game->dice(1, 10000) <= primaryChance) {
             int min_count = 1;
@@ -3100,12 +3148,12 @@ void CEntityManager::npc_dead_item_generator(int npc_h, short attacker_h, char a
         double effectiveSecondary = baseSecondary * static_cast<double>(m_game->m_secondary_drop_rate);
         effectiveSecondary *= cazador_bonus;
 
-        // === Multiplicador secundario para NPCs Élite ===
+        // === Multiplicador secundario para NPCs Ã‰lite ===
         if (m_npc_list[npc_h]->m_status.hero) {
             effectiveSecondary *= 5.0f;
         }
         
-        // === Secondary Boost para Nodos de Maná ===
+        // === Secondary Boost para Nodos de ManÃ¡ ===
         if (m_npc_list[npc_h]->m_type == 42) {
             effectiveSecondary = 10000.0;
         }
@@ -3184,7 +3232,7 @@ bool CEntityManager::spawn_npc_drop_item(int npc_h, int item_id, int min_count, 
 		return false;
 	}
 
-	// === Nodos de Maná: Chunk gold si es mayor a 10000 ===
+	// === Nodos de ManÃ¡: Chunk gold si es mayor a 10000 ===
 	bool is_tomb = (m_npc_list[npc_h]->m_npc_config_id >= 150 && m_npc_list[npc_h]->m_npc_config_id <= 152);
 	if (item_id == 90 && is_tomb && count > 10000) {
 		int remaining = count;
@@ -3259,7 +3307,7 @@ bool CEntityManager::spawn_npc_drop_item(int npc_h, int item_id, int min_count, 
 	int drop_y = m_npc_list[npc_h]->m_y;
 	int map_idx = m_npc_list[npc_h]->m_map_index;
 
-	// === Nodos de Maná: Scatter normal items ===
+	// === Nodos de ManÃ¡: Scatter normal items ===
 	if (m_npc_list[npc_h]->m_npc_config_id >= 150 && m_npc_list[npc_h]->m_npc_config_id <= 152) {
 		for(int t = 0; t < 50; t++) {
 			int dX = m_game->dice(1, 13) - 7; // -6 to +6
@@ -4255,13 +4303,13 @@ void CEntityManager::process_spot_spawns(int map_index)
     char cName_Master[11], waypoint[11];
     char sa;
 
-    // (Asegúrate de que la función anterior esté cerrada con su '}' antes de este bucle)
+    // (AsegÃºrate de que la funciÃ³n anterior estÃ© cerrada con su '}' antes de este bucle)
 
     // Loop through all spot mob generators
     for (int j = 1; j < smap::MaxSpotMobGenerator; j++) {
         if (!m_map_list[map_index]->m_spot_mob_generator[j].is_defined) continue;
 
-        // Bloquear spawn si el spot está en enfriamiento por el evento de Élites
+        // Bloquear spawn si el spot estÃ¡ en enfriamiento por el evento de Ã‰lites
         if (GameClock::GetTimeMS() < m_map_list[map_index]->m_spot_mob_generator[j].elite_block_until_time) {
             continue;
         }
@@ -4329,7 +4377,7 @@ void CEntityManager::process_spot_spawns(int map_index)
             m_map_list[map_index]->m_spot_mob_generator[j].cur_mobs++;
         }
     } 
-} // <--- ESTA LLAVE CIERRA LA FUNCIÓN QUE CONTIENE EL BUCLE FOR
+} // <--- ESTA LLAVE CIERRA LA FUNCIÃ“N QUE CONTIENE EL BUCLE FOR
 
 bool CEntityManager::can_spawn_at_spot(int map_index, int spot_index) const
 {

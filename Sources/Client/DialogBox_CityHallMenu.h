@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "IDialogBox.h"
 
 class DialogBox_CityHallMenu : public IDialogBox
@@ -23,6 +23,7 @@ public:
 		change_play_mode = 9,
 		teleport_menu = 10,
 		hero_item_confirm = 11,
+		middleland_siege_warning = 12,
 	};
 	mode m_mode{mode::main_menu};
 	int m_hero_item_id{};
@@ -48,6 +49,7 @@ private:
 	void DrawMode9_ChangePlayMode(short sX, short sY, short size_x);
 	void DrawMode10_TeleportMenu(short sX, short sY, short size_x);
 	void DrawMode11_HeroItemConfirm(short sX, short sY, short size_x);
+	void DrawMode_MiddlelandSiegeWarning(short sX, short sY, short size_x);
 
 	bool on_click_mode0(short sX, short sY);
 	bool on_click_mode1(short sX, short sY);
@@ -58,5 +60,6 @@ private:
 	bool on_click_mode9(short sX, short sY);
 	bool on_click_mode10(short sX, short sY);
 	bool on_click_mode11(short sX, short sY);
+	bool on_click_mode_middleland_siege_warning(short sX, short sY);
 	std::string m_cTakeHeroItemName;
 };

@@ -68,5 +68,6 @@ namespace DialogBoxId
 		Prestige,
 		Enchanting,
 		EnchantingBag,
+		MiddlelandSiegePrompt,
 	};
 }

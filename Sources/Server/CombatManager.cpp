@@ -51,7 +51,7 @@ static int ___iCAB10[] = { 0,0, 1,2,3 };
 void CombatManager::remove_from_target(short target_h, char target_type, int code)
 {
 	
-	uint32_t time = GameClock::GetTimeMS();
+	unsigned int time = GameClock::GetTimeMS();
 
 	for(int i = 0; i < MaxNpcs; i++)
 		if (m_game->m_npc_list[i] != 0) {
@@ -84,7 +84,7 @@ int CombatManager::get_danger_value(int npc_h, short dX, short dY)
 	int danger_value;
 	short owner, do_type;
 	char  owner_type;
-	uint32_t register_time;
+	unsigned int register_time;
 
 	if (m_game->m_npc_list[npc_h] == 0) return false;
 
@@ -209,6 +209,63 @@ void CombatManager::client_killed_handler(int client_h, int attacker_h, char att
 		}
 		m_game->m_war_manager->update_heldenian_status();
 	}
+
+	// === EVENTO MOBA: MIDDLELAND SIEGE KILLS & SHUTDOWNS ===
+	if (m_game->m_middleland_siege_state == 2 && m_game->m_client_list[client_h]->m_is_middleland_siege_registered) {
+		int victim_team = m_game->m_client_list[client_h]->m_middleland_siege_team;
+		int attacker_team = 0;
+		if (attacker_type == hb::shared::owner_class::Player && attacker_h >= 0 && attacker_h < hb::server::config::MaxClients && m_game->m_client_list[attacker_h] != nullptr) {
+			attacker_team = m_game->m_client_list[attacker_h]->m_middleland_siege_team;
+		}
+
+		if (attacker_team > 0 && attacker_team != victim_team) {
+			int points_earned = 100;
+			
+			// Check shutdown
+			if (m_game->m_client_list[client_h]->m_middleland_killstreak >= 3) {
+				points_earned += 500;
+				char shutdown_msg[256];
+				snprintf(shutdown_msg, sizeof(shutdown_msg), "%s ended %s's killstreak! (+500 points)", attacker_name, m_game->m_client_list[client_h]->m_char_name);
+				
+				for (int i = 1; i < hb::server::config::MaxClients; i++) {
+					if (m_game->m_client_list[i] && m_game->m_client_list[i]->m_is_init_complete && m_game->m_client_list[i]->m_is_middleland_siege_registered) {
+						m_game->send_notify_msg(0, i, Notify::NoticeMsg, 0, 0, 0, shutdown_msg);
+					}
+				}
+			}
+
+			// Add points
+			if (attacker_team == 1) {
+				m_game->m_middleland_score_aresden += points_earned;
+			} else if (attacker_team == 2) {
+				m_game->m_middleland_score_elvine += points_earned;
+			}
+
+			// Add killstreak
+			m_game->m_client_list[attacker_h]->m_middleland_killstreak++;
+
+			// Broadcast score
+			hb::net::PacketHeader pkt{};
+			pkt.msg_id = MsgId::NotifyMiddlelandSiegeScore;
+			pkt.msg_type = 0;
+			
+			char buffer[256];
+			std::memcpy(buffer, &pkt, sizeof(pkt));
+			std::memcpy(buffer + sizeof(pkt), &m_game->m_middleland_score_aresden, 4);
+			std::memcpy(buffer + sizeof(pkt) + 4, &m_game->m_middleland_score_elvine, 4);
+
+			for (int i = 1; i < hb::server::config::MaxClients; i++) {
+				if (m_game->m_client_list[i] && m_game->m_client_list[i]->m_is_init_complete && m_game->m_client_list[i]->m_is_middleland_siege_registered) {
+					if (m_game->m_client_list[i]->m_socket)
+						m_game->m_client_list[i]->m_socket->send_msg(buffer, sizeof(pkt) + 8, 0);
+				}
+			}
+		}
+
+		// Reset killstreak for victim
+		m_game->m_client_list[client_h]->m_middleland_killstreak = 0;
+	}
+	// =======================================================
 
 	if (attacker_type == hb::shared::owner_class::Player) {
 		// v1.432
@@ -341,7 +398,7 @@ void CombatManager::effect_damage_spot(short attacker_h, char attacker_type, sho
 	int party_id, damage, side_condition, index, remain_life, temp, max_super_attack, rep_damage;
 	char attacker_side;
 	direction damage_move_dir;
-	uint32_t time, exp_gained;
+	unsigned int time, exp_gained;
 	double tmp1, tmp2, tmp3;
 	short atk_x, atk_y, tgt_x, tgt_y, dX, dY, item_index;
 
@@ -489,7 +546,7 @@ void CombatManager::effect_damage_spot(short attacker_h, char attacker_type, sho
 		// GM mode damage immunity
 		if (m_game->m_client_list[target_h]->m_is_gm_mode)
 		{
-			uint32_t now = GameClock::GetTimeMS();
+			unsigned int now = GameClock::GetTimeMS();
 			if (now - m_game->m_client_list[target_h]->m_last_gm_immune_notify_time > 2000)
 			{
 				m_game->m_client_list[target_h]->m_last_gm_immune_notify_time = now;
@@ -506,7 +563,7 @@ void CombatManager::effect_damage_spot(short attacker_h, char attacker_type, sho
 		if ((attacker_type == hb::shared::owner_class::Player) && (m_game->m_client_list[target_h]->m_is_neutral) &&
 			(m_game->m_client_list[target_h]->m_player_kill_count == 0) && (m_game->m_client_list[target_h]->m_is_own_location)) return;
 
-		if ((time - m_game->m_client_list[target_h]->m_time) > (uint32_t)m_game->m_lag_protection_interval) return;
+		if ((time - m_game->m_client_list[target_h]->m_time) > (unsigned int)m_game->m_lag_protection_interval) return;
 		if ((m_game->m_map_list[m_game->m_client_list[target_h]->m_map_index]->m_is_attack_enabled == false)) return;
 		if ((attacker_type == hb::shared::owner_class::Player) && (m_game->m_client_list[attacker_h]->m_is_neutral) && (m_game->m_client_list[target_h]->m_player_kill_count == 0)) return;
 		if ((m_game->m_client_list[target_h]->m_party_id != 0) && (party_id == m_game->m_client_list[target_h]->m_party_id)) return;
@@ -660,7 +717,7 @@ void CombatManager::effect_damage_spot(short attacker_h, char attacker_type, sho
 				}
 
 				if (m_game->m_client_list[target_h]->m_add_charge_critical > 0) {
-					if (m_game->dice(1, 100) <= static_cast<uint32_t>(m_game->m_client_list[target_h]->m_add_charge_critical)) {
+					if (m_game->dice(1, 100) <= static_cast<unsigned int>(m_game->m_client_list[target_h]->m_add_charge_critical)) {
 						max_super_attack = (m_game->m_client_list[target_h]->m_level / 10);
 						if (m_game->m_client_list[target_h]->m_super_attack_left < max_super_attack) m_game->m_client_list[target_h]->m_super_attack_left++;
 						m_game->send_notify_msg(0, target_h, Notify::SuperAttackLeft, 0, 0, 0, 0);
@@ -829,12 +886,12 @@ void CombatManager::effect_damage_spot(short attacker_h, char attacker_type, sho
 
 				if ((m_game->m_npc_list[target_h]->m_no_die_remain_exp > 0) && (m_game->m_npc_list[target_h]->m_is_summoned != true) &&
 					(attacker_type == hb::shared::owner_class::Player) && (m_game->m_client_list[attacker_h] != 0)) {
-					if (m_game->m_npc_list[target_h]->m_no_die_remain_exp > static_cast<uint32_t>(damage)) {
+					if (m_game->m_npc_list[target_h]->m_no_die_remain_exp > static_cast<unsigned int>(damage)) {
 						exp_gained = damage;
 						if ((m_game->m_npc_exp_multiplier != 1.0f)) {
 							tmp1 = (double)exp_gained;
 							tmp2 = (double)m_game->m_npc_exp_multiplier;
-							exp_gained = (uint32_t)(tmp1 * tmp2 + 0.5);
+							exp_gained = (unsigned int)(tmp1 * tmp2 + 0.5);
 						}
 						if ((m_game->m_is_crusade_mode) && (exp_gained > 10)) exp_gained = 10;
 
@@ -842,7 +899,7 @@ void CombatManager::effect_damage_spot(short attacker_h, char attacker_type, sho
 							tmp1 = (double)m_game->m_client_list[attacker_h]->m_add_exp;
 							tmp2 = (double)exp_gained;
 							tmp3 = (tmp1 / 100.0f) * tmp2;
-							exp_gained += (uint32_t)tmp3;
+							exp_gained += (unsigned int)tmp3;
 						}
 
 						if (m_game->m_client_list[attacker_h]->m_level > 100) {
@@ -865,7 +922,7 @@ void CombatManager::effect_damage_spot(short attacker_h, char attacker_type, sho
 						if ((m_game->m_npc_exp_multiplier != 1.0f)) {
 							tmp1 = (double)exp_gained;
 							tmp2 = (double)m_game->m_npc_exp_multiplier;
-							exp_gained = (uint32_t)(tmp1 * tmp2 + 0.5);
+							exp_gained = (unsigned int)(tmp1 * tmp2 + 0.5);
 						}
 						if ((m_game->m_is_crusade_mode) && (exp_gained > 10)) exp_gained = 10;
 
@@ -873,7 +930,7 @@ void CombatManager::effect_damage_spot(short attacker_h, char attacker_type, sho
 							tmp1 = (double)m_game->m_client_list[attacker_h]->m_add_exp;
 							tmp2 = (double)exp_gained;
 							tmp3 = (tmp1 / 100.0f) * tmp2;
-							exp_gained += (uint32_t)tmp3;
+							exp_gained += (unsigned int)tmp3;
 						}
 
 						if (m_game->m_client_list[attacker_h]->m_level > 100) {
@@ -901,19 +958,56 @@ void CombatManager::effect_damage_spot(short attacker_h, char attacker_type, sho
 void CombatManager::effect_damage_spot_damage_move(short attacker_h, char attacker_type, short target_h, char target_type, short atk_x, short atk_y, short v1, short v2, short v3, bool exp, int attr)
 {
 	int damage, side_condition, index, remain_life, temp, max_super_attack;
-	uint32_t time;
+	unsigned int time;
 	weapon_class::weapon_class wc;
 	char attacker_side;
 	direction damage_move_dir;
 	double tmp1, tmp2, tmp3;
 	int party_id, move_damage;
 	short tgt_x, tgt_y;
+	short dX = 0, dY = 0; // CORRECCIÓN: Variables declaradas
+	unsigned int exp_gained = 0; // CORRECCIÓN: Variable de exp declarada
 
 	if (attacker_type == hb::shared::owner_class::Player)
 		if (m_game->m_client_list[attacker_h] == 0) return;
 
 	if (attacker_type == hb::shared::owner_class::Npc)
 		if (m_game->m_npc_list[attacker_h] == 0) return;
+
+	// === EVENTO MOBA: PREVENCIÓN DE FUEGO AMIGO EN MIDDLELAND ===
+	if (m_game->m_middleland_siege_state == 2) 
+	{
+		int map_idx = -1;
+		int atk_side = 0;
+		int def_side = 0;
+
+		// 1. Obtener Bando y Mapa del Atacante
+		if (attacker_type == hb::shared::owner_class::Player && attacker_h > 0 && attacker_h < MaxClients && m_game->m_client_list[attacker_h] != nullptr) {
+			atk_side = m_game->m_client_list[attacker_h]->m_side;
+			map_idx = m_game->m_client_list[attacker_h]->m_map_index;
+		} 
+		else if (attacker_type == hb::shared::owner_class::Npc && attacker_h > 0 && attacker_h < hb::server::config::MaxNpcs && m_game->m_npc_list[attacker_h] != nullptr) {
+			atk_side = m_game->m_npc_list[attacker_h]->m_side;
+			map_idx = m_game->m_npc_list[attacker_h]->m_map_index;
+		}
+
+		// 2. Obtener Bando del Defensor
+		if (target_type == hb::shared::owner_class::Player && target_h > 0 && target_h < MaxClients && m_game->m_client_list[target_h] != nullptr) {
+			def_side = m_game->m_client_list[target_h]->m_side;
+		} 
+		else if (target_type == hb::shared::owner_class::Npc && target_h > 0 && target_h < hb::server::config::MaxNpcs && m_game->m_npc_list[target_h] != nullptr) {
+			def_side = m_game->m_npc_list[target_h]->m_side;
+		}
+
+		// 3. Comprobar Fuego Amigo
+		if (map_idx == m_game->m_middleland_map_index && atk_side > 0 && def_side > 0)
+		{
+			if (atk_side == def_side) {
+				return; 
+			}
+		}
+	}
+	// ============================================================
 
 	time = GameClock::GetTimeMS();
 	tgt_x = 0;
@@ -948,13 +1042,11 @@ void CombatManager::effect_damage_spot_damage_move(short attacker_h, char attack
 			}
 		}
 
-		// v1.432 2001 4 7 13 7
 		damage += m_game->m_client_list[attacker_h]->m_add_magical_damage;
 
 		if (m_game->m_map_list[m_game->m_client_list[attacker_h]->m_map_index]->m_is_fight_zone)
 			damage += damage / 3;
 
-		// Crusade :     1.33
 		if ((target_type == hb::shared::owner_class::Player) && (m_game->m_is_crusade_mode) && (m_game->m_client_list[attacker_h]->m_crusade_duty == 1))
 		{
 			if (m_game->m_client_list[attacker_h]->m_level <= 80)
@@ -997,10 +1089,9 @@ void CombatManager::effect_damage_spot_damage_move(short attacker_h, char attack
 		if (m_game->m_client_list[target_h]->m_is_init_complete == false) return;
 		if (m_game->m_client_list[target_h]->m_is_killed) return;
 
-		// GM mode damage immunity
 		if (m_game->m_client_list[target_h]->m_is_gm_mode)
 		{
-			uint32_t now = GameClock::GetTimeMS();
+			unsigned int now = GameClock::GetTimeMS();
 			if (now - m_game->m_client_list[target_h]->m_last_gm_immune_notify_time > 2000)
 			{
 				m_game->m_client_list[target_h]->m_last_gm_immune_notify_time = now;
@@ -1009,7 +1100,7 @@ void CombatManager::effect_damage_spot_damage_move(short attacker_h, char attack
 			return;
 		}
 
-		if ((time - m_game->m_client_list[target_h]->m_time) > (uint32_t)m_game->m_lag_protection_interval) return;
+		if ((time - m_game->m_client_list[target_h]->m_time) > (unsigned int)m_game->m_lag_protection_interval) return;
 		if (m_game->m_client_list[target_h]->m_map_index == -1) return;
 		if ((m_game->m_map_list[m_game->m_client_list[target_h]->m_map_index]->m_is_attack_enabled == false)) return;
 		if ((attacker_type == hb::shared::owner_class::Player) && (m_game->m_client_list[attacker_h]->m_is_neutral) && (m_game->m_client_list[target_h]->m_player_kill_count == 0)) return;
@@ -1019,21 +1110,18 @@ void CombatManager::effect_damage_spot_damage_move(short attacker_h, char attack
 
 		if ((attacker_type == hb::shared::owner_class::Player) && (m_game->m_client_list[target_h]->m_is_neutral) && (m_game->m_client_list[target_h]->m_player_kill_count == 0) && (m_game->m_client_list[target_h]->m_is_player_civil)) return;
 
-		// 01-12-17
 		if ((m_game->m_client_list[target_h]->m_party_id != 0) && (party_id == m_game->m_client_list[target_h]->m_party_id)) return;
 		m_game->m_client_list[target_h]->m_logout_hack_check = time;
 
 		if (attacker_type == hb::shared::owner_class::Player) {
-
+			// Purga de C4390: Limpieza total de llaves vacías
 			if (m_game->m_client_list[attacker_h]->m_is_safe_attack_mode) {
 				if (attacker_h == target_h) return;
 				side_condition = get_player_relationship_raw(attacker_h, target_h);
-				if ((side_condition == 7) || (side_condition == 2) || (side_condition == 6)) {
-				}
-				else {
-					if (m_game->m_map_list[m_game->m_client_list[attacker_h]->m_map_index]->m_is_fight_zone) {
+				if (!((side_condition == 7) || (side_condition == 2) || (side_condition == 6))) {
+					if (!m_game->m_map_list[m_game->m_client_list[attacker_h]->m_map_index]->m_is_fight_zone) {
+						return;
 					}
-					else return;
 				}
 			}
 
@@ -1145,7 +1233,7 @@ void CombatManager::effect_damage_spot_damage_move(short attacker_h, char attack
 		}
 
 		m_game->m_client_list[target_h]->m_hp -= damage;
-		// Interrupt spell casting on damage
+		
 		if (damage > 0) {
 			m_game->m_client_list[target_h]->m_last_damage_taken_time = GameClock::GetTimeMS();
 			if (m_game->m_client_list[target_h]->m_magic_pause_time) {
@@ -1170,7 +1258,7 @@ void CombatManager::effect_damage_spot_damage_move(short attacker_h, char attack
 				}
 
 				if (m_game->m_client_list[target_h]->m_add_charge_critical > 0) {
-					if (m_game->dice(1, 100) <= static_cast<uint32_t>(m_game->m_client_list[target_h]->m_add_charge_critical)) {
+					if (m_game->dice(1, 100) <= static_cast<unsigned int>(m_game->m_client_list[target_h]->m_add_charge_critical)) {
 						max_super_attack = (m_game->m_client_list[target_h]->m_level / 10);
 						if (m_game->m_client_list[target_h]->m_super_attack_left < max_super_attack) m_game->m_client_list[target_h]->m_super_attack_left++;
 						m_game->send_notify_msg(0, target_h, Notify::SuperAttackLeft, 0, 0, 0, 0);
@@ -1199,8 +1287,8 @@ void CombatManager::effect_damage_spot_damage_move(short attacker_h, char attack
 						else if (tgt_y > atk_y) damage_move_dir = direction::southwest;
 						else if (tgt_y < atk_y) damage_move_dir = direction::northwest;
 					}
-
 					m_game->m_client_list[target_h]->m_last_damage = damage;
+
 					m_game->send_notify_msg(0, target_h, Notify::Hp, 0, 0, 0, 0);
 					m_game->send_notify_msg(0, target_h, Notify::DamageMove, damage_move_dir, damage, 0, 0);
 				}
@@ -1215,9 +1303,6 @@ void CombatManager::effect_damage_spot_damage_move(short attacker_h, char attack
 				}
 
 				if (m_game->m_client_list[target_h]->m_magic_effect_status[hb::shared::magic::HoldObject] != 0) {
-					// Hold-Person    .     .
-					// 1: Hold-Person 
-					// 2: Paralize
 					m_game->send_notify_msg(0, target_h, Notify::MagicEffectOff, hb::shared::magic::HoldObject, m_game->m_client_list[target_h]->m_magic_effect_status[hb::shared::magic::HoldObject], 0, 0);
 
 					m_game->m_client_list[target_h]->m_magic_effect_status[hb::shared::magic::HoldObject] = 0;
@@ -1232,10 +1317,73 @@ void CombatManager::effect_damage_spot_damage_move(short attacker_h, char attack
 		if (m_game->m_npc_list[target_h]->m_hp <= 0) return;
 		if ((m_game->m_is_crusade_mode) && (attacker_side == m_game->m_npc_list[target_h]->m_side)) return;
 
+		tgt_x = m_game->m_npc_list[target_h]->m_x;
+		tgt_y = m_game->m_npc_list[target_h]->m_y;
+
 		switch (m_game->m_npc_list[target_h]->m_action_limit) {
 		case 1:
 		case 2:
+			return;
+
 		case 4:
+			if (tgt_x == atk_x) {
+				if (tgt_y == atk_y) return;
+				else if (tgt_y > atk_y) damage_move_dir = direction::south;
+				else if (tgt_y < atk_y) damage_move_dir = direction::north;
+			}
+			else if (tgt_x > atk_x) {
+				if (tgt_y == atk_y)     damage_move_dir = direction::east;
+				else if (tgt_y > atk_y) damage_move_dir = direction::southeast;
+				else if (tgt_y < atk_y) damage_move_dir = direction::northeast;
+			}
+			else if (tgt_x < atk_x) {
+				if (tgt_y == atk_y)     damage_move_dir = direction::west;
+				else if (tgt_y > atk_y) damage_move_dir = direction::southwest;
+				else if (tgt_y < atk_y) damage_move_dir = direction::northwest;
+			}
+
+			dX = m_game->m_npc_list[target_h]->m_x + _tmp_cTmpDirX[damage_move_dir];
+			dY = m_game->m_npc_list[target_h]->m_y + _tmp_cTmpDirY[damage_move_dir];
+
+			if (m_game->m_map_list[m_game->m_npc_list[target_h]->m_map_index]->get_moveable(dX, dY, 0) == false) {
+				damage_move_dir = static_cast<direction>(m_game->dice(1, 8));
+				dX = m_game->m_npc_list[target_h]->m_x + _tmp_cTmpDirX[damage_move_dir];
+				dY = m_game->m_npc_list[target_h]->m_y + _tmp_cTmpDirY[damage_move_dir];
+				if (m_game->m_map_list[m_game->m_npc_list[target_h]->m_map_index]->get_moveable(dX, dY, 0) == false) return;
+			}
+
+			m_game->m_map_list[m_game->m_npc_list[target_h]->m_map_index]->clear_owner(5, target_h, hb::shared::owner_class::Npc, m_game->m_npc_list[target_h]->m_x, m_game->m_npc_list[target_h]->m_y);
+			m_game->m_map_list[m_game->m_npc_list[target_h]->m_map_index]->set_owner(target_h, hb::shared::owner_class::Npc, dX, dY);
+			m_game->m_npc_list[target_h]->m_x = dX;
+			m_game->m_npc_list[target_h]->m_y = dY;
+			m_game->m_npc_list[target_h]->m_dir = damage_move_dir;
+
+			m_game->send_event_to_near_client_type_a(target_h, hb::shared::owner_class::Npc, MsgId::EventMotion, Type::Move, 0, 0, 0);
+
+			dX = m_game->m_npc_list[target_h]->m_x + _tmp_cTmpDirX[damage_move_dir];
+			dY = m_game->m_npc_list[target_h]->m_y + _tmp_cTmpDirY[damage_move_dir];
+
+			if (m_game->m_map_list[m_game->m_npc_list[target_h]->m_map_index]->get_moveable(dX, dY, 0) == false) {
+				damage_move_dir = static_cast<direction>(m_game->dice(1, 8));
+				dX = m_game->m_npc_list[target_h]->m_x + _tmp_cTmpDirX[damage_move_dir];
+				dY = m_game->m_npc_list[target_h]->m_y + _tmp_cTmpDirY[damage_move_dir];
+
+				if (m_game->m_map_list[m_game->m_npc_list[target_h]->m_map_index]->get_moveable(dX, dY, 0) == false) return;
+			}
+
+			m_game->m_map_list[m_game->m_npc_list[target_h]->m_map_index]->clear_owner(5, target_h, hb::shared::owner_class::Npc, m_game->m_npc_list[target_h]->m_x, m_game->m_npc_list[target_h]->m_y);
+			m_game->m_map_list[m_game->m_npc_list[target_h]->m_map_index]->set_owner(target_h, hb::shared::owner_class::Npc, dX, dY);
+			m_game->m_npc_list[target_h]->m_x = dX;
+			m_game->m_npc_list[target_h]->m_y = dY;
+			m_game->m_npc_list[target_h]->m_dir = damage_move_dir;
+
+			m_game->send_event_to_near_client_type_a(target_h, hb::shared::owner_class::Npc, MsgId::EventMotion, Type::Move, 0, 0, 0);
+
+			if (m_game->m_war_manager->check_energy_sphere_destination(target_h, attacker_h, attacker_type)) {
+				// Use EntityManager for NPC deletion
+				if (m_game->m_entity_manager != NULL)
+					m_game->m_entity_manager->delete_entity(target_h);
+			}
 			return;
 		}
 
@@ -1252,11 +1400,9 @@ void CombatManager::effect_damage_spot_damage_move(short attacker_h, char attack
 		case 67: // McGaffin
 		case 68: // Perry
 		case 69: // Devlin
-			damage = 0;
-			break;
+			return;
 		}
 
-		// (AbsDamage 0 )    .
 		if (m_game->m_npc_list[target_h]->m_abs_damage > 0) {
 			tmp1 = (double)damage;
 			tmp2 = (double)(m_game->m_npc_list[target_h]->m_abs_damage) / 100.0f;
@@ -1266,16 +1412,13 @@ void CombatManager::effect_damage_spot_damage_move(short attacker_h, char attack
 			if (damage < 0) damage = 1;
 		}
 
-		if (m_game->m_npc_list[target_h]->m_magic_effect_status[hb::shared::magic::Protect] == 2)
-			damage = damage / 2;
-
 		m_game->m_npc_list[target_h]->m_hp -= damage;
 		if (m_game->m_npc_list[target_h]->m_hp <= 0) {
-			// NPC .
-			m_game->m_entity_manager->on_entity_killed(target_h, attacker_h, attacker_type, damage);
+			// Use EntityManager for NPC death handling
+			if (m_game->m_entity_manager != NULL)
+				m_game->m_entity_manager->on_entity_killed(target_h, attacker_h, attacker_type, damage);
 		}
 		else {
-
 			switch (attacker_type) {
 			case hb::shared::owner_class::Player:
 				if ((m_game->m_npc_list[target_h]->m_type != 21) && (m_game->m_npc_list[target_h]->m_type != 55) && (m_game->m_npc_list[target_h]->m_type != 56)
@@ -1290,92 +1433,59 @@ void CombatManager::effect_damage_spot_damage_move(short attacker_h, char attack
 			m_game->send_event_to_near_client_type_a(target_h, hb::shared::owner_class::Npc, MsgId::EventMotion, Type::Damage, damage, 0, 0);
 
 			if ((m_game->dice(1, 3) == 2) && (m_game->m_npc_list[target_h]->m_action_limit == 0)) {
-
 				if ((attacker_type == hb::shared::owner_class::Npc) &&
 					(m_game->m_npc_list[attacker_h]->m_type == m_game->m_npc_list[target_h]->m_type) &&
 					(m_game->m_npc_list[attacker_h]->m_side == m_game->m_npc_list[target_h]->m_side)) return;
 
-				// ActionLimit 1   .   .
 				m_game->m_npc_list[target_h]->m_behavior = Behavior::Attack;
 				m_game->m_npc_list[target_h]->m_behavior_turn_count = 0;
 				m_game->m_npc_list[target_h]->m_target_index = attacker_h;
 				m_game->m_npc_list[target_h]->m_target_type = attacker_type;
 
-				// Damage    .
 				m_game->m_npc_list[target_h]->m_time = time;
 
 				if (m_game->m_npc_list[target_h]->m_magic_effect_status[hb::shared::magic::HoldObject] != 0) {
-					// Hold    .
 					m_game->m_npc_list[target_h]->m_magic_effect_status[hb::shared::magic::HoldObject] = 0;
 					m_game->m_delay_event_manager->remove_from_delay_event_list(target_h, hb::shared::owner_class::Npc, hb::shared::magic::HoldObject);
 				}
 
-				//Crusade
-				uint32_t exp;
-
-				// NPC           .
 				if ((m_game->m_npc_list[target_h]->m_no_die_remain_exp > 0) && (m_game->m_npc_list[target_h]->m_is_summoned != true) &&
 					(attacker_type == hb::shared::owner_class::Player) && (m_game->m_client_list[attacker_h] != 0)) {
-					// ExpStock .      .
-					if (m_game->m_npc_list[target_h]->m_no_die_remain_exp > static_cast<uint32_t>(damage)) {
-						// Crusade
-						exp = damage;
-						if ((m_game->m_npc_exp_multiplier != 1.0f)) {
-							tmp1 = (double)exp;
-							tmp2 = (double)m_game->m_npc_exp_multiplier;
-							exp = (uint32_t)(tmp1 * tmp2 + 0.5);
-						}
-						if ((m_game->m_is_crusade_mode) && (exp > 10)) exp = 10;
-
-						if (m_game->m_client_list[attacker_h]->m_add_exp > 0) {
-							tmp1 = (double)m_game->m_client_list[attacker_h]->m_add_exp;
-							tmp2 = (double)exp;
-							tmp3 = (tmp1 / 100.0f) * tmp2;
-							exp += (uint32_t)tmp3;
-						}
-
-						if (m_game->m_client_list[attacker_h]->m_level > 100) {
-							switch (m_game->m_npc_list[target_h]->m_type) {
-							case 55:
-							case 56:
-								exp = 0;
-								break;
-							default: break;
-							}
-						}
-
-						if (exp)
-							m_game->get_exp(attacker_h, exp); //m_game->m_client_list[attacker_h]->m_exp_stock += exp;     //damage;
-						else m_game->get_exp(attacker_h, (exp / 2)); //m_game->m_client_list[attacker_h]->m_exp_stock += (exp/2); //(damage/2);
+					
+					// CORRECCIÓN: Usamos exp_gained para que no colisione con el booleano 'exp'
+					if (m_game->m_npc_list[target_h]->m_no_die_remain_exp > static_cast<unsigned int>(damage)) {
+						exp_gained = damage;
 						m_game->m_npc_list[target_h]->m_no_die_remain_exp -= damage;
 					}
 					else {
-						// Crusade
-						exp = m_game->m_npc_list[target_h]->m_no_die_remain_exp;
-						if ((m_game->m_is_crusade_mode) && (exp > 10)) exp = 10;
-
-						if (m_game->m_client_list[attacker_h]->m_add_exp > 0) {
-							tmp1 = (double)m_game->m_client_list[attacker_h]->m_add_exp;
-							tmp2 = (double)exp;
-							tmp3 = (tmp1 / 100.0f) * tmp2;
-							exp += (uint32_t)tmp3;
-						}
-
-						if (m_game->m_client_list[attacker_h]->m_level > 100) {
-							switch (m_game->m_npc_list[target_h]->m_type) {
-							case 55:
-							case 56:
-								exp = 0;
-								break;
-							default: break;
-							}
-						}
-
-						if (exp)
-							m_game->get_exp(attacker_h, exp); //m_game->m_client_list[attacker_h]->m_exp_stock += exp;     //m_game->m_npc_list[target_h]->m_no_die_remain_exp;
-						else m_game->get_exp(attacker_h, (exp / 2)); //m_game->m_client_list[attacker_h]->m_exp_stock += (exp/2); //(m_game->m_npc_list[target_h]->m_no_die_remain_exp/2);
+						exp_gained = m_game->m_npc_list[target_h]->m_no_die_remain_exp;
 						m_game->m_npc_list[target_h]->m_no_die_remain_exp = 0;
 					}
+
+					if (m_game->m_client_list[attacker_h]->m_add_exp > 0) {
+						tmp1 = (double)m_game->m_client_list[attacker_h]->m_add_exp;
+						tmp2 = (double)exp_gained;
+						tmp3 = (tmp1 / 100.0f) * tmp2;
+						exp_gained += (unsigned int)tmp3;
+					}
+
+					if (m_game->m_is_crusade_mode) {
+						if (exp_gained > 10) exp_gained = 10;
+					}
+
+					if (m_game->m_client_list[attacker_h]->m_level > 100) {
+						switch (m_game->m_npc_list[target_h]->m_type) {
+						case 55:
+						case 56:
+							exp_gained = 0;
+							break;
+						default: break;
+						}
+					}
+
+					if (exp_gained > 0)
+						m_game->get_exp(attacker_h, exp_gained, true);
+					else m_game->get_exp(attacker_h, (exp_gained / 2), true);
 				}
 			}
 		}
@@ -1386,7 +1496,7 @@ void CombatManager::effect_damage_spot_damage_move(short attacker_h, char attack
 void CombatManager::effect_hp_up_spot(short attacker_h, char attacker_type, short target_h, char target_type, short v1, short v2, short v3)
 {
 	int hp, max_hp;
-	uint32_t time = GameClock::GetTimeMS();
+	unsigned int time = GameClock::GetTimeMS();
 
 	if (attacker_type == hb::shared::owner_class::Player)
 		if (m_game->m_client_list[attacker_h] == 0) return;
@@ -1448,7 +1558,7 @@ void CombatManager::effect_hp_up_spot(short attacker_h, char attacker_type, shor
 void CombatManager::effect_sp_down_spot(short attacker_h, char attacker_type, short target_h, char target_type, short v1, short v2, short v3)
 {
 	int sp, max_sp;
-	uint32_t time = GameClock::GetTimeMS();
+	unsigned int time = GameClock::GetTimeMS();
 
 	if (attacker_type == hb::shared::owner_class::Player)
 		if (m_game->m_client_list[attacker_h] == 0) return;
@@ -1485,7 +1595,7 @@ void CombatManager::effect_sp_down_spot(short attacker_h, char attacker_type, sh
 void CombatManager::effect_sp_up_spot(short attacker_h, char attacker_type, short target_h, char target_type, short v1, short v2, short v3)
 {
 	int sp, max_sp;
-	uint32_t time = GameClock::GetTimeMS();
+	unsigned int time = GameClock::GetTimeMS();
 
 	if (attacker_type == hb::shared::owner_class::Player)
 		if (m_game->m_client_list[attacker_h] == 0) return;
@@ -1727,7 +1837,7 @@ void CombatManager::poison_effect(int client_h, int v1)
 
 	prob = m_game->m_client_list[client_h]->m_skill_mastery[23] - 10 + m_game->m_client_list[client_h]->m_add_poison_resistance;
 	if (prob <= 10) prob = 10;
-	if (m_game->dice(1, 100) <= static_cast<uint32_t>(prob)) {
+	if (m_game->dice(1, 100) <= static_cast<unsigned int>(prob)) {
 		m_game->m_client_list[client_h]->m_is_poisoned = false;
 		m_game->m_status_effect_manager->set_poison_flag(client_h, hb::shared::owner_class::Player, false);
 		m_game->send_notify_msg(0, client_h, Notify::MagicEffectOff, hb::shared::magic::Poison, 0, 0, 0);
@@ -2102,14 +2212,14 @@ bool CombatManager::pk_log(int action, int attacker_h, int victum_h, char* npc)
 	return true;
 }
 
-bool CombatManager::check_client_attack_frequency(int client_h, uint32_t client_time)
+bool CombatManager::check_client_attack_frequency(int client_h, unsigned int client_time)
 {
 	if (m_game->m_client_list[client_h] == 0) return false;
 
 	if (m_game->m_client_list[client_h]->m_attack_freq_time == 0)
 		m_game->m_client_list[client_h]->m_attack_freq_time = client_time;
 	else {
-		uint32_t time_gap = client_time - m_game->m_client_list[client_h]->m_attack_freq_time;
+		unsigned int time_gap = client_time - m_game->m_client_list[client_h]->m_attack_freq_time;
 		m_game->m_client_list[client_h]->m_attack_freq_time = client_time;
 
 		// Compute expected minimum swing time from player's weapon speed and status effects.
@@ -2125,7 +2235,7 @@ bool CombatManager::check_client_attack_frequency(int client_h, uint32_t client_
 		int threshold = expectedSwingTime - TOLERANCE_MS;
 		if (threshold < 200) threshold = 200;
 
-		if (time_gap < static_cast<uint32_t>(threshold)) {
+		if (time_gap < static_cast<unsigned int>(threshold)) {
 			try
 			{
 				hb::logger::warn<log_channel::security>("Swing hack: IP={} player={}, irregular attack rate (gap={}ms min={}ms)", m_game->m_client_list[client_h]->m_ip_address, m_game->m_client_list[client_h]->m_char_name, time_gap, expectedSwingTime);
@@ -2250,13 +2360,13 @@ bool CombatManager::calculate_durability_decrement(short target_h, short attacke
 	return true;
 }
 
-uint32_t CombatManager::calculate_attack_effect(short target_h, char target_type, short attacker_h, char attacker_type, int tdX, int tdY, int attack_mode, bool near_attack, bool is_dash, bool arrow_use)
+unsigned int CombatManager::calculate_attack_effect(short target_h, char target_type, short attacker_h, char attacker_type, int tdX, int tdY, int attack_mode, bool near_attack, bool is_dash, bool arrow_use)
 {
 	int    iAP_SM, iAP_L, attacker_hit_ratio, target_defense_ratio, dest_hit_ratio, result, iAP_Abs_Armor, iAP_Abs_Shield;
 	char   attacker_name[hb::shared::limits::NpcNameLen], attacker_side, protect, crop_skill, farming_skill;
 	direction attacker_dir, target_dir;
 	short  weapon_index, attacker_weapon, dX, dY, sX, sY, atk_x, atk_y, tgt_x, tgt_y;
-	uint32_t  time;
+	unsigned int  time;
 	weapon_class::weapon_class wc;
 	double tmp1, tmp2, tmp3;
 	bool   killed;
@@ -2280,6 +2390,42 @@ uint32_t CombatManager::calculate_attack_effect(short target_h, char target_type
 	attacker_sa = 0;
 	attacker_s_avalue = 0;
 	wc = weapon_class::none;
+
+	// === EVENTO MOBA: PREVENCIÓN DE FUEGO AMIGO EN MIDDLELAND ===
+	if (m_game->m_middleland_siege_state == 2) 
+	{
+		int map_idx = -1;
+		int atk_side = 0;
+		int def_side = 0;
+
+		// 1. Obtener Bando y Mapa del Atacante
+		if (attacker_type == hb::shared::owner_class::Player && attacker_h > 0 && attacker_h < MaxClients && m_game->m_client_list[attacker_h] != nullptr) {
+			atk_side = m_game->m_client_list[attacker_h]->m_side;
+			map_idx = m_game->m_client_list[attacker_h]->m_map_index;
+		} 
+		else if (attacker_type == hb::shared::owner_class::Npc && attacker_h > 0 && attacker_h < hb::server::config::MaxNpcs && m_game->m_npc_list[attacker_h] != nullptr) {
+			atk_side = m_game->m_npc_list[attacker_h]->m_side;
+			map_idx = m_game->m_npc_list[attacker_h]->m_map_index;
+		}
+
+		// 2. Obtener Bando del Defensor
+		if (target_type == hb::shared::owner_class::Player && target_h > 0 && target_h < MaxClients && m_game->m_client_list[target_h] != nullptr) {
+			def_side = m_game->m_client_list[target_h]->m_side;
+		} 
+		else if (target_type == hb::shared::owner_class::Npc && target_h > 0 && target_h < hb::server::config::MaxNpcs && m_game->m_npc_list[target_h] != nullptr) {
+			def_side = m_game->m_npc_list[target_h]->m_side;
+		}
+
+		// 3. Comprobar Fuego Amigo
+		if (map_idx == m_game->m_middleland_map_index && atk_side > 0 && def_side > 0)
+		{
+			// Si el atacante y el defensor son del mismo bando (Aresden=1, Elvine=2)
+			if (atk_side == def_side) {
+				return 0; // FUEGO AMIGO BLOQUEADO: Anulamos el golpe físico o de flechas
+			}
+		}
+	}
+	// ============================================================
 
 switch (attacker_type) {
 	case hb::shared::owner_class::Player:
@@ -2377,7 +2523,7 @@ iAP_L += (iAP_L * bonus) / 100;
 }
 }
 
-// === NUEVO: SISTEMA DE TALENTOS (Fuerza Descomunal) ===
+		// === NUEVO: SISTEMA DE TALENTOS (Fuerza Descomunal) ===
 		{
 			int furia_nivel = m_game->m_client_list[attacker_h]->m_status.talents[0];
 			if (furia_nivel > 0) {
@@ -2391,6 +2537,20 @@ iAP_L += (iAP_L * bonus) / 100;
 			}
 		}
 		// =======================================================
+
+		// === EVENTO MOBA: BOOST DE DAÑO PARA MIDDLELAND SIEGE ===
+		if (m_game->m_middleland_siege_state == 2 && m_game->m_client_list[attacker_h]->m_is_middleland_siege_registered) {
+			int side = m_game->m_client_list[attacker_h]->m_middleland_siege_team;
+			if (side == 1 && m_game->m_middleland_score_aresden >= 10000) {
+				iAP_SM += (iAP_SM * 50) / 100;
+				iAP_L  += (iAP_L * 50) / 100;
+			} else if (side == 2 && m_game->m_middleland_score_elvine >= 10000) {
+				iAP_SM += (iAP_SM * 50) / 100;
+				iAP_L  += (iAP_L * 50) / 100;
+			}
+		}
+		// =======================================================
+
 
 		item_index = m_game->m_client_list[attacker_h]->m_item_equipment_status[to_int(EquipPos::RightHand)];
 		if ((item_index != -1) && (m_game->m_client_list[attacker_h]->m_item_list[item_index] != 0)) {
@@ -2573,7 +2733,7 @@ iAP_L += (iAP_L * bonus) / 100;
 		// GM mode damage immunity
 		if (m_game->m_client_list[target_h]->m_is_gm_mode)
 		{
-			uint32_t now = GameClock::GetTimeMS();
+			unsigned int now = GameClock::GetTimeMS();
 			if (now - m_game->m_client_list[target_h]->m_last_gm_immune_notify_time > 2000)
 			{
 				m_game->m_client_list[target_h]->m_last_gm_immune_notify_time = now;
@@ -2952,7 +3112,7 @@ iAP_L += (iAP_L * bonus) / 100;
 		switch (target_type) {
 		case hb::shared::owner_class::Player:
 			m_game->m_skill_manager->clear_skill_using_status(target_h);
-			if ((time - m_game->m_client_list[target_h]->m_time) > (uint32_t)m_game->m_lag_protection_interval) {
+			if ((time - m_game->m_client_list[target_h]->m_time) > (unsigned int)m_game->m_lag_protection_interval) {
 				return 0;
 			}
 			else {
@@ -3233,7 +3393,7 @@ if (attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[at
 							if (m_game->m_client_list[target_h]->m_mp > temp) m_game->m_client_list[target_h]->m_mp = temp;
 						}
 						if (m_game->m_client_list[target_h]->m_add_charge_critical > 0) {
-							if (m_game->dice(1, 100) <= static_cast<uint32_t>(m_game->m_client_list[target_h]->m_add_charge_critical)) {
+							if (m_game->dice(1, 100) <= static_cast<unsigned int>(m_game->m_client_list[target_h]->m_add_charge_critical)) {
 								max_super_attack = (m_game->m_client_list[target_h]->m_level / 10);
 								if (m_game->m_client_list[target_h]->m_super_attack_left < max_super_attack) m_game->m_client_list[target_h]->m_super_attack_left++;
 								m_game->send_notify_msg(0, target_h, Notify::SuperAttackLeft, 0, 0, 0, 0);
@@ -3284,12 +3444,14 @@ if (attacker_type == hb::shared::owner_class::Player && m_game->m_client_list[at
 							}
 							else prob = 1;
 
-							if (m_game->dice(1, 10000) >= static_cast<uint32_t>(prob))
+							if (m_game->dice(1, 10000) >= static_cast<unsigned int>(prob))
 								m_game->send_event_to_near_client_type_a(target_h, hb::shared::owner_class::Player, MsgId::EventMotion, Type::Damage, iAP_SM, attacker_weapon, 0);
 						}
 
-						if (m_game->m_client_list[target_h]->m_magic_effect_status[hb::shared::magic::HoldObject] == 1) {
+						// CORRECCIÓN PARA JUGADORES: Eliminar el uso de 'm_hold_resist'
+						if (m_game->m_client_list[target_h]->m_magic_effect_status[hb::shared::magic::HoldObject] != 0) {
 							m_game->send_notify_msg(0, target_h, Notify::MagicEffectOff, hb::shared::magic::HoldObject, m_game->m_client_list[target_h]->m_magic_effect_status[hb::shared::magic::HoldObject], 0, 0);
+
 							m_game->m_client_list[target_h]->m_magic_effect_status[hb::shared::magic::HoldObject] = 0;
 							m_game->m_delay_event_manager->remove_from_delay_event_list(target_h, hb::shared::owner_class::Player, hb::shared::magic::HoldObject);
 						}
@@ -3554,8 +3716,10 @@ else if ((m_game->m_npc_list[target_h]->m_type == 31) && (attacker_type == 1) &&
 			if (m_game->m_npc_list[target_h]->m_hp <= 0) {
 				m_game->m_entity_manager->on_entity_killed(target_h, attacker_h, attacker_type, damage);
 				killed = true;
-				killed_dice = m_game->m_npc_list[target_h]->m_max_hp / 5;
-				if (killed_dice < 1) killed_dice = 1;
+				if (m_game->m_npc_list[target_h] != nullptr) {
+					killed_dice = m_game->m_npc_list[target_h]->m_max_hp / 5;
+					if (killed_dice < 1) killed_dice = 1;
+				}
 			}
 			else {
 				bool skip_counter =
@@ -3719,7 +3883,7 @@ else if ((m_game->m_npc_list[target_h]->m_type == 31) && (attacker_type == 1) &&
 					m_game->m_delay_event_manager->remove_from_delay_event_list(target_h, hb::shared::owner_class::Npc, hb::shared::magic::HoldObject);
 				}
 				else if (m_game->m_npc_list[target_h]->m_magic_effect_status[hb::shared::magic::HoldObject] == 2) {
-					if (m_game->m_npc_list[target_h]->m_hold_resist > 0 && m_game->dice(1, 100) <= static_cast<uint32_t>(m_game->m_npc_list[target_h]->m_hold_resist)) {
+					if (m_game->m_npc_list[target_h]->m_hold_resist > 0 && m_game->dice(1, 100) <= static_cast<unsigned int>(m_game->m_npc_list[target_h]->m_hold_resist)) {
 						m_game->m_npc_list[target_h]->m_magic_effect_status[hb::shared::magic::HoldObject] = 0;
 						m_game->m_delay_event_manager->remove_from_delay_event_list(target_h, hb::shared::owner_class::Npc, hb::shared::magic::HoldObject);
 					}
@@ -3727,7 +3891,7 @@ else if ((m_game->m_npc_list[target_h]->m_type == 31) && (attacker_type == 1) &&
 
 				if ((m_game->m_npc_list[target_h]->m_no_die_remain_exp > 0) && (m_game->m_npc_list[target_h]->m_is_summoned != true) &&
 					(attacker_type == hb::shared::owner_class::Player) && (m_game->m_client_list[attacker_h] != 0)) {
-					if (m_game->m_npc_list[target_h]->m_no_die_remain_exp > static_cast<uint32_t>(damage)) {
+					if (m_game->m_npc_list[target_h]->m_no_die_remain_exp > static_cast<unsigned int>(damage)) {
 						exp = damage;
 						m_game->m_npc_list[target_h]->m_no_die_remain_exp -= damage;
 					}

@@ -98,6 +98,7 @@ namespace MsgId
 		RequestEnchantAction                    = 0x0FA4000C,
 		// === EVENTO MOBA: ASEDIO EN MIDDLELAND ===
 		NotifyMiddlelandSiegeState              = 0x0FA4000D,
+		NotifyMiddlelandSiegeScore              = 0x0FA4000E,
 		// =========================================
 	};
 }
@@ -185,7 +186,9 @@ namespace CommonType
         GuildTeleport                   = 0x0F18,
         // =============================================
 		// === EVENTO MOBA: ASEDIO EN MIDDLELAND ===
-        ReqJoinMiddlelandSiege          = 0x0F90
+        ReqJoinMiddlelandSiege          = 0x0F90,
+        ReqAcceptMiddlelandSiegeTeleport= 0x0F91,
+        ReqCancelMiddlelandSiegeTeleport= 0x0F92
         // =========================================
     };
 }

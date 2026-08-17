@@ -326,6 +326,8 @@ std::array<bool, hb::shared::limits::MaxItems> m_is_item_equipped{};
 	bool m_bMiddlelandSiegeRegistrationOpen = false;
 	bool m_bIsRegisteredForMiddleland = false;
 	std::chrono::steady_clock::time_point m_middleland_end_time;
+	int m_middleland_score_aresden = 0;
+	int m_middleland_score_elvine = 0;
 	// =========================================
 
 	bool m_hide_local_cursor;
